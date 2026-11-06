@@ -46,6 +46,15 @@ chown -R agaura-admin: /home/agaura-admin/.ssh && chmod 700 /home/agaura-admin/.
 Then follow [deploy/README.md](../deploy/README.md) §1: firewall (22, 80, 443 on the system and
 in the Infomaniak Manager), SSH by key only without root login, automatic security updates.
 
+Ports 80 and 443 must be free for Caddy: some images come with a web server already running
+(Apache on Infomaniak's Debian images), and Caddy then fails to start with "address already in
+use". Check, and remove it unless something else on the server needs it:
+
+```sh
+sudo ss -ltnp | grep -E ':(80|443)\b'                     # nothing expected
+sudo systemctl disable --now apache2 && sudo apt purge -y 'apache2*' && sudo apt autoremove -y
+```
+
 Install Docker Engine with the Compose plugin (https://docs.docker.com/engine/install/), then
 let your user run it: `sudo usermod -aG docker $USER` and log in again. Check with
 `docker compose version`, and `docker version` for an Engine 27 or later (IPv6, §2).
