@@ -30,8 +30,18 @@ Docker publishes its ports through its own rules, which `ufw` does not filter: p
 Caddy's 80 and 443 (as `compose.yaml` does; the application port stays internal). Apply the
 same three ports in the firewall of the Infomaniak Manager when the offer has one.
 
-In `/etc/ssh/sshd_config`: `PasswordAuthentication no`, `PermitRootLogin no`, then
-`sudo systemctl reload ssh`. Security updates: `sudo apt install unattended-upgrades`.
+SSH by key only, without root login. Cloud images include `/etc/ssh/sshd_config.d/*.conf` at the
+top of `sshd_config`, and the first value read wins (cloud-init writes `50-cloud-init.conf`): put
+both settings in a file read before it, check, reload, and keep the current session open while
+a second terminal logs in again:
+
+```sh
+printf 'PasswordAuthentication no\nPermitRootLogin no\n' | sudo tee /etc/ssh/sshd_config.d/10-agaura.conf
+sudo sshd -t && sudo systemctl reload ssh
+sudo sshd -T | grep -E '^(passwordauthentication|permitrootlogin) '   # both "no"
+```
+
+Security updates: `sudo apt install unattended-upgrades`.
 
 ## 2. Caddy access log for fail2ban
 

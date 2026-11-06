@@ -30,13 +30,17 @@ address behind Docker; §9 checks it. Leave it out until that check passes.
 
 ## 3. Prepare the server
 
-As root, once: a sudo user with your SSH key, then log in as that user (skip this when the
-server image already comes with a sudo user).
+A sudo user with your SSH key. The Debian images of Infomaniak come with one, `debian` (usually uid 1000, `id -u`:
+the uid of the application's user in the container, so `backups/auto` needs no `chown`): keep
+it and skip the commands below, writing `debian` wherever this guide says `agaura-admin`.
+Otherwise create one, as root (`sudo -i` first when logged in as another user: `adduser` lives
+in `/usr/sbin`, outside a plain user's `PATH`, hence "adduser: command not found"), then log in
+as that user from a second terminal before closing the first:
 
 ```sh
 adduser agaura-admin && usermod -aG sudo agaura-admin
 mkdir -p /home/agaura-admin/.ssh && cp ~/.ssh/authorized_keys /home/agaura-admin/.ssh/
-chown -R agaura-admin: /home/agaura-admin/.ssh
+chown -R agaura-admin: /home/agaura-admin/.ssh && chmod 700 /home/agaura-admin/.ssh
 ```
 
 Then follow [deploy/README.md](../deploy/README.md) §1: firewall (22, 80, 443 on the system and

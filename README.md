@@ -271,7 +271,9 @@ ssh root@VPS
 ```
 
 **2. Prepare the server**, as root (`sudo -i` when logged in as another user), once: a sudo user
-with the same key, the firewall, Docker.
+with the same key, the firewall, Docker. On an Infomaniak Debian image the sudo user `debian`
+exists already: skip the first three lines and write `debian` for `agaura-admin` below
+(docs/INSTALL.md §3).
 
 ```sh
 adduser agaura-admin && usermod -aG sudo agaura-admin
