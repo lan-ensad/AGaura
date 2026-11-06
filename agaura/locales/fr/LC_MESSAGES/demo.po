@@ -1,0 +1,232 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+
+#: services/demo.py:40
+msgid "Chair of the session"
+msgstr "Présidente de séance"
+
+#: services/demo.py:41
+msgid "Secretary"
+msgstr "Secrétaire"
+
+#: services/demo.py:42
+msgid "Teller"
+msgstr "Scrutateur"
+
+#: services/demo.py:48
+msgid "Welcome and quorum check"
+msgstr "Accueil et vérification du quorum"
+
+#: services/demo.py:49
+msgid "Activity report"
+msgstr "Rapport moral"
+
+#: services/demo.py:50
+msgid "Financial report %(year)s"
+msgstr "Rapport financier %(year)s"
+
+#: services/demo.py:51
+msgid "Election to the board"
+msgstr "Élection au conseil d'administration"
+
+#: services/demo.py:52 services/demo.py:85 services/demo.py:142
+msgid "Projects to fund"
+msgstr "Projets à financer"
+
+#: services/demo.py:53 services/demo.py:78 services/demo.py:128
+msgid "Venue of the next assembly"
+msgstr "Lieu de la prochaine assemblée"
+
+#: services/demo.py:54
+msgid "Any other business"
+msgstr "Questions diverses"
+
+#: services/demo.py:59 services/demo.py:161
+msgid "Village hall"
+msgstr "Salle des fêtes"
+
+#: services/demo.py:59 services/demo.py:189
+msgid "Community centre"
+msgstr "Maison des associations"
+
+#: services/demo.py:59
+msgid "Media library"
+msgstr "Médiathèque"
+
+#: services/demo.py:63
+msgid "Shared garden"
+msgstr "Jardin partagé"
+
+#: services/demo.py:63
+msgid "Mural"
+msgstr "Fresque murale"
+
+#: services/demo.py:63
+msgid "Bike workshop"
+msgstr "Atelier vélo"
+
+#: services/demo.py:72
+msgid "Approval of the activity report"
+msgstr "Approbation du rapport moral"
+
+#: services/demo.py:80 services/demo.py:134
+msgid "Election to the board (2 seats)"
+msgstr "Élection au conseil d'administration (2 sièges)"
+
+#: services/demo.py:118
+msgid "Approval of the %(year)s accounts"
+msgstr "Approbation des comptes %(year)s"
+
+#: services/demo.py:160
+msgid "Demonstration general assembly"
+msgstr "Assemblée générale de démonstration"
+
+#: services/demo.py:173
+msgid "Paul Martin, secretary"
+msgstr "Paul Martin, secrétaire"
+
+#: services/demo.py:187
+msgid "General assembly %(year)s"
+msgstr "Assemblée générale %(year)s"
+
+#: templates/account/demo.html:4 templates/account/demo.html:8 templates/public/home.html:36
+msgid "Try the demonstration"
+msgstr "Essayer la démo"
+
+#: templates/account/demo.html:12
+msgid "Nothing is kept: the account and its sessions are deleted 2 hours after your last action, at the latest 24 hours after opening, or as soon as you end the demonstration."
+msgstr "Rien n'est conservé : le compte et ses sessions sont effacés 2 heures après votre dernière action, au plus tard 24 heures après l'ouverture, ou dès que vous terminez la démo."
+
+#: templates/account/demo.html:15
+msgid "Opening the demonstration logs you out of your account on this browser."
+msgstr "Ouvrir la démo vous déconnecte de votre compte sur ce navigateur."
+
+#: templates/account/demo.html:20
+msgid "Open the demonstration"
+msgstr "Ouvrir la démo"
+
+#: templates/account/settings.html:20
+msgid "Demonstration account"
+msgstr "Compte de démonstration"
+
+#: templates/account/settings.html:21
+msgid "This account has no email address and no password. It is deleted with its sessions 2 hours after the last action, at the latest 24 hours after the demonstration opened."
+msgstr "Ce compte n'a ni adresse e-mail ni mot de passe. Il est effacé avec ses sessions 2 heures après la dernière action, au plus tard 24 heures après l'ouverture de la démo."
+
+#: templates/account/settings.html:24
+msgid "End the demonstration and delete everything"
+msgstr "Terminer la démo et tout effacer"
+
+#: templates/layouts/admin.html:29
+msgid "End the demonstration"
+msgstr "Terminer la démo"
+
+#: templates/layouts/admin.html:41 templates/layouts/admin.html:43 templates/layouts/voter.html:31
+msgid "Demonstration"
+msgstr "Démonstration"
+
+#: templates/layouts/admin.html:41
+msgid "Nothing is kept: this account and its sessions are deleted 2 hours after the last action, at the latest 24 hours after opening."
+msgstr "Rien n'est conservé : ce compte et ses sessions sont effacés 2 heures après la dernière action, au plus tard 24 heures après l'ouverture."
+
+#: web/account/demo.py:42
+msgid "Too many demonstrations are open at the moment. Try again in a few minutes."
+msgstr "Trop de démos sont ouvertes en ce moment. Réessayez dans quelques minutes."
+
+#: web/account/demo.py:49
+msgid "Demonstration open: two example sessions are ready. Nothing will be kept."
+msgstr "Démo ouverte : deux sessions d'exemple sont prêtes. Rien ne sera conservé."
+
+#: web/account/demo.py:51
+msgid "Demonstration ended: its account and its sessions are deleted."
+msgstr "Démo terminée : son compte et ses sessions sont effacés."
+
+#: web/account/profile.py:61
+msgid "Demonstration opened"
+msgstr "Démo ouverte"
+
+#: templates/account/demo.html:10
+msgid "The demonstration opens an account of your own, without an email address or a password, with two example sessions: one to prepare and run, one already voted on with its results."
+msgstr "La démo ouvre un compte rien qu'à vous, sans adresse e-mail ni mot de passe, avec deux sessions d'exemple : l'une à préparer et à mener, l'autre déjà votée, avec ses résultats."
+
+#: templates/account/demo.html:11 templates/account/settings.html:23
+msgid "Limits of the demonstration"
+msgstr "Limites de la démo"
+
+#: templates/layouts/admin.html:42
+msgid "Limits: 5 voters per session, no export. To get an account: %(email)s."
+msgstr "Limites : 5 votants par session, aucun export. Pour obtenir un compte : %(email)s."
+
+#: templates/layouts/admin.html:44
+msgid "5 voters at most, no export; nothing is kept: everything is deleted within 24 hours."
+msgstr "5 votants au plus, aucun export ; rien n'est conservé : tout est effacé sous 24 heures."
+
+#: templates/layouts/voter.html:31
+msgid "5 voters at most; nothing is kept: everything is deleted within 24 hours."
+msgstr "5 votants au plus ; rien n'est conservé : tout est effacé sous 24 heures."
+
+#: templates/macros/demo.html:12
+msgid "Demonstration: no export, neither the minutes nor the CSV and JSON files. Exports need an account: to get one, write to %(email)s."
+msgstr "Démo : aucun export, ni le procès-verbal ni les fichiers CSV et JSON. Les exports demandent un compte : pour en obtenir un, écrivez à %(email)s."
+
+#: templates/macros/demo.html:18
+msgid "Each session takes 5 voters at most: phones join it and vote as in a real assembly, up to five."
+msgstr "Chaque session accepte 5 votants au plus : des téléphones la rejoignent et votent comme dans une vraie assemblée, jusqu'à cinq."
+
+#: templates/macros/demo.html:19
+msgid "No export: the minutes and the CSV and JSON files need an account. To get one, write to %(email)s."
+msgstr "Aucun export : le procès-verbal et les fichiers CSV et JSON demandent un compte. Pour en obtenir un, écrivez à %(email)s."
+
+#: templates/macros/demo.html:20
+msgid "3 sessions open at once at most, 20 polls per session."
+msgstr "3 sessions non terminées à la fois au plus, 20 votes par session."
+
+#: templates/manage/_entries.html:40
+msgid "Maximum: 5 voters, the limit of a demonstration session, whatever the registered members or the headcount. Past it, a new device is refused with a message saying so. A real assembly needs an account."
+msgstr "Maximum : 5 votants, la limite d'une session de démonstration, quels que soient les membres inscrits ou le comptage. Au-delà, un nouvel appareil est refusé avec un message qui l'explique. Une vraie assemblée demande un compte."
+
+#: templates/manage/_status.html:97
+msgid "Demonstration: the 5 voters a demonstration session takes have joined. No new device can join; a real assembly needs an account."
+msgstr "Démo : les 5 votants qu'accepte une session de démonstration l'ont rejointe. Aucun nouvel appareil ne peut entrer ; une vraie assemblée demande un compte."
+
+#: web/messages.py:45
+msgid "This demonstration session takes 5 voters at most, and they have all joined: no new device can join it. A real assembly needs an account."
+msgstr "Cette session de démonstration accepte 5 votants au plus, et ils l'ont tous rejointe : aucun nouvel appareil ne peut entrer. Une vraie assemblée demande un compte."
+
+#: web/manage/exports.py:121
+msgid "Exports need an account"
+msgstr "Les exports demandent un compte"
+
+#: web/manage/exports.py:123
+msgid "A demonstration exports nothing: no minutes, no CSV or JSON file. To get an account, write to %(email)s."
+msgstr "Une démo n'exporte rien : ni procès-verbal, ni fichier CSV ou JSON. Pour obtenir un compte, écrivez à %(email)s."
+
+#: templates/macros/demo.html:30
+msgid "Try without an account"
+msgstr "Essayer sans compte"
+
+#: templates/macros/demo.html:31
+msgid "The demonstration opens a trial account of your own, without signing up, with two example sessions. Its limits: 5 voters per session, no export, and nothing is kept: everything is deleted 2 hours after the last action, at the latest 24 hours after opening."
+msgstr "La démo ouvre un compte d'essai rien qu'à vous, sans inscription, avec deux sessions d'exemple. Ses limites : 5 votants par session, aucun export, et rien n'est conservé : tout est effacé 2 heures après la dernière action, au plus tard 24 heures après l'ouverture."
+
+msgid "The Gazette"
+msgstr "La Gazette"
+
+msgid "Neighbourhood echo"
+msgstr "L'Écho du quartier"
+
+msgid "The Link"
+msgstr "Le Lien"
+
+msgid "Name of the newsletter"
+msgstr "Nom de la lettre d'information"
+
+#: templates/macros/demo.html:22
+msgid "When every place is taken, a demonstration left 30 minutes without any action is deleted to make room for a new visitor."
+msgstr "Quand toutes les places sont prises, une démo laissée 30 minutes sans action est effacée pour faire place à un nouveau visiteur."

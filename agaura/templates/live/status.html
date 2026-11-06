@@ -1,0 +1,26 @@
+{# The session cannot be joined: not started yet, or closed. Once closed, a device that took
+   part still reads the results published to voters (results), under their own heading. #}
+{% extends "layouts/voter.html" %}
+{% from "live/macros.html" import results_title, result_section with context %}
+{% set title_heading = true %}
+{% block title %}{{ assembly.title }} · AGaura{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/live.css') }}">{% endblock %}
+{% block session_title %}{{ assembly.title }}{% endblock %}
+{% block content %}
+<section class="card session-state">
+  {% if assembly.status.value == "preparation" %}
+  <h2>{{ _("The session has not started yet.") }}</h2>
+  <p>{{ _("You can join as soon as the tribune opens it.") }}</p>
+  <p><a class="button wide" href="/{{ public_id }}" data-reload-later>{{ _("Refresh") }}</a></p>
+  {% else %}
+  <h2>{{ _("The session is closed.") }}</h2>
+  <p>{{ _("Thank you for taking part.") }}</p>
+  {% endif %}
+</section>
+{% if results %}
+{{ results_title() }}
+{% for poll in results %}{{ result_section(poll) }}
+{% endfor %}
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/live.js') }}" defer></script>{% endblock %}

@@ -1,0 +1,18 @@
+{#- Secret link of the projection screen (FR-16), in the Projection screen rubric, the owner's
+    only. What the screen shows is told next to it, in words ("Ce que la salle voit",
+    _screen_recap.html). -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+<section class="card links" id="links" aria-labelledby="links-title">
+  <h2 id="links-title">{{ icon("presentation") }} {{ _("Screen link") }}</h2>
+  <p class="hint">{{ _("Open this secret link on the computer connected to the projector: it updates by itself and shows a result only when the tribune chooses to, poll by poll.") }}</p>
+  <div class="link-row">
+    <input type="text" class="link-url mono" readonly value="{{ links_screen_url }}" aria-label="{{ _('Projection screen link') }}" id="links-screen-url">
+    <button type="button" class="button small" data-copy="links-screen-url" data-copied="{{ _('Copied') }}" hidden>{{ _("Copy") }}</button>
+    <a class="button small primary" href="{{ links_screen_url }}" target="_blank" rel="noopener noreferrer">{{ icon("external-link") }} {{ _("Open the screen") }}</a>
+  </div>
+  <form method="post" action="/manage/{{ assembly.public_id }}/screen-link" data-confirm="{{ _('Create a new screen link? The current link stops working, including on a screen already open.') }}">
+    {{ csrf() }}
+    <button type="submit" class="button small">{{ _("New screen link") }}</button>
+  </form>
+</section>

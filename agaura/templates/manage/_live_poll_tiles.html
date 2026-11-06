@@ -1,0 +1,26 @@
+{#- Polls open now at the top of Polls (_polls_open.html), each a tile folded by default like
+    every poll of the rubric (macros/polls.html): its title and state; unfolded, the turnout
+    against the attendees and "Close the vote". Steering keeps them at one click
+    (_live_polls.html). The live part "poll-tiles" of the panel answer: ids of its own
+    (open-poll-<id>), so that manage.js keeps an unfolded tile open when it redraws the part.
+    "Close the vote" is the primary button when one poll is open (R12). Needs panel. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/polls.html" import tile_head with context %}
+{% set assembly = panel.assembly %}
+{% if panel.open_polls %}
+<div class="poll-list">
+  {% for view in panel.open_polls %}
+  <details class="open-poll poll-tile" id="open-poll-{{ view.poll.id }}">
+    {{ tile_head(view.poll, trial=view.poll.trial, closes_at=view.poll.closes_at) }}
+    <progress class="bar" max="{{ [panel.attendees, view.turnout, 1] | max }}" value="{{ view.turnout }}">{{ view.turnout }}</progress>
+    <p class="muted small">{{ ngettext("%(num)s ballot", "%(num)s ballots", view.turnout) }} / {{ ngettext("%(num)s attendee", "%(num)s attendees", panel.attendees) }}</p>
+    <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ view.poll.id }}/close" class="inline">
+      {{ csrf() }}
+      <button type="submit" class="button{{ ' primary' if panel.open_polls | length == 1 }} small">{{ _("Close the vote") }}</button>
+    </form>
+  </details>
+  {% endfor %}
+</div>
+{% else %}
+<p class="muted">{{ _("No poll is open.") }}</p>
+{% endif %}

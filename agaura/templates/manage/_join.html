@@ -1,0 +1,47 @@
+{#- How voters join: address, QR code and session password, or the individual codes. The card
+    lives in Access and attendance in every state (D-A); during the session Steering also shows
+    the command "Join" (compact: true, #cmd-join), read only, with a smaller QR code. The
+    password is shown with the macro of the projection screen (D10: the 8 digits generated in
+    two groups of four; a password chosen by the tribune as typed, unless it is digits only), so
+    the tribune reads aloud what the room sees; the groups are spans without a space between
+    them, so a copied selection is the bare password. The owner's only. -#}
+{% from "screen/macros.html" import password_text %}
+{% from "macros/console.html" import command_head with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set is_compact = compact is defined and compact %}
+{% set codes = assembly.access_mode.value != "password" %}
+{% if is_compact %}
+<section class="card cmd" id="cmd-join" aria-labelledby="cmd-join-title">
+  {{ command_head("qr-code", _("Join"), "access", "join", _("In Access"), "cmd-join-title") }}
+  {% if codes %}
+  <p class="mono small join-address"><a href="{{ voter_url }}">{{ voter_url }}</a></p>
+  <p class="cmd-state">{{ _("Each person joins with the individual code printed on their card.") }}</p>
+  {% else %}
+  <div class="cmd-join">
+    {% if join_qr %}<div class="qr" role="img" aria-label="{{ _('QR code to join the session') }}">{{ join_qr }}</div>{% endif %}
+    <div>
+      <p class="mono small join-address"><a href="{{ voter_url }}">{{ voter_url }}</a></p>
+      <p class="secret">{{ password_text(password) }}</p>
+      <p class="muted small">{{ _("The QR code contains the password: scanning it joins directly.") }}</p>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% else %}
+<section class="card join-card" id="join" aria-labelledby="join-title">
+  <h2 id="join-title">{{ icon("qr-code") }} {{ _("Joining the session") }}</h2>
+  <p class="join-address">{{ _("Address") }} : <a class="mono" href="{{ voter_url }}">{{ voter_url }}</a></p>
+  {% if not codes %}
+  <div class="access-password">
+    {% if join_qr %}<div class="qr" role="img" aria-label="{{ _('QR code to join the session') }}">{{ join_qr }}</div>{% endif %}
+    <div>
+      <p class="label">{{ _("Session password") }}</p>
+      <p class="secret">{{ password_text(password) }}</p>
+      <p class="muted small">{{ _("The QR code contains the password: scanning it joins directly.") }}</p>
+    </div>
+  </div>
+  {% else %}
+  <p>{{ _("Each person joins with the individual code printed on their card.") }} <a href="#codes">{{ _("Manage the codes") }}</a></p>
+  {% endif %}
+</section>
+{% endif %}

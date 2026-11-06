@@ -1,0 +1,100 @@
+{#- Delegate links (FR-92), in Settings, the owner's only: part of this console for someone of the
+    tribune without an account, for this session only, until the link is revoked or the session
+    closed. Like the drafts of Polls, a card whose head adds one: each link in use is a tile with
+    everything in view, nothing folded (the owner's request, 2026-11-06): its name and last use,
+    its address with its copy button and QR code, then the form of its name and rights, saved
+    with "Enregistrer", and "Retirer le lien". The "+" of the head is a link to the tile of a new
+    link (#delegates-new), hidden until it is the target of the address (manage.css), so it
+    shows without script too; with no link yet, that tile shows from the start and the head has
+    no "+". A link can also be created in place from the "Confier" button of a card or a command
+    (hand_over of macros/delegates.html, D-G); with script, that answer carries this card too,
+    which manage.js swaps. Needs delegates_links, delegates_rights, delegates_max,
+    delegates_name_length (agaura/web/manage/delegates.py). -#}
+{% from "macros/forms.html" import csrf, help with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set closed = assembly.status.value == "closed" %}
+{% set can_add = not closed and delegates_links | length < delegates_max %}
+
+{% macro rights_fields(id_prefix, checked=[]) -%}
+<fieldset class="delegate-rights">
+  <legend>{{ _("This link opens") }}</legend>
+  <div class="delegate-rights-grid">
+    {% for right in delegates_rights %}
+    <label class="checkbox" for="{{ id_prefix }}-{{ right }}"><input type="checkbox" id="{{ id_prefix }}-{{ right }}" name="rights" value="{{ right }}"{% if right in checked %} checked{% endif %}> {{ right_label(right) }}</label>
+    {% endfor %}
+  </div>
+</fieldset>
+{%- endmacro %}
+
+<section class="card" id="delegates" aria-labelledby="delegates-title">
+  <div class="card-head">
+    <h2 id="delegates-title">{{ icon("user-round-key") }} {{ _("Delegate links") }}</h2>
+    {% if can_add and delegates_links %}<a class="button small tip delegates-add" href="#delegates-new" aria-label="{{ _('New delegate link') }}" data-tip="{{ _('New delegate link') }}">{{ icon("plus") }}</a>{% endif %}
+  </div>
+  {{ help(_("Hand part of this console to someone of the tribune, without an account: a secret link, for this session only."), _("The person opens the link on a phone or a computer and gets only the parts chosen here: agenda, session notes, polls, chronometer, what the room sees, headcount. Never the session password, the codes, the screen link, the documents or the settings. The link works on several devices until it is revoked or the session is closed; the session log shows the person's name next to each action taken with it.")) }}
+  {% if closed %}
+  <p class="muted">{{ _("The delegate links ended when the session was closed.") }}</p>
+  {% else %}
+  <div class="delegate-grid">
+    {% for link in delegates_links %}
+    <article class="delegate-item" id="delegate-{{ link.id }}" aria-labelledby="delegate-{{ link.id }}-title">
+      <div class="spread delegate-head">
+        <h3 id="delegate-{{ link.id }}-title">{{ link.name }}</h3>
+        <span class="muted small">{% if link.last_seen_at %}{{ _("Last used %(when)s", when=link.last_seen_at | short_datetime) }}{% else %}{{ _("Not opened yet") }}{% endif %}</span>
+      </div>
+      <div class="delegate-link" id="delegate-{{ link.id }}-link">
+        <div class="qr" role="img" aria-label="{{ _('QR code of the link for %(name)s', name=link.name) }}">{{ link.qr }}</div>
+        <div class="stack">
+          <div class="link-row">
+            <input type="text" class="link-url mono" readonly value="{{ link.url }}" aria-label="{{ _('Link for %(name)s', name=link.name) }}" id="delegate-{{ link.id }}-url">
+            <button type="button" class="button small" data-copy="delegate-{{ link.id }}-url" data-copied="{{ _('Copied') }}" hidden>{{ _("Copy") }}</button>
+          </div>
+          <p class="hint">{{ _("Send it to this person only: whoever holds the link gets these rights. Scanning the QR code opens it on a phone.") }}</p>
+        </div>
+      </div>
+      <form method="post" action="/manage/{{ assembly.public_id }}/delegates/edit#delegate-{{ link.id }}" class="stack delegate-edit" id="delegate-{{ link.id }}-edit">
+        {{ csrf() }}
+        <input type="hidden" name="delegate" value="{{ link.id }}">
+        <div class="field">
+          <label for="delegate-{{ link.id }}-name">{{ _("Name") }}</label>
+          <input id="delegate-{{ link.id }}-name" name="name" value="{{ link.name }}" maxlength="{{ delegates_name_length }}" required autocomplete="off">
+        </div>
+        {{ rights_fields("delegate-" ~ link.id ~ "-right", link.rights) }}
+      </form>
+      {#- Two forms side by side: "Enregistrer" belongs to the one above (form attribute, also
+          its default button for Enter), "Retirer le lien" to its own. -#}
+      <div class="delegate-actions">
+        <button type="submit" class="button small" form="delegate-{{ link.id }}-edit">{{ _("Save") }}</button>
+        <form method="post" action="/manage/{{ assembly.public_id }}/delegates/revoke#delegates" data-confirm="{{ _('Revoke this link? It stops working at once, on every device where it was opened.') }}">
+          {{ csrf() }}<input type="hidden" name="delegate" value="{{ link.id }}">
+          <button type="submit" class="button small danger">{{ _("Revoke the link") }}</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+
+    {% if can_add %}
+    <article class="delegate-item delegate-new{% if delegates_links %} is-folded{% endif %}" id="delegates-new" aria-labelledby="delegates-new-title" data-focus-first>
+      <h3 id="delegates-new-title">{{ _("New delegate link") }}</h3>
+      <form method="post" action="/manage/{{ assembly.public_id }}/delegates" class="stack">
+        {{ csrf() }}
+        <div class="field">
+          <label for="delegates-new-name">{{ _("Name") }}</label>
+          <p class="hint" id="delegates-new-name-hint">{{ _("Who receives the link, as the session log will name them: for instance a first name and a function.") }}</p>
+          <input id="delegates-new-name" name="name" maxlength="{{ delegates_name_length }}" required autocomplete="off" autocapitalize="words" aria-describedby="delegates-new-name-hint">
+        </div>
+        {{ rights_fields("delegates-new-right") }}
+        <div class="actions">
+          <button type="submit" class="button primary">{{ _("Create the link") }}</button>
+          {% if delegates_links %}<a class="button quiet" href="#delegates">{{ _("Cancel") }}</a>{% endif %}
+        </div>
+      </form>
+    </article>
+    {% endif %}
+  </div>
+
+  {% if not can_add %}
+  <p class="hint">{{ _("At most %(max)s links in use: revoke one to create another.", max=delegates_max) }}</p>
+  {% endif %}
+  {% endif %}
+</section>

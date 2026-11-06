@@ -1,0 +1,76 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf, field with context %}
+{% block title %}{{ _("Accounts") }} · AGaura{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/superadmin.css') }}">{% endblock %}
+{% block content %}
+<h1>{{ _("Accounts") }}</h1>
+<p class="muted">{{ _("Create accounts by invitation and delete them. This super-admin account has no access to sessions or their content.") }}</p>
+
+<section class="card" aria-labelledby="invite-title">
+  <h2 id="invite-title">{{ _("Invite a person") }}</h2>
+  <form method="post" action="/superadmin/invite" class="stack">
+    {{ csrf() }}
+    <div class="grid-2">
+      {{ field("email", _("Email address"), type="email", value=form.email, required=true, autocomplete="off",
+               attrs={"maxlength": "254"}) }}
+      {{ field("display_name", _("Name (optional)"), value=form.display_name, autocomplete="off",
+               attrs={"maxlength": "100"}) }}
+    </div>
+    <p class="hint">{{ _("The person receives an email with a link, valid for 7 days, to choose a password. The link also confirms the address.") }}</p>
+    <button type="submit" class="button primary">{{ _("Create the account and send the invitation") }}</button>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="accounts-title">
+  <h2 id="accounts-title">{{ _("All accounts") }} <span class="muted">({{ accounts | length }})</span></h2>
+  <ul class="sa-accounts">
+    {% for account in accounts %}
+    <li class="sa-account">
+      <div class="sa-account-head">
+        <strong class="sa-email">{{ account.email }}</strong>
+        {% if account.is_superadmin %}
+        <span class="badge neutral">{{ _("Super-admin") }}</span>
+        {% elif account.state == states.PENDING %}
+        <span class="badge warning">{{ _("Invitation pending") }}</span>
+        {% elif account.state == states.DISABLED %}
+        <span class="badge danger">{{ _("Disabled") }}</span>
+        {% else %}
+        <span class="badge success">{{ _("Active") }}</span>
+        {% endif %}
+        {% if account.id == user.id %}<span class="muted small">{{ _("(this account)") }}</span>{% endif %}
+      </div>
+      {% if account.display_name %}<p class="sa-name">{{ account.display_name }}</p>{% endif %}
+      <p class="muted small sa-dates">
+        {{ _("Created on %(date)s", date=account.created_at | short_datetime) }} ·
+        {% if account.last_seen_at %}{{ _("last seen on %(date)s", date=account.last_seen_at | short_datetime) }}{% else %}{{ _("never logged in") }}{% endif %}
+      </p>
+      {% if account.state == states.PENDING %}
+      <p class="small">{% if account.invitation_valid %}{{ _("The invitation link is still valid.") }}{% else %}{{ _("The invitation link has expired.") }}{% endif %}</p>
+      {% endif %}
+      {% if not account.is_superadmin %}
+      <div class="sa-actions">
+        {% if account.state == states.PENDING %}
+        <form method="post" action="/superadmin/accounts/{{ account.id }}/resend" class="inline">
+          {{ csrf() }}
+          <button type="submit" class="button small">{{ _("Send a new invitation") }}</button>
+        </form>
+        {% endif %}
+        <details class="sa-delete">
+          <summary>{{ _("Delete this account") }}</summary>
+          <form method="post" action="/superadmin/accounts/{{ account.id }}/delete" class="stack">
+            {{ csrf() }}
+            <p class="small">{{ _("The account is deleted with all its sessions, their polls, results and exports. This cannot be undone. Type the address of the account and your own password to confirm.") }}</p>
+            {{ field("confirm_email", _("Address of the account"), type="email", required=true, autocomplete="off",
+                     id="confirm-" ~ account.id, attrs={"maxlength": "254"}) }}
+            {{ field("password", _("Your password"), type="password", required=true, autocomplete="current-password",
+                     id="password-" ~ account.id) }}
+            <button type="submit" class="button danger small">{{ _("Delete the account") }}</button>
+          </form>
+        </details>
+      </div>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

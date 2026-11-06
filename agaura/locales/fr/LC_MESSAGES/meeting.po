@@ -1,0 +1,282 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+
+#: templates/manage/_agenda.html:14
+msgid "Item %(number)s of %(count)s"
+msgstr "Point %(number)s sur %(count)s"
+
+#: templates/manage/_agenda.html:14 templates/manage/_agenda.html:41
+msgid "No item under discussion"
+msgstr "Aucun point en cours"
+
+#: templates/manage/_agenda.html:39
+msgid "Previous"
+msgstr "Précédent"
+
+#: templates/manage/_agenda.html:40
+msgid "Next"
+msgstr "Suivant"
+
+#: templates/manage/_agenda.html:57
+msgid "Fill in the agenda"
+msgstr "Saisir l'ordre du jour"
+
+#: templates/manage/_agenda.html:71
+msgid "Save the agenda"
+msgstr "Enregistrer l'ordre du jour"
+
+#: templates/manage/_agenda.html:75
+msgid "The session is closed: the agenda can no longer change."
+msgstr "La session est terminée : l'ordre du jour ne peut plus changer."
+
+#: templates/manage/_tribune.html:16
+msgid "Nobody at the tribune yet."
+msgstr "Personne à la tribune pour l'instant."
+
+#: templates/manage/_tribune.html:18
+msgid "The people running the session, with their function. Their names appear in the minutes."
+msgstr "Les personnes qui conduisent la séance, avec leur fonction. Leurs noms figurent au procès-verbal."
+
+#: templates/manage/_tribune.html:21
+msgid "Edit the tribune"
+msgstr "Modifier la tribune"
+
+#: templates/manage/_tribune.html:21
+msgid "Fill in the tribune"
+msgstr "Composer la tribune"
+
+#: templates/manage/_tribune.html:26
+msgid "The tribune was not saved: correct the rows marked below."
+msgstr "La tribune n'a pas été enregistrée : corrigez les lignes signalées ci-dessous."
+
+#: templates/manage/_tribune.html:37
+msgid "Person %(number)s"
+msgstr "Personne %(number)s"
+
+#: templates/manage/_tribune.html:45
+msgid "Function"
+msgstr "Fonction"
+
+#: templates/manage/_tribune.html:56
+msgid "Save the tribune"
+msgstr "Enregistrer la tribune"
+
+#: web/manage/meeting.py:40
+msgid "The tribune has at most 20 people."
+msgstr "La tribune compte au plus 20 personnes."
+
+#: web/manage/meeting.py:41
+msgid "Enter this person's name, or empty the function."
+msgstr "Indiquez le nom de cette personne, ou videz sa fonction."
+
+#: web/manage/meeting.py:42
+msgid "A name has at most 100 characters."
+msgstr "Un nom compte au plus 100 caractères."
+
+#: web/manage/meeting.py:43
+msgid "A function has at most 100 characters."
+msgstr "Une fonction compte au plus 100 caractères."
+
+#: web/manage/meeting.py:44
+msgid "The agenda has at most 50 items."
+msgstr "L'ordre du jour compte au plus 50 points."
+
+#: web/manage/meeting.py:45
+msgid "An agenda item has at most 200 characters."
+msgstr "Un point de l'ordre du jour compte au plus 200 caractères."
+
+#: web/manage/meeting.py:46
+msgid "This agenda item no longer exists: reload the page."
+msgstr "Ce point de l'ordre du jour n'existe plus : rechargez la page."
+
+#: web/manage/meeting.py:51
+msgid "Tribune saved."
+msgstr "Tribune enregistrée."
+
+#: web/manage/meeting.py:52
+msgid "Agenda saved."
+msgstr "Ordre du jour enregistré."
+
+#: web/manage/meeting.py:53
+msgid "Item under discussion changed."
+msgstr "Point en cours modifié."
+
+#: web/manage/meeting.py:58
+msgid "Tribune edited"
+msgstr "Tribune modifiée"
+
+#: web/manage/meeting.py:59
+msgid "Agenda edited"
+msgstr "Ordre du jour modifié"
+
+#: web/manage/meeting.py:60
+msgid "Item under discussion changed"
+msgstr "Point en cours de l'ordre du jour changé"
+
+#: web/manage/meeting.py:63
+msgid "Item %(number)s is longer than 200 characters: shorten it."
+msgstr "Le point %(number)s dépasse 200 caractères : raccourcissez-le."
+
+#: templates/manage/_tribune.html:51
+msgid "One row per person, in the order of the minutes; the function is optional. Empty a row to remove that person."
+msgstr "Une ligne par personne, dans l'ordre du procès-verbal ; la fonction est facultative. Pour retirer une personne, videz sa ligne."
+
+#: templates/manage/_tribune.html:61
+msgid "Add a person"
+msgstr "Ajouter une personne"
+
+#: templates/manage/_attendance.html:5
+msgid "%(num)s reading"
+msgid_plural "%(num)s readings"
+msgstr[0] "%(num)s relevé"
+msgstr[1] "%(num)s relevés"
+
+#: templates/manage/_attendance.html:18
+msgid "No reading yet."
+msgstr "Aucun relevé pour l'instant."
+
+#: templates/manage/_attendance.html:20
+msgid "A reading is taken when the session opens and closes, each time the headcount is saved and when a poll is pushed or closed; never when someone joins or votes. Connections: accesses in use at that moment, as Attendees."
+msgstr "Un relevé est pris à l'ouverture et à la clôture de la session, à chaque effectif enregistré et à chaque vote lancé ou clos ; jamais à l'arrivée ni au vote d'une personne. Connexions : accès en cours à ce moment, comme « Présents »."
+
+#: templates/exports/minutes.html:157 templates/manage/_notes.html:30 templates/manage/_notes.html:46
+msgid "Outside the agenda"
+msgstr "Hors ordre du jour"
+
+#: templates/manage/_notes.html:9
+msgid "Session notes"
+msgstr "Notes de séance"
+
+#: templates/manage/_notes.html:13
+msgid "New note"
+msgstr "Nouvelle note"
+
+#: templates/manage/_notes.html:15
+msgid "Attached to the item under discussion: %(number)s. %(title)s"
+msgstr "Rattachée au point en cours : %(number)s. %(title)s"
+
+#: templates/manage/_notes.html:15
+msgid "No item under discussion: the note will be outside the agenda."
+msgstr "Aucun point en cours : la note sera hors ordre du jour."
+
+#: templates/manage/_notes.html:17 templates/manage/_notes.html:52
+msgid "Internal note"
+msgstr "Note interne"
+
+#: templates/manage/_notes.html:17 templates/manage/_notes.html:52
+msgid "(left out of the minutes)"
+msgstr "(absente du procès-verbal)"
+
+#: templates/manage/_notes.html:18
+msgid "Add"
+msgstr "Ajouter"
+
+#: templates/manage/_notes.html:20
+msgid "Ctrl+Enter adds the note."
+msgstr "Ctrl+Entrée ajoute la note."
+
+#: templates/manage/_notes.html:31
+msgid "Internal"
+msgstr "Interne"
+
+#: templates/manage/_notes.html:32
+msgid "edited"
+msgstr "modifiée"
+
+#: templates/manage/_notes.html:40
+msgid "Text of the note"
+msgstr "Texte de la note"
+
+#: templates/manage/_notes.html:44
+msgid "Agenda item"
+msgstr "Point de l'ordre du jour"
+
+#: templates/manage/_notes.html:55
+msgid "Delete this note?"
+msgstr "Supprimer cette note ?"
+
+#: templates/manage/_notes.html:58
+msgid "Delete the note"
+msgstr "Supprimer la note"
+
+#: templates/manage/_notes.html:65
+msgid "No note yet."
+msgstr "Aucune note pour l'instant."
+
+#: web/manage/notes.py:38
+msgid "Write the note before adding it."
+msgstr "Écrivez la note avant de l'ajouter."
+
+#: web/manage/notes.py:39
+msgid "A note has at most 5,000 characters."
+msgstr "Une note compte au plus 5 000 caractères."
+
+#: web/manage/notes.py:40
+msgid "This session has reached the maximum of 500 notes."
+msgstr "Cette session a atteint le maximum de 500 notes."
+
+#: web/manage/notes.py:45
+msgid "Note added."
+msgstr "Note ajoutée."
+
+#: web/manage/notes.py:46
+msgid "Note saved."
+msgstr "Note enregistrée."
+
+#: web/manage/notes.py:47
+msgid "Note deleted."
+msgstr "Note supprimée."
+
+#: web/manage/notes.py:52
+msgid "Note added after the session closed"
+msgstr "Note ajoutée après la clôture"
+
+#: web/manage/notes.py:53
+msgid "Note edited after the session closed"
+msgstr "Note modifiée après la clôture"
+
+#: web/manage/notes.py:54
+msgid "Note deleted after the session closed"
+msgstr "Note supprimée après la clôture"
+
+#: templates/manage/_notes.html:26
+msgid "Quick note"
+msgstr "Note rapide"
+
+#: templates/manage/_notes.html:26
+msgid "All the notes"
+msgstr "Toutes les notes"
+
+#: templates/manage/_notes.html:38
+msgid "Last note, %(when)s:"
+msgstr "Dernière note, %(when)s :"
+
+#: templates/manage/_agenda.html:31
+msgid "Agenda items"
+msgstr "Points de l'ordre du jour"
+
+#: templates/manage/_agenda.html:32
+msgid "One item per line, numbered automatically."
+msgstr "Un point par ligne, numéroté automatiquement."
+
+#: templates/manage/_agenda.html:35
+msgid "The agenda has just been changed from another console: saving this text replaces that version."
+msgstr "L'ordre du jour vient d'être modifié depuis une autre console : enregistrer ce texte remplacera cette version."
+
+#: templates/manage/_agenda.html:38
+msgid "Unsaved changes"
+msgstr "Modifications non enregistrées"
+
+#: templates/manage/_agenda.html:39
+msgid "Discard the changes"
+msgstr "Annuler les modifications"
+
+#: templates/manage/_agenda.html:52
+msgid "Change item"
+msgstr "Changer"

@@ -1,0 +1,442 @@
+/* AGaura — shared styles. No framework, no inline styles (strict CSP). Mobile first. */
+
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --text: #1b1f24;
+  --muted: #5b6470;
+  --border: #d5dae1;
+  --accent: #1f4fbf;
+  --accent-strong: #163a8f;
+  --accent-soft: #e8eefb;
+  --success: #1e7a46;
+  --success-soft: #e6f4ec;
+  --danger: #b3261e;
+  --danger-soft: #fbeaea;
+  --warning: #7a4d00;
+  --warning-soft: #fdf3dc;
+  /* Lines: --border draws cards and separators (decoration, 1.41:1 on white); --border-strong
+     draws the edge of a control whose edge is its only outline (text field, grade button,
+     secondary button): 3.77:1 on white, 3.49:1 on --bg, 3.24:1 on --accent-soft (WCAG 1.4.11). */
+  --border-strong: #7b8494;
+  /* Neutral states (closed, draft, handed over): ink on grey, 8.35:1. */
+  --neutral-soft: #eceef2;
+  --neutral-ink: #3d4550;
+  /* Borders of the tinted notices and cards. */
+  --success-line: #b9dfc8;
+  --warning-line: #f0d9a6;
+  --danger-line: #f0c2bf;
+  --accent-line: #b4c5ee;
+  /* Text of the tinted notices (8.13:1, 9.33:1, 8.90:1 on their soft background). */
+  --success-ink: #14522f;
+  --warning-ink: #5c3900;
+  --danger-ink: #7d1a14;
+  /* Information: the blue of AGaura, never a fourth hue. */
+  --info: var(--accent-strong);
+  --info-soft: var(--accent-soft);
+  --info-line: var(--accent-line);
+  /* Live (charter v2): what runs now, a vote open, the session in session, a chronometer
+     running. Plum, apart from the green of what is done (adopted, recorded): 7.86:1 on white,
+     6.72:1 on --live-soft; always with its dot and its word. */
+  --live: #8a1f8f;
+  --live-soft: #f7e9f7;
+  --live-line: #e2b5e3;
+  /* Night blue: the band of the session, the same on the phones (voter bar) and on the
+     projector (screen head); white text 12.51:1, --night-ink 8.51:1. */
+  --night: #12306f;
+  --night-ink: #c9d5f2;
+  /* Results on the projection screen (FR-75), on the night card: bar track, winning bar (6.23:1
+     on the track, 8.02:1 on night), other bars in --night-ink (6.61:1 on the track). */
+  --night-track: #24427f;
+  --night-win: #8fe0b0;
+  /* Icons (Lucide, 24 grid, stroke 2): three sizes only. */
+  --icon-sm: 1rem;
+  --icon-md: 1.25rem;
+  --icon-lg: 1.5rem;
+
+  --radius: 10px;    /* cards, choice rows */
+  --radius-sm: 8px;  /* buttons, fields, list items */
+  --radius-xs: 6px;  /* grade badges */
+  --radius-pill: 999px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 8%);
+  --shadow-pop: 0 10px 28px rgb(16 24 40 / 16%);  /* "⋯" menus, "More" */
+  --shadow-bar: 0 -2px 10px rgb(16 24 40 / 8%);   /* bars fixed at the bottom */
+  --tap: 48px; /* minimum touch target (NFR-06 asks for 44 px) */
+
+  /* Spacing on a 4 px grid: the values already in use, named for new rules. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Type scale (rem of 16 px; the voter page sets 18 px on its body). 12 px is the floor, for
+     spaced capitals only. */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.25rem;
+  --fs-2xl: 1.5rem;
+
+  /* Majority Judgment scale, best to worst (D8): colour plus text, never colour alone. Grades 0
+     and 1 are dark enough for white text at body size (7.40:1 and 4.77:1). The same values are
+     written in grade_color() of macros/results.html (SVG fills): keep both in step. */
+  --grade-0: #14623a;
+  --grade-1: #3a8228;
+  --grade-2: #8aa82d;
+  --grade-3: #d9a514;
+  --grade-4: #dc7426;
+  --grade-5: #c0392b;
+
+  /* System fonts only: no font is downloaded. */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
+
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+h1, h2, h3 { line-height: 1.25; margin: 0 0 0.6em; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.05rem; }
+p { margin: 0 0 0.9em; }
+a { color: var(--accent); }
+a:hover { color: var(--accent-strong); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+code, .mono { font-family: var(--font-mono); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    /* 0s, not a tiny duration: any duration turns every style change (font sizes included)
+       into a transition, and the projection screen would measure the old sizes when fitting. */
+    transition-duration: 0s !important; scroll-behavior: auto !important;
+  }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.muted { color: var(--muted); }
+.small { font-size: 0.875rem; }
+.nowrap { white-space: nowrap; }
+/* Links under a form of the account pages (forgotten password, back to the login page), and
+   action links inside console text (.action-link: "Tout l'ordre du jour", "Suivi des
+   présences", exports): a box at least 24 px tall, the smallest target WCAG 2.5.8 allows, for
+   a line barely taller. */
+.form-links a, .action-link { display: inline-block; min-height: 24px; padding-block: 0.125rem; }
+
+/* --- Layout -------------------------------------------------------------- */
+
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); }
+.topbar-inner {
+  max-width: 1080px; margin: 0 auto; padding: 0.6rem 1rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+/* Wordmark: the sign of the favicon, then the name. The sign is never redrawn, recoloured or
+   shown without the name in the interface (the favicon is the only sign alone). */
+.brand {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-weight: 800; font-size: 1.2rem; color: var(--text); text-decoration: none; letter-spacing: 0.01em;
+}
+.brand svg.icon { width: 1.6rem; height: 1.6rem; vertical-align: 0; }
+.topbar nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.topbar nav a { text-decoration: none; font-weight: 500; }
+
+.page { width: 100%; max-width: 1080px; margin: 0 auto; padding: 1.25rem 1rem 3rem; flex: 1; }
+.footer { color: var(--muted); font-size: 0.875rem; text-align: center; padding: 1.5rem 1rem; }
+
+.stack > * + * { margin-top: 1rem; }
+.grid-2 { display: grid; gap: 1rem; }
+@media (min-width: 760px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+.row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.spread { display: flex; gap: 0.75rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 1.25rem; margin-bottom: 1rem;
+}
+.card > :last-child { margin-bottom: 0; }
+.narrow { max-width: 480px; margin-left: auto; margin-right: auto; }
+.hero { margin: 0.5rem 0 1.5rem; }
+.lead { font-size: 1.1rem; color: var(--muted); max-width: 46rem; }
+
+/* --- Forms and buttons ------------------------------------------------- */
+
+form.inline { display: inline; margin: 0; }
+.field { display: flex; flex-direction: column; gap: 0.3rem; }
+.field label, .label { font-weight: 600; }
+.hint { color: var(--muted); font-size: 0.875rem; margin: 0; }
+input[type="text"], input[type="email"], input[type="password"], input[type="number"],
+input[type="date"], input:not([type]), select, textarea {
+  font: inherit; color: inherit; width: 100%; min-height: var(--tap);
+  padding: 0.6rem 0.75rem; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: #fff;
+}
+textarea { min-height: 6rem; resize: vertical; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+fieldset { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem 1rem 1rem; margin: 0; }
+legend { font-weight: 600; padding: 0 0.3rem; }
+.checkbox { display: flex; gap: 0.6rem; align-items: center; min-height: var(--tap); }
+.checkbox input { width: 1.3rem; height: 1.3rem; }
+
+/* Buttons, four levels: primary (one per card: the next step), secondary (.button alone: the
+   other actions of a card), quiet (underlined text: a way out, a pointer elsewhere, a rare
+   action), danger (only the last step of an irreversible action; its trigger stays
+   secondary). Focus: the shared 3 px ring of :focus-visible. */
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  min-height: var(--tap); padding: 0.55rem 1.1rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong); background: var(--surface); color: var(--text);
+  font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.button:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.button.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
+.button.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.button.danger:hover { background: #8c1d17; border-color: #8c1d17; color: #fff; }
+.button.quiet {
+  border-color: transparent; background: transparent; color: var(--accent);
+  text-decoration: underline; text-underline-offset: 0.18em;
+}
+.button.quiet:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.button.small { min-height: 36px; padding: 0.3rem 0.75rem; font-size: 0.9rem; }
+.button.wide { width: 100%; }
+/* Disabled: flat and grey whatever the level (no opacity), so a disabled primary never reads
+   as the next step; the reason is written next to it when it is not obvious. */
+.button[disabled], .button[aria-disabled="true"],
+.button[disabled]:hover, .button[aria-disabled="true"]:hover {
+  background: var(--bg); border-color: var(--border); color: #67707c; text-decoration: none; cursor: not-allowed;
+}
+button.link {
+  background: none; border: 0; padding: 0; font: inherit; font-weight: 500;
+  color: var(--accent); cursor: pointer; min-height: 0;
+}
+.actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+
+/* --- Feedback ------------------------------------------------------------ */
+
+/* Notices: notice (done), warning (to check), error (refused). A notice is text first: the
+   colour only repeats what its first words say. */
+.alert { border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1rem; border: 1px solid; }
+.alert-error { background: var(--danger-soft); border-color: var(--danger-line); color: var(--danger-ink); }
+.alert-notice { background: var(--success-soft); border-color: var(--success-line); color: var(--success-ink); }
+.alert-warning { background: var(--warning-soft); border-color: var(--warning-line); color: var(--warning); }
+.alert-info { background: var(--info-soft); border-color: var(--info-line); color: var(--info); }
+.alert > :last-child { margin-bottom: 0; }
+/* Notices with an icon: the icon repeats the first words (decorative). */
+.alert.has-icon { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.6rem; align-items: start; }
+.alert.has-icon > svg.icon { width: 1.25rem; height: 1.25rem; margin-top: 0.1rem; }
+.alert.has-icon > div > :last-child { margin-bottom: 0; }
+
+/* Status pills: a word, sometimes a glyph before it, the colour last; never a button. Poll life
+   cycle: Brouillon (.neutral), ● En cours (.live.is-live), Clos (.neutral), ✓ Publié
+   (.is-done), Annulé (.danger). */
+.badge {
+  display: inline-block; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em;
+  padding: 0.15rem 0.55rem; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--accent-strong);
+  white-space: nowrap;
+}
+.badge.success { background: var(--success-soft); color: var(--success); }
+.badge.danger { background: var(--danger-soft); color: var(--danger); }
+.badge.warning { background: var(--warning-soft); color: var(--warning); }
+.badge.neutral { background: var(--neutral-soft); color: var(--neutral-ink); }
+/* Live: a vote open, the session in session. Plum, never the green of "done". */
+.badge.live { background: var(--live-soft); color: var(--live); }
+/* Glyphs repeat the word for a reader of shapes; screen readers skip them (empty alt text). */
+.badge.is-live::before {
+  content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.4em;
+  border-radius: 50%; background: currentColor; vertical-align: 0.08em;
+}
+.badge.is-done::before { content: "\2713\00a0"; content: "\2713\00a0" / ""; }
+/* "Confié à Paul Martin" on a console card handed over to a delegate link (FR-92): a link to
+   that delegate link in Réglages, with an icon (aria-hidden) and the name in a <span>, cut with
+   an ellipsis when the card is too narrow. Links are created from the card ("Confier") or in
+   Réglages, and managed in Réglages. */
+.badge.delegate {
+  display: inline-flex; align-items: center; gap: 0.3rem; max-width: 100%; min-height: 24px; padding: 0.1rem 0.6rem;
+  background: var(--neutral-soft); color: var(--neutral-ink); font-weight: 600; letter-spacing: 0;
+}
+.badge.delegate svg { flex: none; width: 0.95em; height: 0.95em; }
+.badge.delegate > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* --- Data ---------------------------------------------------------------- */
+
+.table-wrap { overflow-x: auto; }
+table.data { width: 100%; border-collapse: collapse; }
+table.data th, table.data td { text-align: left; padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.data th { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+/* "table.data td" sets text-align: left with a higher specificity: without this rule, figures
+   were left-aligned. */
+table.data .num { text-align: right; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; }
+.kpi { background: var(--bg); border-radius: 8px; padding: 0.75rem; }
+.kpi strong { display: block; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.kpi span { color: var(--muted); font-size: 0.85rem; }
+
+/* Result bars use <progress>: no inline style needed for the width. */
+progress.bar { width: 100%; height: 0.75rem; border: 0; border-radius: 999px; background: #e7eaf0; overflow: hidden; appearance: none; }
+progress.bar::-webkit-progress-bar { background: #e7eaf0; border-radius: 999px; }
+progress.bar::-webkit-progress-value { background: var(--accent); border-radius: 999px; }
+progress.bar::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+progress.bar.win::-webkit-progress-value { background: var(--success); }
+progress.bar.win::-moz-progress-bar { background: var(--success); }
+
+.grade { display: inline-block; padding: 0.1rem 0.5rem; border-radius: var(--radius-xs); font-weight: 700; color: #fff; }
+.grade-0 { background: var(--grade-0); }
+.grade-1 { background: var(--grade-1); }
+.grade-2 { background: var(--grade-2); color: #1b1f24; }
+.grade-3 { background: var(--grade-3); color: #1b1f24; }
+.grade-4 { background: var(--grade-4); color: #1b1f24; }
+.grade-5 { background: var(--grade-5); }
+
+.qr svg { width: 100%; max-width: 260px; height: auto; display: block; }
+.secret { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 700; letter-spacing: 0.12em; }
+
+/* --- Voter pages: one column, large type --------------------------------- */
+
+body.voter { font-size: 18px; }
+/* Night blue: the band of the session, the same as the head of the projection screen. */
+.voter-bar { position: relative; background: var(--night); color: #fff; }
+.voter-bar-inner { display: flex; align-items: center; gap: 0.5rem; max-width: 560px; margin: 0 auto; padding: 0 1rem; }
+.voter-title { flex: 1; min-width: 0; margin: 0; padding: 0.75rem 0; font-weight: 700; overflow-wrap: anywhere; }
+.voter-page { width: 100%; max-width: 560px; margin: 0 auto; padding: 1rem 1rem 3rem; flex: 1; }
+
+/* Information button of the voter bar: the service ethics, opened over the page. */
+.about > summary { display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; list-style: none; cursor: pointer; border-radius: 50%; }
+.about > summary::-webkit-details-marker { display: none; }
+.about > summary:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+.about[open] > summary { background: rgb(255 255 255 / 18%); }
+.about-panel { position: absolute; z-index: 10; top: 100%; left: 0; right: 0; max-width: 560px; max-height: 75vh; margin: 0 auto; padding: 1rem 1.25rem; overflow-y: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 0 0 var(--radius) var(--radius); box-shadow: var(--shadow); font-size: 1rem; }
+.about-panel h2 { margin-top: 0; font-size: 1.15rem; }
+
+/* Service ethics: home page card and voter information panel. */
+.ethics { margin: 0; padding-left: 1.2rem; }
+.ethics li + li { margin-top: 0.6rem; }
+
+/* --- Results -------------------------------------------------------------- */
+
+.result-table td progress.bar { display: block; margin-top: 0.35rem; }
+.verdict { font-size: 1.15rem; font-weight: 800; margin-bottom: 0.75rem; }
+.verdict.success { color: var(--success); }
+.verdict.danger { color: var(--danger); }
+.verdict.warning { color: var(--warning); }
+.result-counts { margin: 1rem 0 0; }
+.result-counts dt { color: var(--muted); font-size: 0.85rem; }
+.result-counts dd { margin: 0; }
+.grade-x { background: #5b6470; }
+/* Rule line, merit profile of Majority Judgment, votes per grade. */
+.result-rule { margin: -0.4rem 0 0.5rem; }
+svg.merit { display: block; width: 100%; height: 1.1rem; margin-top: 0.35rem; border-radius: 3px; }
+.merit-legend { display: flex; flex-wrap: wrap; gap: 0.25rem 0.9rem; margin: 0.6rem 0 0.25rem; color: var(--muted); }
+.merit-key { display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+.merit-key svg { flex: none; }
+.merit-details { margin-top: 0.5rem; }
+.merit-details > summary { cursor: pointer; min-height: 2rem; color: var(--accent); }
+/* Duels of a Condorcet result: a matrix, numbered heads, figures in tabular digits. */
+.duel-details .table-wrap { margin: 0.5rem 0 0.25rem; }
+table.duel-table { width: auto; min-width: 100%; font-variant-numeric: tabular-nums; }
+table.duel-table th, table.duel-table td { padding: 0.35rem 0.45rem; white-space: nowrap; }
+table.duel-table tbody th { color: var(--text); font-weight: 600; white-space: normal; min-width: 8rem; }
+table.duel-table td.is-won { background: var(--accent-soft); }
+.duel-key { display: inline-block; min-width: 1.2rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.merit-list { margin: 0.5rem 0 0.25rem; padding-left: 1.2rem; }
+.merit-list li + li { margin-top: 0.35rem; }
+
+/* Help folded to one line (macro help() of macros/forms.html): "Learn more" opens the rest. */
+.help { margin: 0; font-size: 0.875rem; color: var(--muted); }
+.help > summary { display: block; min-height: 0; padding: 0.3rem 0; list-style: none; cursor: pointer; }
+.help > summary::-webkit-details-marker { display: none; }
+.help[open] > summary { margin-bottom: 0.25rem; }
+.help-toggle { color: var(--accent); font-weight: 500; text-decoration: underline; white-space: nowrap; }
+.help[open] .help-toggle { display: none; }
+.help > .hint { margin: 0; }
+
+/* --- Icons (charter v2) --------------------------------------------------- */
+
+/* <svg class="icon"><use href="/static/icons.svg?v=…#i-NAME"/></svg>, from the macro icon() of
+   macros/icons.html. Decorative by default (aria-hidden); the text next to it names the thing.
+   Sizes follow the text (1.15em) or one of three tokens. */
+svg.icon { display: inline-block; flex: none; width: 1.15em; height: 1.15em; vertical-align: -0.2em; }
+svg.icon-sm { width: var(--icon-sm); height: var(--icon-sm); }
+svg.icon-md { width: var(--icon-md); height: var(--icon-md); }
+svg.icon-lg { width: var(--icon-lg); height: var(--icon-lg); }
+.button svg.icon { width: 1.15em; height: 1.15em; margin-inline: -0.1em; }
+.badge svg.icon { width: 1em; height: 1em; margin-right: 0.3em; vertical-align: -0.15em; }
+
+/* Icon-only buttons (order arrows, "⋯", remove an option, full screen): an aria-label, and the
+   same words as a tooltip shown on hover and on keyboard focus (WCAG 1.4.13: it stays while
+   hovered, and leaves with the focus). */
+.tip { position: relative; }
+.tip::after {
+  content: attr(data-tip); position: absolute; z-index: 40; left: 50%; bottom: calc(100% + 0.4rem); transform: translateX(-50%);
+  padding: 0.25rem 0.55rem; border-radius: var(--radius-xs); background: var(--text); color: #fff;
+  font-size: var(--fs-xs); font-weight: 600; line-height: 1.3; white-space: nowrap; pointer-events: none; opacity: 0;
+}
+.tip:hover::after, .tip:focus-visible::after { opacity: 1; }
+
+/* Live dot: the shape of "now", before the word ("● En cours"), in the colour of its text. */
+.live-dot { display: inline-block; width: 0.55em; height: 0.55em; margin-right: 0.35em; border-radius: 50%; background: currentColor; vertical-align: 0.08em; }
+
+/* Stepper: where a person stands in a sequence of two or three steps (the ballot box of the
+   voter page: choisir, vérifier, déposé). The current step is in words for screen readers
+   (aria-current="step"), in weight and by its filled number for the eye; a step done takes a
+   check mark. */
+.stepper { list-style: none; margin: 0 0 1rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; counter-reset: step; font-size: var(--fs-sm); }
+.stepper li { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--muted); counter-increment: step; }
+.stepper li::before {
+  content: counter(step); display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  border: 2px solid var(--border-strong); background: var(--surface); color: var(--muted); font-weight: 700; font-size: var(--fs-xs);
+}
+.stepper li.is-done::before { content: "\2713"; content: "\2713" / ""; border-color: var(--success); background: var(--success); color: #fff; }
+.stepper li[aria-current="step"] { color: var(--text); font-weight: 700; }
+.stepper li[aria-current="step"]::before { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+/* Lost connection (FR-42): a status always in place, empty and flat until a script fills it;
+   then fixed at the bottom of the screen, over the content and never pushing it (the page
+   gains room below its last line, .net-room, and focus stops short of it, .net-trouble);
+   green while it says the network is back. */
+.net-banner {
+  position: fixed; z-index: 50; left: 0; right: 0; bottom: 0; display: flex; gap: 0.75rem; align-items: center;
+  color: #fff; font-size: 1rem; pointer-events: none;
+}
+.net-banner p { margin: 0; }
+.net-banner svg.icon { display: none; width: 1.5rem; height: 1.5rem; }
+.net-banner.is-lost, .net-banner.is-back {
+  padding: 0.75rem max(1rem, env(safe-area-inset-right, 0px)) calc(0.75rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
+  background: var(--text); box-shadow: var(--shadow-bar); pointer-events: auto;
+}
+.net-banner.is-lost svg.icon { display: inline-block; }
+.net-banner.is-back { background: var(--success); font-weight: 700; }
+.net-banner .net-help { display: block; color: var(--night-ink); font-size: var(--fs-sm); }
+html.net-trouble { scroll-padding-bottom: 8rem; }
+.net-room .voter-page { padding-bottom: 9rem; }
+
+/* Demo (FR-09a): a band at the foot of the top bar of every page of a demo account, of a
+   delegate console and of the voter pages of a demo session. */
+.demo-banner {
+  margin: 0; padding: 0.45rem max(1rem, calc((100% - 1080px) / 2 + 1rem));
+  background: var(--warning-soft); border-top: 1px solid var(--warning-line);
+  color: var(--warning-ink); font-size: var(--fs-sm); text-align: left;
+}
+.voter-bar .demo-banner { padding-inline: max(1rem, calc((100% - 560px) / 2 + 1rem)); }
+.demo-facts { padding-left: 1.25rem; }
+.demo-facts li + li { margin-top: 0.35rem; }
+.demo-limits-title { font-size: var(--fs-lg); margin-top: 1.25rem; }
+.demo-banner a { color: inherit; }
+.demo-offer { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.demo-offer > * + * { margin-top: 0.6rem; }
+.demo-offer-title { display: flex; align-items: center; gap: 0.4rem; font-size: var(--fs-lg); margin: 0; }

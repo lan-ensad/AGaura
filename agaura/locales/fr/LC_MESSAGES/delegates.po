@@ -1,0 +1,237 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+
+#: templates/layouts/admin.html:11
+msgid "Delegate access: %(name)s"
+msgstr "Accès délégué : %(name)s"
+
+#: templates/layouts/admin.html:12
+msgid "Leave the console on this device? The link opens it again."
+msgstr "Quitter la console sur cet appareil ? Le lien permet d'y revenir."
+
+#: templates/manage/_delegate_home.html:5 templates/manage/delegate_join.html:6 templates/manage/delegate_join.html:9
+msgid "Delegate access"
+msgstr "Accès délégué"
+
+#: templates/manage/_delegate_home.html:6
+msgid "Link of %(name)s, for this session only."
+msgstr "Lien de %(name)s, pour cette session uniquement."
+
+#: templates/manage/_delegate_home.html:8
+msgid "The session is not open yet: the tribune opens it."
+msgstr "La session n'est pas encore ouverte : la tribune l'ouvrira."
+
+#: templates/manage/_delegate_home.html:8
+msgid "The tribune may change what this link opens or revoke it at any time; it ends when the session is closed."
+msgstr "La tribune peut à tout moment modifier ce que ce lien ouvre ou le retirer ; il prend fin à la clôture de la session."
+
+#: templates/manage/_delegates.html:11
+msgid "This link opens"
+msgstr "Ce lien ouvre"
+
+#: templates/manage/_delegates.html:19
+msgid "Delegate links"
+msgstr "Liens délégués"
+
+#: templates/manage/_delegates.html:20
+msgid "Hand part of this console to someone of the tribune, without an account: a secret link, for this session only."
+msgstr "Confiez une partie de cette console à une personne de la tribune, sans compte : un lien secret, pour cette session uniquement."
+
+#: templates/manage/_delegates.html:20
+msgid "The person opens the link on a phone or a computer and gets only the parts chosen here: agenda, session notes, polls, chronometer, what the room sees, headcount. Never the session password, the codes, the screen link, the documents or the settings. The link works on several devices until it is revoked or the session is closed; the session log shows the person's name next to each action taken with it."
+msgstr "La personne ouvre le lien sur un téléphone ou un ordinateur et n'accède qu'aux parties cochées ici : ordre du jour, notes de séance, votes, chronomètre, ce que la salle voit, effectif compté. Jamais au mot de passe de la session, aux codes, au lien de l'écran, aux documents ni aux réglages. Le lien fonctionne sur plusieurs appareils jusqu'à son retrait ou la clôture de la session ; le journal de la session indique le nom de la personne à côté de chaque action faite avec."
+
+#: templates/manage/_delegates.html:22
+msgid "The delegate links ended when the session was closed."
+msgstr "Les liens délégués ont pris fin à la clôture de la session."
+
+#: templates/manage/_delegates.html:30
+msgid "Last used %(when)s"
+msgstr "Dernière utilisation : %(when)s"
+
+#: templates/manage/_delegates.html:30
+msgid "Not opened yet"
+msgstr "Pas encore ouvert"
+
+#: templates/manage/_delegates.html:36
+msgid "QR code of the link for %(name)s"
+msgstr "QR code du lien de %(name)s"
+
+#: templates/manage/_delegates.html:39
+msgid "Link for %(name)s"
+msgstr "Lien de %(name)s"
+
+#: templates/manage/_delegates.html:42
+msgid "Send it to this person only: whoever holds the link gets these rights. Scanning the QR code opens it on a phone."
+msgstr "Envoyez-le à cette personne seulement : qui détient le lien obtient ces accès. Scanner le QR code l'ouvre sur un téléphone."
+
+#: templates/manage/_delegates.html:59
+msgid "Revoke this link? It stops working at once, on every device where it was opened."
+msgstr "Retirer ce lien ? Il cesse aussitôt de fonctionner, sur tous les appareils où il a été ouvert."
+
+#: templates/manage/_delegates.html:61
+msgid "Revoke the link"
+msgstr "Retirer le lien"
+
+#: templates/manage/_delegates.html:70
+msgid "New delegate link"
+msgstr "Nouveau lien délégué"
+
+#: templates/manage/_delegates.html:75
+msgid "Who receives the link, as the session log will name them: for instance a first name and a function."
+msgstr "Qui reçoit le lien, tel que le journal de la session le nommera : par exemple un prénom et une fonction."
+
+#: templates/manage/_delegates.html:79
+msgid "Create the link"
+msgstr "Créer le lien"
+
+#: templates/manage/_delegates.html:83
+msgid "At most %(max)s links in use: revoke one to create another."
+msgstr "%(max)s liens au plus en service : retirez-en un pour en créer un autre."
+
+#: templates/manage/console.html:134
+msgid "by %(name)s, delegate link"
+msgstr "par %(name)s, lien délégué"
+
+#: templates/manage/delegate_ended.html:5 templates/manage/delegate_ended.html:8
+msgid "Delegate access ended"
+msgstr "Accès délégué terminé"
+
+#: templates/manage/delegate_ended.html:9
+msgid "This link no longer opens the console: the tribune revoked it, or the session is closed."
+msgstr "Ce lien n'ouvre plus la console : la tribune l'a retiré, ou la session est close."
+
+#: templates/manage/delegate_ended.html:10
+msgid "To go on, ask the tribune for a new link."
+msgstr "Pour continuer, demandez un nouveau lien à la tribune."
+
+#: templates/manage/delegate_ended.html:13
+msgid "Remove it from this device"
+msgstr "L'effacer de cet appareil"
+
+#: templates/manage/delegate_join.html:10
+msgid "This link opens part of the console of a session, without an account, on this device."
+msgstr "Ce lien ouvre une partie de la console d'une session, sans compte, sur cet appareil."
+
+#: templates/manage/delegate_join.html:11
+msgid "Opening the console…"
+msgstr "Ouverture de la console…"
+
+#: templates/manage/delegate_join.html:15
+msgid "Key of the link"
+msgstr "Clé du lien"
+
+#: templates/manage/delegate_join.html:16
+msgid "Filled in by itself when the link is opened. Otherwise, paste the part of the link after “#k=”."
+msgstr "Remplie d'elle-même à l'ouverture du lien. Sinon, collez la partie du lien qui suit « #k= »."
+
+#: templates/manage/delegate_join.html:19
+msgid "Open the console"
+msgstr "Ouvrir la console"
+
+#: web/manage/delegates.py:57
+msgid "Enter the name of the person who receives the link."
+msgstr "Indiquez le nom de la personne qui reçoit le lien."
+
+#: web/manage/delegates.py:59
+msgid "Choose at least one thing this link may do."
+msgstr "Cochez au moins une partie de la console à ouvrir."
+
+#: web/manage/delegates.py:60
+msgid "A session has at most 20 delegate links in use."
+msgstr "Une session compte au plus 20 liens délégués en service."
+
+#: web/manage/delegates.py:62
+msgid "This link does not open the console: it was revoked, the session is closed, or the address is incomplete. Ask the tribune for a new link."
+msgstr "Ce lien ne donne pas accès à la console : il a été retiré, la session est close, ou l'adresse est incomplète. Demandez un nouveau lien à la tribune."
+
+#: web/manage/delegates.py:70
+msgid "Link created. Send it to this person only, or let them scan the QR code."
+msgstr "Lien créé. Envoyez-le à cette personne seulement, ou faites-lui scanner le QR code."
+
+#: web/manage/delegates.py:72
+msgid "Rights of the link changed; the link itself stays the same."
+msgstr "Accès du lien modifiés ; le lien lui-même reste le même."
+
+#: web/manage/delegates.py:73
+msgid "Link revoked: it no longer opens the console."
+msgstr "Lien retiré : il n'ouvre plus la console."
+
+#: web/manage/delegates.py:74
+msgid "Delegate access removed from this device."
+msgstr "Accès délégué effacé de cet appareil."
+
+#: web/manage/delegates.py:79
+msgid "Delegate link created"
+msgstr "Lien délégué créé"
+
+#: web/manage/delegates.py:80
+msgid "Delegate link changed"
+msgstr "Lien délégué modifié"
+
+#: web/manage/delegates.py:81
+msgid "Delegate link revoked"
+msgstr "Lien délégué retiré"
+
+#: templates/macros/delegates.html:12
+msgid "Handed over to %(name)s"
+msgstr "Confié à %(name)s"
+
+#: templates/macros/delegates.html:12
+msgid "Handed over to %(name)s and %(num)s other"
+msgid_plural "Handed over to %(name)s and %(num)s others"
+msgstr[0] "Confié à %(name)s et %(num)s autre"
+msgstr[1] "Confié à %(name)s et %(num)s autres"
+
+#: templates/macros/delegates.html:38
+msgid "Hand the agenda over to someone"
+msgstr "Confier l'ordre du jour à une personne"
+
+#: templates/macros/delegates.html:39
+msgid "Hand the session notes over to someone"
+msgstr "Confier les notes de séance à une personne"
+
+#: templates/macros/delegates.html:40
+msgid "Hand the polls over to someone"
+msgstr "Confier les votes à une personne"
+
+#: templates/macros/delegates.html:41
+msgid "Hand the chronometer over to someone"
+msgstr "Confier le chronomètre à une personne"
+
+#: templates/macros/delegates.html:42
+msgid "Hand the headcount over to someone"
+msgstr "Confier l'effectif compté à une personne"
+
+#: templates/macros/delegates.html:48
+msgid "Hand over"
+msgstr "Confier"
+
+#: templates/macros/delegates.html:52
+msgid "Link created for %(name)s."
+msgstr "Lien créé pour %(name)s."
+
+#: templates/macros/delegates.html:52
+msgid "Send it to this person only, or let them scan the QR code."
+msgstr "L'envoyer à cette personne seulement, ou lui faire scanner le QR code."
+
+#: templates/macros/delegates.html:72
+msgid "Other rights"
+msgstr "Autres accès"
+
+#: templates/macros/delegates.html:81
+msgid "Manage the links, in Settings"
+msgstr "Gérer les liens, dans Réglages"
+
+msgid "Hand what the room sees over to someone"
+msgstr "Confier ce que la salle voit à une personne"
+
+#: templates/macros/delegates.html:66
+msgid "Close"
+msgstr "Fermer"

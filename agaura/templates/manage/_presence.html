@@ -1,0 +1,43 @@
+{#- Headcount (FR-28): the people counted in the room, compared with the accesses in use. Its card
+    lives in Access and attendance in every state (D-A); during the session Steering also shows
+    the command (compact: true, #cmd-presence): the same form and the comparison in one line.
+    Each saved value is a reading of the attendance record (#attendance, _attendance.html),
+    which the card holds for the owner, under its form; each form posts to the copy it came
+    from, the route redirecting without an anchor. "Save" is a secondary button, a
+    tool, except for a delegate with the headcount alone (R12); the delegation of the card's
+    head (R13, D-G) says who holds the headcount. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/delegates.html" import hand_over with context %}
+{% from "macros/console.html" import command_head with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set is_compact = compact is defined and compact %}
+{% set lone = can is defined and can.lone_tool %}
+{% set action = "/manage/" ~ assembly.public_id ~ "/headcount" %}
+{% set value = assembly.headcount if assembly.headcount is not none else '' %}
+{% if is_compact %}
+<section class="card cmd" id="cmd-presence" aria-labelledby="cmd-presence-title">
+  {{ command_head("clipboard-list", _("Headcount"), "access", "presence", _("In Access"), "cmd-presence-title", control=hand_over("headcount", "cmd-presence")) }}
+  <form method="post" action="{{ action }}#cmd-presence" class="row">
+    {{ csrf() }}
+    <label class="inline-field">{{ _("People counted") }}
+      <input type="number" name="headcount" min="0" inputmode="numeric" class="short" value="{{ value }}"></label>
+    <button type="submit" class="button small{{ ' primary' if lone }}">{{ _("Save") }}</button>
+  </form>
+  <p class="cmd-state">{% if assembly.headcount is none %}{{ _("No headcount entered yet.") }}{% else %}{{ ngettext("%(accesses)s accesses in use for %(num)s person counted.", "%(accesses)s accesses in use for %(num)s people counted.", assembly.headcount, accesses=state.panel.attendees) }}{% endif %}</p>
+</section>
+{% else %}
+<section class="card presence-card" id="presence" aria-labelledby="presence-title">
+  <div class="card-head">
+    <h2 id="presence-title">{{ icon("clipboard-list") }} {{ _("Headcount") }}</h2>
+    {{ hand_over("headcount", "presence") }}
+  </div>
+  <form method="post" action="{{ action }}#presence" class="row">
+    {{ csrf() }}
+    <label class="inline-field">{{ _("People counted in the room") }}
+      <input type="number" name="headcount" min="0" inputmode="numeric" class="short" value="{{ value }}"></label>
+    <button type="submit" class="button small{{ ' primary' if lone }}">{{ _("Save") }}</button>
+  </form>
+  <p class="hint">{{ _("Compared with the accesses in use: a warning shows when they, or the ballots of a poll, exceed it. Nothing is blocked. Leave empty to remove it.") }}</p>
+  {% if can.owner %}{% include "manage/_attendance.html" %}{% endif %}
+</section>
+{% endif %}

@@ -1,0 +1,80 @@
+# Docker keeps what each container prints (`docker compose logs`) and, by default, never drops
+# any of it. Caddy prints an access line per request, with the client address: cap each
+# service at three files of 10 MB, the oldest removed first (deploy/README.md §2).
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  app:
+    build: .
+    image: agaura:local
+    env_file:
+      - path: .env
+        required: true  # copied from .env.example; nothing starts without it
+    environment:
+      AGAURA_DATA_DIR: /data
+      AGAURA_BACKUP_DIR: /backups
+    volumes:
+      - agaura-data:/data
+      # Automatic backups (agaura/backups.py): a directory of the host, outside the data volume,
+      # owned by the container's user (uid 1000, docs/INSTALL.md §4). The start fails while it
+      # is missing, rather than Docker creating it for root, where no copy could be written.
+      - type: bind
+        source: ${BACKUP_DIR:-./backups/auto}
+        target: /backups
+        bind:
+          create_host_path: false
+    expose:
+      - "8000"
+    restart: unless-stopped
+    # Out of memory, the kernel kills the application and Docker restarts it, instead of the
+    # whole server running short during someone else's assembly. One PDF is rendered at a time
+    # (agaura/pdf.py); the largest, 2,000 code cards, brings the process to about 550 MiB.
+    mem_limit: 1g
+    # Each live page, console and projection screen keeps a connection open, one file
+    # descriptor each; Docker's default of 1,024 would stop NFR-01's 1,000 voters short. The
+    # application refuses streams past 3,000 (agaura/web/realtime.py): room for those, the
+    # requests in flight and the database files.
+    ulimits:
+      nofile:
+        soft: 8192
+        hard: 8192
+    logging: *logging
+
+  caddy:
+    # A fixed version: deploy/update.sh starts the one a release names (Docker pulls it), and the
+    # log filters of deploy/Caddyfile are checked against it. Raise it in a release, after
+    # "caddy validate" and a look at the access log (docs/INSTALL.md §10, Update).
+    image: caddy:2.11.7-alpine
+    depends_on:
+      - app
+    environment:
+      AGAURA_DOMAIN: ${AGAURA_DOMAIN:-localhost}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+      # Access log read by fail2ban on the server (deploy/README.md).
+      - ${CADDY_LOG_DIR:-./logs/caddy}:/var/log/caddy
+    restart: unless-stopped
+    logging: *logging
+
+# IPv6 on the internal network: without it, Docker relays IPv6 clients through its userland
+# proxy and Caddy sees every one of them as the network gateway (172.x.0.1), so per-address
+# limits and fail2ban would treat all IPv6 visitors as one. Docker 27 or later allocates a
+# private (ULA) subnet by itself; check with docs/INSTALL.md §9.
+networks:
+  default:
+    enable_ipv6: true
+
+volumes:
+  agaura-data:
+  caddy-data:
+  caddy-config:

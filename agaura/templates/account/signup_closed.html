@@ -1,0 +1,16 @@
+{% extends "layouts/admin.html" %}
+{% block title %}{{ _("Create an account") }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Accounts are created by invitation") }}</h1>
+  <p>{{ _("On this platform, accounts are not created here: the person in charge of the platform creates each account, and an email with a link lets you choose your password.") }}</p>
+  {% set contact = request.app.state.settings.contact_email %}
+  {% set contact_link %}<a href="mailto:{{ contact }}">{{ contact }}</a>{% endset %}
+  <p>{{ _("To get an account, write to %(email)s.", email=contact_link) }}</p>
+  <p class="muted">{{ _("To vote in a session, no account is needed: open the address shown in the room.") }}</p>
+  <p class="actions">
+    <a class="button primary" href="/login">{{ _("Log in") }}</a>
+    <a class="button" href="/">{{ _("Back to the home page") }}</a>
+  </p>
+</section>
+{% endblock %}

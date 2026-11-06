@@ -1,0 +1,322 @@
+{#- PDF minutes of a session (FR-62), rendered by WeasyPrint (agaura/exports/minutes.py).
+    A4, page numbers from @page counters, CSS inline: WeasyPrint fetches nothing. A trial vote
+    (Poll.trial, D-I) never reaches this template: agaura/services/exports.py leaves it out of
+    the record, its number and its attendance readings included. -#}
+{% from "macros/results.html" import verdict, single_choice_rule, approval_rule, condorcet_rule, condorcet_finding, duel_table, duel_note, path_note, merit_bar, ranked %}
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>{{ _("Minutes of the votes") }} · {{ assembly.title }}</title>
+<style>
+@page {
+  size: A4;
+  margin: 18mm 16mm 20mm 16mm;
+  @top-left { content: string(session-title); font-size: 7.5pt; color: #5b6470; }
+  @top-right { content: string(session-id); font-size: 7.5pt; color: #5b6470; }
+  @bottom-left { content: string(generated); font-size: 7.5pt; color: #5b6470; }
+  @bottom-right { content: counter(page) " / " counter(pages); font-size: 7.5pt; color: #5b6470; }
+}
+@page :first {
+  @top-left { content: none; }
+  @top-right { content: none; }
+}
+html { font-family: "DejaVu Sans", "Liberation Sans", Arial, sans-serif; font-size: 9pt; line-height: 1.35; color: #1b1f24; }
+body { margin: 0; }
+h1 { font-size: 17pt; margin: 0 0 1.5mm; string-set: session-title content(); }
+h2 { font-size: 12pt; margin: 7mm 0 2mm; padding-bottom: 1mm; border-bottom: 0.6pt solid #1b1f24; }
+h3 { font-size: 10.5pt; margin: 0 0 1mm; break-after: avoid; }
+p { margin: 0 0 1.5mm; }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 8pt; font-weight: bold; color: #5b6470; margin-bottom: 1mm; }
+.session-id { string-set: session-id content(); }
+.muted { color: #5b6470; }
+.small { font-size: 8pt; }
+.mono { font-family: "DejaVu Sans Mono", "Liberation Mono", monospace; }
+.generated { string-set: generated content(); }
+dl.facts { display: table; width: 100%; margin: 4mm 0 0; border-collapse: collapse; }
+dl.facts > div { display: table-row; }
+dl.facts dt, dl.facts dd { display: table-cell; padding: 1.2mm 2mm; border-bottom: 0.4pt solid #d5dae1; vertical-align: top; }
+dl.facts dt { width: 38mm; font-weight: bold; color: #5b6470; }
+dl.facts dd { margin: 0; }
+.poll { margin: 0 0 5mm; padding-top: 3mm; border-top: 0.4pt solid #d5dae1; break-inside: avoid; }
+.poll:first-of-type { border-top: 0; padding-top: 0; }
+.poll-head { break-inside: avoid; }
+.description { white-space: pre-line; color: #5b6470; }
+.counts { margin: 1.5mm 0; }
+.counts span { margin-right: 3mm; white-space: nowrap; }
+.verdict { font-size: 10.5pt; font-weight: bold; margin: 2mm 0 1.5mm; }
+.verdict.success { color: #1e7a46; }
+.verdict.danger { color: #b3261e; }
+.verdict.warning { color: #7a4d00; }
+.cancelled { border: 0.6pt solid #b3261e; background: #fbeaea; padding: 2mm 3mm; margin: 2mm 0; }
+.in-progress { border: 0.6pt solid #7a4d00; background: #fdf3dc; padding: 2mm 3mm; margin: 2mm 0; }
+table { width: 100%; border-collapse: collapse; margin: 1.5mm 0 2mm; }
+th, td { text-align: left; padding: 1mm 1.5mm; border-bottom: 0.4pt solid #d5dae1; vertical-align: top; }
+th { font-size: 7.5pt; color: #5b6470; font-weight: bold; }
+tr { break-inside: avoid; }
+.num { text-align: right; white-space: nowrap; width: 26mm; }
+.rank { text-align: right; white-space: nowrap; width: 9mm; }
+.merit-table th.num, .merit-table td.num { width: 11mm; }
+.merit-table .majority-grade { width: 22mm; }
+.merit-table th { font-size: 7pt; }
+.merit-table td.majority { font-weight: bold; background: #eef1f5; }
+svg.merit { display: block; width: 100%; height: 3.2mm; margin-top: 0.8mm; }
+.duel-table { width: auto; }
+.duel-table th.num, .duel-table td.num { width: auto; min-width: 6mm; }
+.duel-table tbody th { font-size: 8pt; color: #1b1f24; font-weight: normal; }
+.duel-table td.is-won { background: #eef1f5; }
+.duel-key { color: #5b6470; margin-right: 1mm; }
+.matrix-title { font-weight: bold; margin-top: 2mm; }
+.digest { font-size: 7.5pt; word-break: break-all; color: #5b6470; }
+.note { margin-top: 6mm; font-size: 8pt; color: #5b6470; }
+.closing { break-inside: avoid; }
+.member { margin: 0 0 0.6mm; }
+.member:last-child { margin-bottom: 0; }
+ol.agenda { margin: 0 0 1mm; padding-left: 7mm; }
+ol.agenda li { margin: 0 0 0.8mm; padding-left: 1mm; }
+table.attendance .when { white-space: nowrap; width: 30mm; }
+.course { break-inside: auto; }
+.course h3 { margin-top: 3mm; }
+ul.feed { list-style: none; margin: 0 0 2mm; padding: 0; }
+ul.feed > li { display: table; width: 100%; padding: 1mm 0; border-bottom: 0.4pt solid #d5dae1; break-inside: avoid; }
+ul.feed .when { display: table-cell; width: 14mm; white-space: nowrap; color: #5b6470; vertical-align: top; }
+ul.feed .feed-body { display: table-cell; vertical-align: top; }
+.feed-note { white-space: pre-line; }
+.feed-outcome, .feed-outcome .verdict { margin: 0.5mm 0 0; font-size: 9pt; }
+.feed-ref { margin: 0.5mm 0 0; font-size: 7.5pt; color: #5b6470; }
+a.ref { color: #5b6470; text-decoration: none; }
+a.ref::after { content: ", " attr(data-page-label) " " target-counter(attr(href), page); }
+table.attendance .num { width: 24mm; }
+</style>
+</head>
+<body>
+<header>
+  <p class="eyebrow">{{ _("Minutes of the votes") }}</p>
+  <h1>{{ assembly.title }}</h1>
+  <p>{{ assembly.date | long_date }}{% if assembly.date and assembly.place %} · {% endif %}{{ assembly.place or "" }}</p>
+  <p class="muted small">{{ _("Session") }} <span class="mono session-id">{{ assembly.public_id }}</span> · {{ assembly_status_label(assembly.status) }}</p>
+  <p class="generated muted small">{{ _("Generated by AGaura on %(datetime)s (Paris time)", datetime=generated_at | short_datetime) }}</p>
+</header>
+
+<dl class="facts">
+  {% if assembly.tribune %}
+  <div><dt>{{ _("Tribune") }}</dt><dd>
+    {% for member in assembly.tribune %}
+    <p class="member">{{ member.name }}{% if member.role %} <span class="muted">&mdash; {{ member.role }}</span>{% endif %}</p>
+    {% endfor %}
+  </dd></div>
+  {% endif %}
+  {% if assembly.opened_at %}
+  <div><dt>{{ _("Session opened") }}</dt><dd>{{ assembly.opened_at | short_datetime }}</dd></div>
+  {% endif %}
+  {% if assembly.closed_at %}
+  <div><dt>{{ _("Session closed") }}</dt><dd>{{ assembly.closed_at | short_datetime }}</dd></div>
+  {% endif %}
+  <div><dt>{{ _("Access mode") }}</dt><dd>{% if assembly.access_mode.value == "codes" %}{{ _("Individual codes") }} <span class="muted">({{ _("one printed code per person") }})</span>{% else %}{{ _("Session password") }} <span class="muted">({{ _("one vote per device") }})</span>{% endif %}</dd></div>
+  <div><dt>{{ _("Attendees") }}</dt><dd>{{ session.attendees }} <span class="muted">({% if assembly.access_mode.value == "codes" %}{{ _("codes activated") }}{% else %}{{ _("devices that joined the session") }}{% endif %})</span></dd></div>
+  <div><dt>{{ _("Registered members") }}</dt><dd>{{ assembly.registered_count if assembly.registered_count is not none else _("not specified") }}</dd></div>
+  <div><dt>{{ _("Quorum") }}</dt><dd>
+    {% if session.quorum is not none %}
+    {% set required = ngettext("%(num)s attendee required", "%(num)s attendees required", session.quorum) %}
+    {% if "/" in assembly.quorum_rule %}{% set required = required ~ " (" ~ _("%(rule)s of registered members", rule=assembly.quorum_rule) ~ ")" %}{% endif %}
+    {{ _("%(label)s:", label=required) }}
+    {% if session.quorum_reached %}<strong>{{ _("reached") }}</strong>{% else %}<strong>{{ _("not reached") }}</strong>{% endif %}
+    {% elif assembly.quorum_rule %}
+    {{ _("%(rule)s of registered members; cannot be checked without the number of registered members.", rule=assembly.quorum_rule) }}
+    {% else %}
+    {{ _("none set") }}
+    {% endif %}
+  </dd></div>
+  {% if assembly.headcount is not none %}
+  <div><dt>{{ _("Headcount") }}</dt><dd>{{ ngettext("%(num)s person counted in the room", "%(num)s people counted in the room", assembly.headcount) }}</dd></div>
+  {% endif %}
+  <div><dt>{{ _("Polls") }}</dt><dd>
+    {{ ngettext("%(num)s poll pushed", "%(num)s polls pushed", polls | length) }}{% if cancelled_count %}, {{ ngettext("including %(num)s cancelled", "including %(num)s cancelled", cancelled_count) }}{% endif %}
+  </dd></div>
+</dl>
+
+{% if attendance %}
+<h2>{{ _("Attendance record") }}</h2>
+<table class="attendance">
+  <thead><tr><th>{{ _("Time") }}</th><th>{{ _("Event") }}</th><th class="num">{{ _("Headcount") }}</th><th class="num">{{ _("Connections") }}</th></tr></thead>
+  <tbody>
+  {% for row in attendance %}
+  <tr><td class="when">{{ row.when }}</td><td>{{ row.label }}</td><td class="num">{{ row.headcount if row.headcount is not none else "–" }}</td><td class="num">{{ row.attendees if row.attendees is not none else "–" }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="muted small">{{ _("Headcount: people counted in the room, as last entered by the tribune. Connections: voter accesses in use at that moment (as Attendees). A reading is taken when the session opens and closes, when the headcount is saved and when a poll is pushed or closed, never when someone joins or votes.") }}</p>
+{% endif %}
+
+{% if assembly.agenda %}
+<h2>{{ _("Agenda") }}</h2>
+<ol class="agenda">
+  {% for item in assembly.agenda %}
+  <li>{{ item.title }}</li>
+  {% endfor %}
+</ol>
+{% endif %}
+
+{% if proceedings %}
+<h2>{{ _("Course of the session") }}</h2>
+{% for group in proceedings %}
+<section class="course">
+  {% if group.position %}<h3>{{ group.position }}. {{ group.title }}</h3>
+  {% elif assembly.agenda %}<h3>{{ _("Outside the agenda") }}</h3>{% endif %}
+  {% if group.entries %}
+  <ul class="feed">
+    {% for entry in group.entries %}
+    {% if entry.note %}
+    <li><span class="when">{{ entry.when }}</span><div class="feed-body feed-note">{{ entry.note.text }}</div></li>
+    {% else %}
+    {% set poll = entry.record.poll %}
+    <li><span class="when">{{ entry.when }}</span><div class="feed-body">
+      <strong>{{ _("No. %(number)s", number=entry.record.number) }} · {{ poll.title }}</strong>
+      {% if poll.status.value == "cancelled" %}<p class="feed-outcome">{{ _("Cancelled: %(reason)s", reason=poll.cancel_reason) }}</p>
+      {% elif poll.status.value == "open" %}<p class="feed-outcome">{{ _("Voting was still open when these minutes were generated: no result yet.") }}</p>
+      {% elif poll.result %}<div class="feed-outcome">{{ verdict(poll, poll.result.data.outcome, option_labels(poll)) }}</div>{% endif %}
+      <p class="feed-ref"><a class="ref" href="#poll-{{ entry.record.number }}" data-page-label="{{ _('page') }}">{{ _("Details: poll no. %(number)s", number=entry.record.number) }}</a></p>
+    </div></li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted small">{{ _("No note and no poll for this item.") }}</p>
+  {% endif %}
+</section>
+{% endfor %}
+{% endif %}
+
+<h2>{{ _("Polls") }}</h2>
+{% for record in polls %}
+{% set poll = record.poll %}
+{% set status = poll.status.value %}
+<section class="poll" id="poll-{{ record.number }}">
+  <div class="poll-head">
+    <h3>{{ _("No. %(number)s", number=record.number) }} · {{ poll.title }}</h3>
+    <p class="muted small">{{ poll_method_label(poll) }}
+      {% if poll.opened_at %} · {{ _("opened at %(time)s", time=poll.opened_at | time_of_day) }}{% endif %}
+      {% if poll.closed_at %} · {{ _("closed at %(time)s", time=poll.closed_at | time_of_day) }}{% endif %}</p>
+    {% if poll.description %}<p class="description">{{ poll.description }}</p>{% endif %}
+  </div>
+  {% if status == "cancelled" %}
+  <div class="cancelled">
+    <strong>{{ _("Cancelled: %(reason)s", reason=poll.cancel_reason) }}</strong>
+    <p class="small">{{ ngettext("%(num)s ballot kept, not counted. No result is announced.", "%(num)s ballots kept, not counted. No result is announced.", record.turnout) }}</p>
+  </div>
+  {% elif status == "open" %}
+  <div class="in-progress">{{ _("Voting was still open when these minutes were generated: no result yet.") }}</div>
+  {% elif poll.result %}
+  {% set data = poll.result.data %}
+  {% set outcome = data.outcome %}
+  {% set labels = option_labels(poll) %}
+  {% set rows = {} %}
+  {% for row in outcome.options %}{% set unused = rows.update({row.option: row}) %}{% endfor %}
+  <p class="counts">
+    <span>{{ _("%(label)s:", label=_("Ballots cast")) }} <strong>{{ data.counts.cast }}</strong></span>
+    <span>{{ _("%(label)s:", label=blank_count_label(poll)) }} <strong>{{ data.counts.blank }}</strong></span>
+    <span>{{ _("%(label)s:", label=_("Valid votes")) }} <strong>{{ data.counts.valid }}</strong></span>
+    {% if data.get("attendees") %}<span>{{ _("%(label)s:", label=_("Turnout")) }} <strong>{{ _("%(cast)s / %(attendees)s", cast=data.counts.cast, attendees=data.attendees) }}</strong> ({{ (data.counts.cast ~ "/" ~ data.attendees) | percent }})</span>{% endif %}
+  </p>
+  {% if poll.method == "single_choice" %}
+  <p class="muted small">{{ single_choice_rule(poll, outcome) }}</p>
+  {{ verdict(poll, outcome, labels) }}
+  <table>
+    <thead><tr><th>{{ _("Option") }}</th><th class="num">{{ _("Votes") }}</th><th class="num">{{ base_label(outcome.base) }}</th></tr></thead>
+    <tbody>
+    {% for row in outcome.options %}
+    <tr>
+      <td>{% if row.option == outcome.winner %}<strong>{{ labels[row.option] }}</strong>{% else %}{{ labels[row.option] }}{% endif %}{% if row.option in outcome.tied %} <em>({{ _("Tie") }})</em>{% endif %}</td>
+      <td class="num">{{ row.votes }}</td>
+      <td class="num">{{ row.share | percent }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% elif poll.method == "approval" %}
+  <p class="muted small">{{ approval_rule(poll, outcome) }}</p>
+  {{ verdict(poll, outcome, labels) }}
+  <table>
+    <thead><tr><th class="rank">{{ _("Rank") }}</th><th>{{ _("Candidate") }}</th><th class="num">{{ _("Approvals") }}</th><th class="num">{{ _("of valid votes") }}</th><th>{{ _("Status") }}</th></tr></thead>
+    <tbody>
+    {% call(id, rank, tied) ranked(outcome) %}
+    {% set row = rows[id] %}
+    <tr>
+      <td class="rank">{{ rank if rank is not none else "–" }}{% if tied %} ={% endif %}</td>
+      <td>{{ labels[id] }}</td>
+      <td class="num">{{ row.approvals }}</td>
+      <td class="num">{{ row.share | percent }}</td>
+      <td>{% if id in outcome.elected %}<strong>{{ _("Elected") }}</strong>{% elif id in outcome.tied %}{{ _("Tie") }}{% else %}–{% endif %}</td>
+    </tr>
+    {% endcall %}
+    </tbody>
+  </table>
+  {% elif poll.method == "majority_judgment" %}
+  {{ verdict(poll, outcome, labels) }}
+  {% set valid = data.counts.valid %}
+  <table class="merit-table">
+    <thead><tr>
+      <th class="rank">{{ _("Rank") }}</th><th>{{ _("Option") }}</th><th class="majority-grade">{{ _("Majority grade") }}</th>
+      {% for grade in range(outcome.grade_count) %}<th class="num">{{ grade_label(grade, outcome.grade_count) }}</th>{% endfor %}
+    </tr></thead>
+    <tbody>
+    {% call(id, rank, tied) ranked(outcome) %}
+    {% set row = rows[id] %}
+    <tr>
+      <td class="rank">{{ rank if rank is not none else "–" }}{% if tied %} ={% endif %}</td>
+      <td>{% if id == outcome.winner %}<strong>{{ labels[id] }}</strong>{% else %}{{ labels[id] }}{% endif %}
+        {% if valid > 0 %}{{ merit_bar(row, outcome.grade_count, valid, print=true) }}
+        <span class="muted small">{{ _("%(above)s better, %(below)s worse", above=row.share_above | percent, below=row.share_below | percent) }}</span>{% endif %}</td>
+      <td class="majority-grade">{% if row.majority_grade is not none %}<strong>{{ grade_label(row.majority_grade, outcome.grade_count) }}</strong>{% else %}–{% endif %}</td>
+      {% for count in row.profile %}<td class="num{{ ' majority' if loop.index0 == row.majority_grade }}">{{ count }}</td>{% endfor %}
+    </tr>
+    {% endcall %}
+    </tbody>
+  </table>
+  <p class="muted small">{{ _("Votes per grade; shaded: the majority grade. The bar shows the merit profile, best grades on the left; the line marks half of the votes.") }}</p>
+  {% elif poll.method == "condorcet" %}
+  {% set valid = data.counts.valid %}
+  <p class="muted small">{{ condorcet_rule() }}</p>
+  {{ verdict(poll, outcome, labels) }}
+  {% if valid > 0 %}<p>{{ condorcet_finding(outcome, labels) }}</p>{% endif %}
+  <table>
+    <thead><tr><th class="rank">{{ _("Rank") }}</th><th>{{ _("Option") }}</th><th class="num">{{ _("Duels won") }}</th><th class="num">{{ _("Duels lost") }}</th></tr></thead>
+    <tbody>
+    {% call(id, rank, tied) ranked(outcome) %}
+    {% set row = rows[id] %}
+    <tr>
+      <td class="rank">{{ rank if rank is not none else "–" }}{% if tied %} ={% endif %}</td>
+      <td>{% if id == outcome.winner %}<strong>{{ labels[id] }}</strong>{% else %}{{ labels[id] }}{% endif %}</td>
+      <td class="num">{{ row.wins }}</td>
+      <td class="num">{{ row.losses }}</td>
+    </tr>
+    {% endcall %}
+    </tbody>
+  </table>
+  {% if valid > 0 %}
+  <p class="matrix-title">{{ _("Duels one on one") }}</p>
+  {{ duel_table(outcome, labels, outcome.pairwise, print=true) }}
+  <p class="muted small">{{ duel_note() }}</p>
+  {% if outcome.condorcet_winner is none %}
+  <p class="matrix-title">{{ _("Strongest chains of duels won") }}</p>
+  {{ duel_table(outcome, labels, outcome.strongest_paths, print=true) }}
+  <p class="muted small">{{ path_note() }}</p>
+  {% endif %}
+  {% endif %}
+  {% endif %}
+  <p class="digest">{{ _("SHA-256 digest of the ballots:") }} <span class="mono">{{ poll.result.ballots_sha256 }}</span></p>
+  {% endif %}
+</section>
+{% else %}
+<p class="muted">{{ _("No poll was pushed during this session.") }}</p>
+{% endfor %}
+
+<div class="closing">
+<p class="note">{{ _("Each digest is the SHA-256 of the poll definition and its anonymous ballots, computed when the poll closed. The JSON export of the session holds the same data, so anyone can recompute the digests and recount every result independently. Ties are reported as such; the bylaws decide how to settle them.") }}</p>
+{% if session.log_anchor %}
+<p class="note">{{ _("Session log fingerprint when this document was produced: %(anchor)s. With it, the platform operator can check that the log was not altered up to this point.", anchor=session.log_anchor) }}</p>
+{% endif %}
+</div>
+
+</body>
+</html>

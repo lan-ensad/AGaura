@@ -1,0 +1,16 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf, field with context %}
+{% block title %}{{ _("Forgotten password") }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Forgotten password") }}</h1>
+  <p>{{ _("Enter the email address of your account. A link to choose a new password will be sent to it.") }}</p>
+  <form method="post" action="/reset" class="stack">
+    {{ csrf() }}
+    {{ field("email", _("Email address"), type="email", value=email, required=true, autocomplete="email",
+             attrs={"maxlength": "254"}) }}
+    <button type="submit" class="button primary">{{ _("Send the link") }}</button>
+  </form>
+  <p class="muted form-links"><a href="/login">{{ _("Back to the login page") }}</a></p>
+</section>
+{% endblock %}

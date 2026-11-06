@@ -1,0 +1,291 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+
+#: templates/live/join.html:8
+msgid "Join the session"
+msgstr "Rejoindre la session"
+
+#: templates/live/join.html:10
+msgid "Your individual code"
+msgstr "Votre code personnel"
+
+#: templates/live/join.html:11
+msgid "Printed on your card, for example K7M4-QX9P. You can also scan the QR code of the card."
+msgstr "Imprimé sur votre carte, par exemple K7M4-QX9P. Vous pouvez aussi scanner le QR code de la carte."
+
+#: templates/live/join.html:14
+msgid "Session password"
+msgstr "Mot de passe de la session"
+
+#: templates/live/join.html:15
+msgid "Shown in the room. You can also scan the QR code shown on the screen."
+msgstr "Affiché dans la salle. Vous pouvez aussi scanner le QR code affiché à l'écran."
+
+#: templates/live/join.html:23
+msgid "Joining the session…"
+msgstr "Connexion à la session…"
+
+#: templates/live/macros.html:11
+msgid "Closes at %(time)s"
+msgstr "Clôture à %(time)s"
+
+#: templates/live/macros.html:22 templates/live/macros.html:36
+msgid "Your choice"
+msgstr "Votre choix"
+
+#: templates/live/macros.html:30 templates/live/macros.html:47 templates/live/macros.html:66
+msgid "Continue"
+msgstr "Continuer"
+
+#: templates/live/macros.html:38
+msgid "Check up to %(num)s option."
+msgid_plural "Check up to %(num)s options."
+msgstr[0] "Cochez au plus %(num)s option."
+msgstr[1] "Cochez au plus %(num)s options."
+
+#: templates/live/macros.html:39
+msgid "Check as many options as you wish."
+msgstr "Cochez autant d'options que vous le souhaitez."
+
+#: templates/live/macros.html:53
+msgid "Give each option a grade. An option left without a grade gets “%(grade)s”."
+msgstr "Attribuez une mention à chaque option. Une option sans mention reçoit « %(grade)s »."
+
+#: templates/live/macros.html:85
+msgid "Check your vote"
+msgstr "Vérifiez votre vote"
+
+#: templates/live/macros.html:88
+msgid "No option checked: this counts as a blank vote."
+msgstr "Aucune option cochée : votre bulletin compte comme un vote blanc."
+
+#: templates/live/macros.html:102
+msgid "(not graded)"
+msgstr "(sans mention)"
+
+#: templates/live/macros.html:106
+msgid "Once confirmed, your vote cannot be changed."
+msgstr "Une fois confirmé, votre vote ne peut plus être modifié."
+
+#: templates/live/macros.html:108
+msgid "Confirm my vote"
+msgstr "Confirmer mon vote"
+
+#: templates/live/macros.html:109
+msgid "Change my vote"
+msgstr "Modifier mon vote"
+
+#: templates/live/macros.html:120
+msgid "Vote recorded"
+msgstr "Vote enregistré"
+
+#: templates/live/macros.html:122
+msgid "Your ballot is secret and can no longer be changed."
+msgstr "Votre bulletin est secret et ne peut plus être modifié."
+
+#: templates/live/macros.html:143
+msgid "Waiting for the next vote"
+msgstr "En attente du prochain vote"
+
+#: templates/live/macros.html:144
+msgid "The next vote will appear here."
+msgstr "Le prochain vote s'affichera ici."
+
+#: templates/live/page.html:8
+msgid "Connection problem: your vote was not sent. Check your network and try again."
+msgstr "Problème de connexion : votre vote n'a pas été envoyé. Vérifiez votre réseau puis réessayez."
+
+#: templates/live/page.html:11 templates/live/status.html:11
+msgid "Refresh"
+msgstr "Actualiser"
+
+#: templates/live/page.html:13
+msgid "Leave"
+msgstr "Quitter"
+
+#: templates/live/page.html:14
+msgid "Ends the session on this device, for example before handing it to someone else."
+msgstr "Met fin à la session sur cet appareil, par exemple avant de le confier à quelqu'un d'autre."
+
+#: templates/live/page.html:17
+msgid "Leave the session on this device"
+msgstr "Quitter la session sur cet appareil"
+
+#: templates/live/poll.html:9
+msgid "Back to the session page"
+msgstr "Retour à la page de la session"
+
+#: templates/live/status.html:10
+msgid "You can join as soon as the tribune opens it."
+msgstr "Vous pourrez la rejoindre dès que la tribune l'aura ouverte."
+
+#: templates/live/status.html:14
+msgid "Thank you for taking part."
+msgstr "Merci de votre participation."
+
+#: web/live/routes.py:54
+msgid "Your vote has been recorded."
+msgstr "Votre vote a été enregistré."
+
+#: web/live/routes.py:55
+msgid "Grade at least one option, or vote blank."
+msgstr "Attribuez une mention à au moins une option, ou votez blanc."
+
+#: templates/live/join.html:12
+msgid "Session password or individual code"
+msgstr "Mot de passe de la session ou code personnel"
+
+#: templates/live/join.html:13
+msgid "Shown in the room, or printed on your card. You can also scan the QR code."
+msgstr "Affiché dans la salle, ou imprimé sur votre carte. Vous pouvez aussi scanner le QR code."
+
+#: web/live/routes.py:65
+msgid "Unable to join. Check the session address and the password or code. If they are right, the session does not accept new entries for now: try again in a few minutes."
+msgstr "Impossible de rejoindre la session. Vérifiez l'adresse de la session et le mot de passe ou le code. S'ils sont exacts, la session n'accepte pas de nouvelles entrées pour le moment : réessayez dans quelques minutes."
+
+#: templates/live/join.html:24
+msgid "Shown in the room: %(num)s digits. You can also scan the QR code shown on the screen."
+msgstr "Affiché dans la salle : %(num)s chiffres. Vous pouvez aussi scanner le QR code affiché à l'écran."
+
+#: templates/live/macros.html:69 templates/live/macros.html:70 templates/live/macros.html:71
+msgid "%(num)s option of %(total)s graded"
+msgid_plural "%(num)s options of %(total)s graded"
+msgstr[0] "%(num)s option sur %(total)s évaluée"
+msgstr[1] "%(num)s options sur %(total)s évaluées"
+
+#: templates/live/macros.html:106
+msgid "%(items)s and %(last)s"
+msgstr "%(items)s et %(last)s"
+
+#: templates/live/macros.html:142
+msgid "%(names)s has no grade: it will count as “%(grade)s”."
+msgid_plural "%(names)s have no grade: they will count as “%(grade)s”."
+msgstr[0] "%(names)s n'a pas de mention : cette option comptera « %(grade)s »."
+msgstr[1] "%(names)s n'ont pas de mention : ces options compteront « %(grade)s »."
+
+#: templates/live/macros.html:155
+msgid "vote recorded"
+msgstr "vote enregistré"
+
+#: templates/live/macros.html:156
+msgid "Your ballot is secret and final."
+msgstr "Bulletin secret et définitif."
+
+#: templates/live/macros.html:189
+msgid "Open votes"
+msgstr "Votes ouverts"
+
+#: templates/live/macros.html:190
+msgid "To vote: %(pending)s · Recorded: %(recorded)s"
+msgstr "À voter : %(pending)s · Enregistrés : %(recorded)s"
+
+#: templates/live/macros.html:200
+msgid "Published results"
+msgstr "Résultats publiés"
+
+#: templates/live/page.html:10
+msgid "New vote open: %(title)s"
+msgstr "Nouveau vote ouvert : %(title)s"
+
+#: web/live/routes.py:79
+msgid "A blank vote cannot be combined with other choices. Your choices are kept below; to vote blank, choose the blank vote alone."
+msgstr "Un vote blanc ne se combine avec aucun autre choix. Vos choix sont conservés ci-dessous ; pour voter blanc, choisissez seulement le vote blanc."
+
+#: templates/live/join.html:43
+msgid "Secret ballot: no ballot is linked to a person or to their phone."
+msgstr "Vote secret : aucun bulletin n'est relié à une personne ni à son téléphone."
+
+#: templates/live/macros.html:58 templates/live/macros.html:59
+msgid "%(num)s more choice possible."
+msgid_plural "%(num)s more choices possible."
+msgstr[0] "Encore %(num)s choix possible."
+msgstr[1] "Encore %(num)s choix possibles."
+
+#: templates/live/macros.html:60
+msgid "Maximum reached: %(num)s choice of %(num)s."
+msgid_plural "Maximum reached: %(num)s choices of %(num)s."
+msgstr[0] "Maximum atteint : %(num)s choix sur %(num)s."
+msgstr[1] "Maximum atteint : %(num)s choix sur %(num)s."
+
+#: templates/live/macros.html:61
+msgid "Uncheck an option to choose another one."
+msgstr "Décochez une option pour en choisir une autre."
+
+#: templates/live/macros.html:62 templates/live/macros.html:63
+msgid "Too many choices: uncheck %(num)s."
+msgid_plural "Too many choices: uncheck %(num)s."
+msgstr[0] "Trop de choix : décochez-en %(num)s."
+msgstr[1] "Trop de choix : décochez-en %(num)s."
+
+#: templates/live/macros.html:65 templates/live/macros.html:66
+msgid "%(num)s option checked."
+msgid_plural "%(num)s options checked."
+msgstr[0] "%(num)s option cochée."
+msgstr[1] "%(num)s options cochées."
+
+#: templates/live/macros.html:144
+msgid "Ballot not cast yet"
+msgstr "Bulletin pas encore déposé"
+
+#: templates/live/macros.html:193
+msgid "Steps of the vote"
+msgstr "Étapes du vote"
+
+#: templates/live/macros.html:194
+msgid "Choose"
+msgstr "Choisir"
+
+#: templates/live/macros.html:195
+msgid "Review"
+msgstr "Vérifier"
+
+#: templates/live/macros.html:196
+msgid "In the ballot box"
+msgstr "Déposé dans l'urne"
+
+#: templates/live/macros.html:205
+msgid "Next vote: %(title)s"
+msgstr "Vote suivant : %(title)s"
+
+#: templates/live/macros.html:243
+msgid "To confirm · %(title)s"
+msgstr "À confirmer · %(title)s"
+
+#: templates/live/macros.html:271
+msgid "You have joined the session"
+msgstr "Vous avez rejoint la session"
+
+#: templates/live/page.html:30
+msgid "Connection lost, reconnecting…"
+msgstr "Connexion perdue, reconnexion en cours…"
+
+#: templates/live/page.html:31
+msgid "The ballot you started stays in place."
+msgstr "Le bulletin entamé reste en place."
+
+#: templates/live/page.html:32
+msgid "Connection restored"
+msgstr "Connexion rétablie"
+
+msgid "%(num)s option of %(total)s ranked"
+msgid_plural "%(num)s options of %(total)s ranked"
+msgstr[0] "%(num)s option sur %(total)s classée"
+msgstr[1] "%(num)s options sur %(total)s classées"
+
+msgid "Your ranking"
+msgstr "Votre classement"
+
+msgid "Give each option its rank, 1st choice for the one you prefer. Options you like as much may share a rank; an option left unranked comes after the ranked ones."
+msgstr "Donnez un rang à chaque option, « 1er choix » pour celle que vous préférez. Des options que vous appréciez autant peuvent partager un rang ; une option non classée passe après les options classées."
+
+msgid "The options not ranked come after the others, tied together."
+msgstr "Les options non classées passent après les autres, à égalité entre elles."
+
+msgid "Rank at least one option, or vote blank."
+msgstr "Classez au moins une option, ou votez blanc."

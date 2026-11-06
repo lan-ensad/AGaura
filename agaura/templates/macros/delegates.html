@@ -1,0 +1,96 @@
+{#- Delegation in the head of a console card or command (FR-92, D-G as changed by the owner on
+    2026-11-04). The owner's only, while the session has not ended: delegates_holders
+    (agaura/web/manage/delegates.py) is empty for a delegate and undefined when a card is
+    rendered alone (timer.js, notes.js), and then nothing shows. Import it with context.
+
+    delegate_badge(right)  "Confié à …": a pill naming the first link that holds the right, then
+                           how many others hold it too (every name in its title); a link to that
+                           link in Settings (#delegate-<id>), where links are changed and revoked.
+    hand_over(right, card) The pill when a link holds the right, then one compact "Confier"
+                           toggle: a disclosure (details, data-menu, one open at a time through
+                           its name; closed by default, by its toggle, Escape or its link to
+                           Settings, never by a tap elsewhere) whose summary keeps its place and
+                           size, is exposed as expanded or not, and looks pressed
+                           while open, and whose panel floats over the card under it
+                           (manage.css), so the card neither grows nor moves: the form of a new
+                           link: a name, the right of this card ticked, the other rights folded,
+                           and "Gérer les liens, dans Réglages". ``card`` is the id of the card
+                           or command (HAND_OVER_CARDS of delegates.py), the prefix of every id
+                           inside and the anchor the form comes back to; without script the
+                           answer redirects there with ?hand=<card>&link=<id>, which opens the
+                           disclosure on the new link (address, copy, QR code); with script
+                           manage.js swaps each [data-hand-over] slot of the page, and the
+                           Settings card, from the answer. The form stays under the new link,
+                           hidden: manage.js shows it again once the link is dismissed ("Fermer",
+                           the toggle or Escape), for the next person. delegates_hand_over is
+                           false for a delegate, once the session has ended, or with the links
+                           at their maximum. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+
+{% macro delegate_badge(right) -%}
+{% set holders = delegates_holders.get(right, []) if delegates_holders is defined else [] %}
+{% if holders %}
+{% set names = holders | map(attribute="name") | list %}
+<a class="badge delegate" href="#delegate-{{ holders[0].id }}"{% if names | length > 1 %} title="{{ names | join(', ') }}"{% endif %}>{{ icon("user-round-key") }}<span>{% if names | length == 1 %}{{ _("Handed over to %(name)s", name=names[0]) }}{% else %}{{ ngettext("Handed over to %(name)s and %(num)s other", "Handed over to %(name)s and %(num)s others", names | length - 1, name=names[0]) }}{% endif %}</span></a>
+{% endif %}
+{%- endmacro %}
+
+{% macro hand_over(right, card) -%}
+{% if delegates_holders is defined and (delegates_holders.get(right) or delegates_hand_over) %}
+{% set opened = delegates_open == card %}
+{% set created = delegates_created if opened else none %}
+{% set names = {
+  "agenda": _("Hand the agenda over to someone"),
+  "notes": _("Hand the session notes over to someone"),
+  "polls": _("Hand the polls over to someone"),
+  "timer": _("Hand the chronometer over to someone"),
+  "screen": _("Hand what the room sees over to someone"),
+  "headcount": _("Hand the headcount over to someone"),
+} %}
+<div class="hand-over-slot" data-hand-over="{{ card }}">
+  {{- delegate_badge(right) }}
+  {%- if delegates_hand_over or created %}
+  <details class="hand-over" id="{{ card }}-hand" name="hand-over" data-menu{% if opened %} open{% endif %}>
+    <summary class="hand-over-toggle" aria-label="{{ names[right] }}">{{ icon("user-round-key") }}<span>{{ _("Hand over") }}</span></summary>
+    <div class="hand-over-panel">
+      {% if created %}
+      <div class="hand-over-created" role="status">
+        <p><strong>{{ _("Link created for %(name)s.", name=created.name) }}</strong> {{ _("Send it to this person only, or let them scan the QR code.") }}</p>
+        <div class="delegate-link">
+          <div class="qr" role="img" aria-label="{{ _('QR code of the link for %(name)s', name=created.name) }}">{{ created.qr }}</div>
+          <div class="link-row">
+            <input type="text" class="link-url mono" readonly value="{{ created.url }}" aria-label="{{ _('Link for %(name)s', name=created.name) }}" id="{{ card }}-hand-url">
+            <button type="button" class="button small" data-copy="{{ card }}-hand-url" data-copied="{{ _('Copied') }}" hidden>{{ _("Copy") }}</button>
+          </div>
+        </div>
+        <button type="button" class="button small quiet" data-hand-over-close hidden>{{ _("Close") }}</button>
+      </div>
+      {% endif %}
+      {% if delegates_hand_over %}
+      <form method="post" action="/manage/{{ assembly.public_id }}/delegates#{{ card }}" class="stack hand-over-form" data-hand-over-form{% if created %} hidden{% endif %}>
+        {{ csrf() }}
+        <input type="hidden" name="card" value="{{ card }}">
+        <div class="field">
+          <label for="{{ card }}-hand-name">{{ _("Name") }}</label>
+          <input id="{{ card }}-hand-name" name="name" maxlength="{{ delegates_name_length }}" required autocomplete="off" autocapitalize="words" aria-describedby="{{ card }}-hand-hint">
+          <p class="hint" id="{{ card }}-hand-hint">{{ _("Who receives the link, as the session log will name them: for instance a first name and a function.") }}</p>
+        </div>
+        <label class="checkbox" for="{{ card }}-hand-{{ right }}"><input type="checkbox" id="{{ card }}-hand-{{ right }}" name="rights" value="{{ right }}" checked> {{ right_label(right) }}</label>
+        <details class="hand-over-more">
+          <summary>{{ _("Other rights") }}</summary>
+          {% for other in delegates_rights if other != right %}
+          <label class="checkbox" for="{{ card }}-hand-{{ other }}"><input type="checkbox" id="{{ card }}-hand-{{ other }}" name="rights" value="{{ other }}"> {{ right_label(other) }}</label>
+          {% endfor %}
+        </details>
+        <p class="meeting-error" role="alert" data-hand-over-error hidden></p>
+        <button type="submit" class="button small">{{ _("Create the link") }}</button>
+      </form>
+      {% endif %}
+      <p class="hint"><a href="#delegates">{{ _("Manage the links, in Settings") }}</a></p>
+    </div>
+  </details>
+  {%- endif %}
+</div>
+{% endif %}
+{%- endmacro %}

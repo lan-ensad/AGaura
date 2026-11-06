@@ -1,0 +1,87 @@
+{#- Card PDF of individual codes (FR-23), rendered by WeasyPrint (agaura.pdf.render_pdf).
+    A4 portrait, no page margin; each sheet holds 2 × 5 cards of 90 × 54 mm, centred, with crop
+    marks in the margins on every cut line. Positions are absolute, in millimetres, so the cut
+    lines are exactly where the marks are. Fonts: DejaVu, installed in the Docker image. -#}
+{% set card_width = 90 %}
+{% set card_height = 54 %}
+{% set columns = 2 %}
+{% set rows = 5 %}
+{% set left = (210 - columns * card_width) / 2 %}
+{% set top = (297 - rows * card_height) / 2 %}
+{% set gap = 2 %}{# between the grid and a crop mark #}
+{% set mark = 6 %}{# length of a crop mark #}
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>{{ _("Individual codes") }} · {{ title }}</title>
+<style>
+  @page { size: A4; margin: 0; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "DejaVu Sans", "Liberation Sans", Arial, sans-serif; color: #000; }
+  .sheet { position: relative; width: 210mm; height: 297mm; overflow: hidden; page-break-after: always; }
+  .sheet:last-child { page-break-after: auto; }
+  .mark { position: absolute; background: #000; }
+  .mark.h { width: {{ mark }}mm; height: 0.25mm; }
+  .mark.v { width: 0.25mm; height: {{ mark }}mm; }
+  .mark.h.start { left: {{ left - gap - mark }}mm; }
+  .mark.h.end { left: {{ left + columns * card_width + gap }}mm; }
+  .mark.v.start { top: {{ top - gap - mark }}mm; }
+  .mark.v.end { top: {{ top + rows * card_height + gap }}mm; }
+  {% for line in range(rows + 1) %}
+  .mark.y-{{ line }} { top: {{ top + line * card_height - 0.125 }}mm; }
+  {% endfor %}
+  {% for line in range(columns + 1) %}
+  .mark.x-{{ line }} { left: {{ left + line * card_width - 0.125 }}mm; }
+  {% endfor %}
+  .card {
+    position: absolute; width: {{ card_width }}mm; height: {{ card_height }}mm; box-sizing: border-box;
+    border: 0.2mm dashed #c4c8ce;
+  }
+  {% for column in range(columns) %}
+  .col-{{ column }} { left: {{ left + column * card_width }}mm; }
+  {% endfor %}
+  {% for row in range(rows) %}
+  .row-{{ row }} { top: {{ top + row * card_height }}mm; }
+  {% endfor %}
+  .qr { position: absolute; left: 4mm; top: {{ (card_height - 30) / 2 }}mm; width: 30mm; height: 30mm; }
+  .qr svg { display: block; width: 30mm; height: 30mm; }
+  .text { position: absolute; left: 37mm; right: 4mm; top: 4.5mm; bottom: 4.5mm; }
+  .title { margin: 0; font-size: 8.5pt; font-weight: bold; line-height: 1.2; max-height: 2.4em; overflow: hidden; }
+  .code {
+    position: absolute; left: 0; right: 0; top: 13mm; margin: 0;
+    font-family: "DejaVu Sans Mono", "Liberation Mono", monospace; font-size: 17pt; font-weight: bold;
+    letter-spacing: 0.04em; white-space: nowrap;
+  }
+  .help { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; font-size: 6.8pt; line-height: 1.3; }
+  .help p { margin: 0 0 0.6mm; }
+  .help p:last-child { margin: 0; font-weight: bold; }
+  .url { font-weight: bold; word-break: break-all; }
+</style>
+</head>
+<body>
+{% for page in pages %}
+<section class="sheet">
+  {% for line in range(rows + 1) %}
+  <div class="mark h start y-{{ line }}"></div><div class="mark h end y-{{ line }}"></div>
+  {% endfor %}
+  {% for line in range(columns + 1) %}
+  <div class="mark v start x-{{ line }}"></div><div class="mark v end x-{{ line }}"></div>
+  {% endfor %}
+  {% for card in page %}
+  <div class="card col-{{ loop.index0 % columns }} row-{{ loop.index0 // columns }}">
+    <div class="qr">{{ card.qr }}</div>
+    <div class="text">
+      <p class="title">{{ title }}</p>
+      <p class="code">{{ card.code }}</p>
+      <div class="help">
+        <p>{{ _("Scan the QR code, or open %(url)s and type this code.", url=display_url) }}</p>
+        <p>{{ _("Personal and secret: one vote per poll.") }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endfor %}
+</body>
+</html>

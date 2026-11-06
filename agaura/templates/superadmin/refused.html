@@ -1,0 +1,9 @@
+{% extends "layouts/admin.html" %}
+{% block title %}{{ _("Not available to the super-admin") }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Not available to the super-admin") }}</h1>
+  <p>{{ _("The super-admin account manages accounts only: it has no access to sessions, their polls, results, minutes or exports.") }}</p>
+  <p class="actions"><a class="button primary" href="/superadmin">{{ _("Go to the accounts") }}</a></p>
+</section>
+{% endblock %}

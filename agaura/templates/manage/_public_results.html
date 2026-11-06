@@ -1,0 +1,25 @@
+{#- Secret link of the public results page (FR-17), in the Documents rubric. -#}
+{% from "macros/forms.html" import csrf with context %}
+<section class="card links" id="public-results" aria-labelledby="public-results-title">
+  <h2 id="public-results-title">{{ _("Public results link") }}</h2>
+  {% if links_results_url %}
+  <p class="hint">{{ _("Anyone with this secret link can see the results of the session. Share it with the members.") }}</p>
+  <div class="link-row">
+    <input type="text" class="link-url mono" readonly value="{{ links_results_url }}" aria-label="{{ _('Public results link') }}" id="links-results-url">
+    <button type="button" class="button small" data-copy="links-results-url" data-copied="{{ _('Copied') }}" hidden>{{ _("Copy") }}</button>
+    <a class="button small" href="{{ links_results_url }}" target="_blank" rel="noopener noreferrer">{{ _("Open the page") }}</a>
+  </div>
+  <form method="post" action="/manage/{{ assembly.public_id }}/public-results" data-confirm="{{ _('Disable the public results link? It stops working for everyone who has it.') }}">
+    {{ csrf() }}
+    <input type="hidden" name="enabled" value="0">
+    <button type="submit" class="button small">{{ _("Disable the link") }}</button>
+  </form>
+  {% else %}
+  <p class="hint">{{ _("Disabled. Once enabled, a secret link shows the results of the session to anyone who has it, for example the members who could not attend.") }}</p>
+  <form method="post" action="/manage/{{ assembly.public_id }}/public-results">
+    {{ csrf() }}
+    <input type="hidden" name="enabled" value="1">
+    <button type="submit" class="button small">{{ _("Enable the public link") }}</button>
+  </form>
+  {% endif %}
+</section>

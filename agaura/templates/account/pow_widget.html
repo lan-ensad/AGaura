@@ -1,0 +1,10 @@
+{# Anti-robot proof of work (static/js/pow.js, agaura/web/pow.py): disable the form's submit button
+   until it is solved, and load css/account.css and js/pow.js in the page. #}
+<div class="pow" data-pow data-challenge-url="/altcha/challenge" data-pow-refresh="{{ pow_refresh }}"
+  data-pow-working="{{ _('Anti-robot check in progress…') }}"
+  data-pow-done="{{ _('Anti-robot check complete.') }}"
+  data-pow-failed="{{ _('The anti-robot check could not run. Reload the page to try again.') }}">
+  <input type="hidden" name="altcha" value="">
+  <p class="pow-status small" role="status" data-pow-status>{{ _("Anti-robot check in progress…") }}</p>
+  <noscript><p class="alert alert-warning">{{ _("This form needs JavaScript for its anti-robot check.") }}</p></noscript>
+</div>

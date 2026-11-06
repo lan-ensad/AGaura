@@ -1,0 +1,86 @@
+{#- Step 1 of the poll editor: the voting method first (FR-31, D-C). The cards come in groups
+    (editor.GROUPS); one group for now, the voting methods. Fresh, each card is a link to step 2
+    (?kind=…, the first of its forms for "Choix unique": editor.opening), its title stretched
+    over the card. After "Changer de mode" (carry), the same cards are the radio buttons of a
+    form that carries every value typed (hidden fields), so that step 2 comes back with what
+    fits the new method (editor.switch_kind); the card of the method typed is checked, its
+    value that method (a resolution stays one). The owner may also copy the polls of a past
+    session here. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+
+{% macro card_texts(kind, tag) -%}
+<{{ tag }} class="method-kind">{{ _(kind.summary) }}</{{ tag }}>
+<{{ tag }} class="method-line" id="kind-{{ kind.name }}-line">{{ _(kind.line) }}</{{ tag }}>
+<{{ tag }} class="method-example">{{ _("Example:") }} <q>{{ _(kind.example) }}</q></{{ tag }}>
+<{{ tag }} class="method-when">{{ _("When:") }} {{ _(kind.when) }}</{{ tag }}>
+{%- endmacro %}
+
+<section class="editor-step" aria-labelledby="methods-title">
+  <h2 id="methods-title">{{ _("Choose the voting method") }}</h2>
+  <p class="hint" id="methods-hint">{{ _("The method sets the form of the ballot and the rule of the result. The next step shows its settings only.") }}</p>
+  {% if step_error %}<div class="alert alert-error" role="alert" id="editor-errors">{{ step_error }}</div>{% endif %}
+
+  {% if carry is none %}
+  {% for group, label, kinds in groups %}
+  <ul class="method-cards" aria-label="{{ _(label) }}" data-group="{{ group }}">
+    {% for kind in kinds %}
+    <li>
+      <div class="method-card">
+        <span class="method-icon">{{ icon(kind.icon) }}</span>
+        <h3><a href="/manage/{{ assembly.public_id }}/polls/new?kind={{ opening(kind) }}" aria-describedby="kind-{{ kind.name }}-line">{{ _(kind.label) }}</a></h3>
+        {{ card_texts(kind, "p") }}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endfor %}
+  {% else %}
+  {% set form_action = "/manage/" ~ assembly.public_id ~ ("/polls/" ~ poll.id ~ "/edit" if poll is not none else "/polls/new") %}
+  <form method="post" action="{{ form_action }}" class="editor" id="method-form" novalidate>
+    {{ csrf() }}
+    {% for name, value in carry.carried() %}<input type="hidden" name="{{ name }}" value="{{ value }}">
+    {% endfor %}
+    <fieldset class="plain" aria-labelledby="methods-title" aria-describedby="methods-hint">
+      {% for group, label, kinds in groups %}
+      <ul class="method-cards" aria-label="{{ _(label) }}" data-group="{{ group }}">
+        {% for kind in kinds %}
+        {% set current = kind.name == current_card %}
+        <li>
+          <label class="method-card" for="switch-{{ kind.name }}">
+            <input type="radio" name="switch" value="{{ current_kind if current else kind.name }}" id="switch-{{ kind.name }}" aria-labelledby="kind-{{ kind.name }}-name" aria-describedby="kind-{{ kind.name }}-line"{% if current %} checked{% endif %}>
+            <span class="method-icon">{{ icon(kind.icon) }}</span>
+            <span class="method-name" id="kind-{{ kind.name }}-name">{{ _(kind.label) }}</span>
+            {{ card_texts(kind, "span") }}
+          </label>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endfor %}
+    </fieldset>
+    <div class="editor-actions">
+      <button type="submit" class="button primary">{{ _("Continue") }}</button>
+      <a class="button quiet" href="{{ back_url }}">{{ _("Cancel") }}</a>
+    </div>
+  </form>
+  {% endif %}
+</section>
+
+{% if copy_sources %}
+<details class="card copy-past" id="copy">
+  <summary>{{ icon("history") }} {{ _("Take up the polls of a past session") }}</summary>
+  <form method="post" action="/manage/{{ assembly.public_id }}/polls/copy" class="stack">
+    {{ csrf() }}
+    <div class="field">
+      <label for="copy-source">{{ _("Session to copy from") }}</label>
+      <select id="copy-source" name="source" aria-describedby="copy-hint">
+        {% for source in copy_sources %}
+        <option value="{{ source.assembly.public_id }}">{{ source.assembly.title }}{% if source.assembly.date %} · {{ source.assembly.date | long_date }}{% endif %} · {{ ngettext("%(num)s poll", "%(num)s polls", source.polls) }}</option>
+        {% endfor %}
+      </select>
+      <p class="hint" id="copy-hint">{{ _("Every poll of that session is copied here as a draft, except cancelled ones. Nothing is pushed: edit, reorder or delete the copies as needed.") }}</p>
+    </div>
+    <button type="submit" class="button">{{ _("Copy as drafts") }}</button>
+  </form>
+</details>
+{% endif %}

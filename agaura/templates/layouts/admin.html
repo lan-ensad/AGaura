@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import csrf, alerts with context %}
+{% from "macros/icons.html" import icon with context %}
+{% from "macros/demo.html" import contact_link as demo_contact with context %}
+{% block body_class %}admin{% endblock %}
+{% block body %}
+<header class="topbar">
+  <div class="topbar-inner">
+    {#- The wordmark: the sign of the favicon (decorative), then the name that names the link. #}
+    <a class="brand" href="/">{{ icon("agaura") }}AGaura</a>
+    <nav aria-label="{{ _('Main menu') }}">
+      {% set delegate = console_access.delegate if console_access is defined and console_access else none %}
+      {% if delegate %}
+      <span class="topbar-delegate">{{ _("Delegate access: %(name)s", name=delegate.name) }}</span>
+      <form method="post" action="/manage/{{ console_access.public_id }}/delegate/leave" class="inline" data-leaves-console data-confirm="{{ _('Leave the console on this device? The link opens it again.') }}">
+        {{ csrf() }}
+        <button type="submit" class="link">{{ _("Leave") }}</button>
+      </form>
+      {% endif %}
+      {% if user %}
+      {% if user.is_superadmin %}
+      <a href="/superadmin">{{ _("Accounts") }}</a>
+      <a href="/account">{{ _("My account") }}</a>
+      {% else %}
+      <a href="/dashboard">{{ _("Dashboard") }}</a>
+      <a href="/account">{{ _("Account") }}</a>
+      {% endif %}
+      <form method="post" action="/logout" class="inline">
+        {{ csrf() }}
+        <button type="submit" class="link">{% if user.is_demo %}{{ _("End the demonstration") }}{% else %}{{ _("Log out") }}{% endif %}</button>
+      </form>
+      {% elif not delegate %}
+      <a href="/login">{{ _("Log in") }}</a>
+      {% if request.app.state.settings.signup_open %}
+      <a href="/signup">{{ _("Sign up") }}</a>
+      {% endif %}
+      {% endif %}
+    </nav>
+  </div>
+  {#- Demo (FR-09a): an account, or a delegate console, of a session that will be deleted. #}
+  {% if user and user.is_demo %}
+  <p class="demo-banner"><strong>{{ _("Demonstration") }}</strong> · {{ _("Nothing is kept: this account and its sessions are deleted 2 hours after the last action, at the latest 24 hours after opening.") }} {{ _("Limits: 5 voters per session, no export. To get an account: %(email)s.", email=demo_contact()) }}</p>
+  {% elif assembly is defined and assembly and assembly.is_demo %}
+  <p class="demo-banner"><strong>{{ _("Demonstration") }}</strong> · {{ _("5 voters at most, no export; nothing is kept: everything is deleted within 24 hours.") }}</p>
+  {% endif %}
+</header>
+<main class="page" id="main">
+  {{ alerts(error, notice) }}
+  {% block content %}{% endblock %}
+</main>
+<footer class="footer">
+  <p>AGaura · {{ _("Voting for in-person general assemblies") }}
+    {%- set source = request.app.state.settings.source_url %}
+    {%- if source %} · <a href="{{ source }}" rel="noopener">{{ _("Source code") }}</a>{% endif %}</p>
+</footer>
+{% block scripts %}{% endblock %}
+{% endblock %}

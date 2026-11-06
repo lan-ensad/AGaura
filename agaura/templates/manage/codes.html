@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Individual codes") }} · {{ title }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/manage.css') }}">{% endblock %}
+{% block body_class %}print-codes{% endblock %}
+{% block body %}
+<div class="codes-toolbar no-print">
+  <div class="alert alert-warning" role="alert">
+    {{ ngettext("%(num)s code generated. Print this page now: the codes cannot be shown again.", "%(num)s codes generated. Print this page now: the codes cannot be shown again.", cards | length) }}
+  </div>
+  <div class="actions">
+    <button type="button" class="button primary" data-print>{{ _("Print") }}</button>
+    <a class="button" href="/manage/{{ public_id }}#codes">{{ _("Back to the console") }}</a>
+  </div>
+</div>
+<div class="code-cards">
+  {% for card in cards %}
+  <section class="code-card">
+    <div class="qr">{{ card.qr }}</div>
+    <div class="code-card-text">
+      <p class="code-card-title">{{ title }}</p>
+      <p class="code-card-code mono">{{ card.code }}</p>
+      <p class="small">{{ _("Scan the QR code, or open %(url)s and type this code.", url=voter_url) }}</p>
+      <p class="small">{{ _("Personal and secret: one vote per poll.") }}</p>
+    </div>
+  </section>
+  {% endfor %}
+</div>
+<script src="{{ static_url('js/manage.js') }}" defer></script>
+{% endblock %}

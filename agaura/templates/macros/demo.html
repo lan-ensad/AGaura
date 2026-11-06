@@ -1,0 +1,36 @@
+{#- Demo (FR-09a): its limits, written out wherever they apply. Import "with context": the
+    contact address comes from the settings (AGAURA_CONTACT_EMAIL). -#}
+{% from "macros/icons.html" import icon with context %}
+
+{% macro contact_link() -%}
+{%- set email = request.app.state.settings.contact_email -%}
+<a href="mailto:{{ email }}">{{ email }}</a>
+{%- endmacro %}
+
+{#- Next to greyed export buttons, which point to it with aria-describedby. -#}
+{% macro exports_note(id) -%}
+<p class="alert alert-info demo-note" id="{{ id }}">{{ icon("lock") }} {{ _("Demonstration: no export, neither the minutes nor the CSV and JSON files. Exports need an account: to get one, write to %(email)s.", email=contact_link()) }}</p>
+{%- endmacro %}
+
+{#- The limits of a demo, on /demo before it opens and on the account page of a demo. -#}
+{% macro limits() -%}
+<ul class="demo-facts">
+  <li>{{ _("Each session takes 5 voters at most: phones join it and vote as in a real assembly, up to five.") }}</li>
+  <li>{{ _("No export: the minutes and the CSV and JSON files need an account. To get one, write to %(email)s.", email=contact_link()) }}</li>
+  <li>{{ _("3 sessions open at once at most, 20 polls per session.") }}</li>
+  <li>{{ _("Nothing is kept: the account and its sessions are deleted 2 hours after your last action, at the latest 24 hours after opening, or as soon as you end the demonstration.") }}</li>
+  <li>{{ _("When every place is taken, a demonstration left 30 minutes without any action is deleted to make room for a new visitor.") }}</li>
+</ul>
+{%- endmacro %}
+
+{#- For visitors without an account, on the home and login pages, when the demo is on: what it
+    is and its limits, before the link to /demo. -#}
+{% macro offer(heading="h3") -%}
+{%- if request.app.state.settings.demo %}
+<div class="demo-offer">
+  <{{ heading }} class="demo-offer-title">{{ icon("play") }} {{ _("Try without an account") }}</{{ heading }}>
+  <p>{{ _("The demonstration opens a trial account of your own, without signing up, with two example sessions. Its limits: 5 voters per session, no export, and nothing is kept: everything is deleted 2 hours after the last action, at the latest 24 hours after opening.") }}</p>
+  <p><a class="button" href="/demo">{{ _("Try the demonstration") }}</a></p>
+</div>
+{%- endif %}
+{%- endmacro %}

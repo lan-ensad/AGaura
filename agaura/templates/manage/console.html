@@ -1,0 +1,196 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+{% block title %}{{ assembly.title }} · AGaura{% endblock %}
+{% block body_class %}admin console-page{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/manage.css') }}"><script src="{{ static_url('js/console-boot.js') }}"></script>{% endblock %}
+
+{#- Session console: a sidebar of rubrics (tabs at the bottom of a phone), a status bar that stays
+    in view, and one section per rubric. manage.js shows one rubric at a time, chosen by the
+    address (#tab-… or the id of anything inside a rubric), else the one marked data-default;
+    without script the rubrics stay stacked and the links jump to them. One feature, one card,
+    one rubric (D-A): each card stays in its rubric in every state of the session. Steering
+    exists once the session is open, and follows the state: commands during (compact copies
+    that act at once and lead to their card, ids prefixed cmd-), summary after. Before the
+    opening nothing is imposed: the console lands on Meeting, headed by a short recap of the
+    steps (_checklist.html, the owner's), and the status bar opens the session, back to
+    Steering (#tab-cockpit). Polls opens, during the session, with the polls open now
+    (_polls_open.html): the same live list as the command, in a card of its own, so a poll
+    pushed from Polls shows where it was pushed from. Meeting (D-B) holds who runs the session,
+    its details (read only once the session is open) and the chronometer, the owner's only; the
+    agenda and the session notes have a rubric each. Through a delegate link (FR-92), only the rubrics and
+    cards of its rights show (can.agenda, can.notes, can.polls, can.timer, can.screen,
+    can.headcount): Steering once the session is open (whose link it is, then its commands),
+    Polls, Agenda, Session notes, Access and attendance (the headcount), Projection screen (the
+    chronometer, what the room sees without the screen link). can.owner gates the rest. -#}
+{% block content %}
+{% set status = assembly.status.value %}
+{% set in_session = status == "in_session" %}
+{% set preparation = status == "preparation" %}
+{% set closed = status == "closed" %}
+{% set meeting_rubric = can.owner %}
+{#- A closed session without an agenda has nothing to show in Agenda (_agenda.html). -#}
+{% set agenda_rubric = can.agenda and (assembly.agenda or not closed) %}
+{% set access_rubric = can.owner or can.headcount %}
+{% set screen_rubric = can.owner or can.screen or (can.timer and not closed) %}
+{% set steering_rubric = not preparation %}
+{#- The rubric shown first (data-default): Steering once the session is open; before, Meeting,
+    where the checklist heads, or for a delegate link the first rubric of its rights, headed by
+    whose link it is (_delegate_home.html). Every right has a rubric in preparation, so a
+    delegate always lands on one it sees. -#}
+{% if steering_rubric %}{% set landing = "cockpit" %}
+{% elif meeting_rubric %}{% set landing = "meeting" %}
+{% elif agenda_rubric %}{% set landing = "agenda" %}
+{% elif can.notes %}{% set landing = "notes" %}
+{% elif can.polls %}{% set landing = "polls" %}
+{% elif access_rubric %}{% set landing = "access" %}
+{% else %}{% set landing = "screen" %}{% endif %}
+{% set delegate_landing = landing if preparation and not can.owner else none %}
+
+<div class="console" data-console data-status="{{ status }}" data-access="{{ can.key }}">
+  {% include "manage/_nav.html" %}
+
+  <div class="console-main">
+    <div class="status-bar" id="status-bar" data-panel-url="/manage/{{ assembly.public_id }}/panel" data-events-url="/manage/{{ assembly.public_id }}/events">
+      <div data-live-part="status">{% set panel = state.panel %}{% include "manage/_status.html" %}</div>
+    </div>
+
+    {% if steering_rubric %}
+    <section class="rubric" id="tab-cockpit" data-rubric data-default aria-labelledby="tab-cockpit-title">
+      <h2 class="rubric-title" id="tab-cockpit-title">{{ _("Steering") }}</h2>
+      {% if not can.owner %}
+      {% include "manage/_delegate_home.html" %}
+      {% if in_session %}{% include "manage/_cockpit.html" %}{% endif %}
+      {% elif in_session %}
+      {% include "manage/_cockpit.html" %}
+      {% else %}
+      {% include "manage/_summary.html" %}
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if can.polls %}
+    <section class="rubric" id="tab-polls" data-rubric{% if landing == "polls" %} data-default{% endif %} aria-labelledby="tab-polls-title">
+      <h2 class="rubric-title" id="tab-polls-title">{{ _("Polls") }}</h2>
+      {% if delegate_landing == "polls" %}{% include "manage/_delegate_home.html" %}{% endif %}
+      {% if closed %}
+      {% include "manage/_finished.html" %}
+      {% include "manage/_drafts.html" %}
+      {% else %}
+      {% if in_session %}{% include "manage/_polls_open.html" %}{% endif %}
+      {% include "manage/_drafts.html" %}
+      {% include "manage/_finished.html" %}
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if meeting_rubric %}
+    <section class="rubric" id="tab-meeting" data-rubric{% if landing == "meeting" %} data-default{% endif %} aria-labelledby="tab-meeting-title">
+      <h2 class="rubric-title" id="tab-meeting-title">{{ _("Meeting") }}</h2>
+      {% if preparation %}{% include "manage/_checklist.html" %}{% endif %}
+      {#- The chronometer above the tribune, beside the details (the owner's request,
+          2026-11-06); a delegate link holding it finds it in Projection screen. -#}
+      <div class="grid-2 meeting-head-cards">
+        {% include "manage/_details.html" %}
+        <div class="meeting-side">
+          {% if can.timer %}{% include "manage/_timer.html" %}{% endif %}
+          {% include "manage/_tribune.html" %}
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if agenda_rubric %}
+    {#- One card, whose heading names the rubric: no title above it to repeat that name. -#}
+    <section class="rubric" id="tab-agenda" data-rubric{% if landing == "agenda" %} data-default{% endif %} aria-labelledby="agenda-title">
+      {% if delegate_landing == "agenda" %}{% include "manage/_delegate_home.html" %}{% endif %}
+      {% include "manage/_agenda.html" %}
+    </section>
+    {% endif %}
+
+    {% if can.notes %}
+    <section class="rubric" id="tab-notes" data-rubric{% if landing == "notes" %} data-default{% endif %} aria-labelledby="notes-title">
+      {% if delegate_landing == "notes" %}{% include "manage/_delegate_home.html" %}{% endif %}
+      {% include "manage/_notes.html" %}
+    </section>
+    {% endif %}
+
+    {% if access_rubric %}
+    <section class="rubric" id="tab-access" data-rubric{% if landing == "access" %} data-default{% endif %} aria-labelledby="tab-access-title">
+      <h2 class="rubric-title" id="tab-access-title">{{ _("Access and attendance") }}</h2>
+      {% if delegate_landing == "access" %}{% include "manage/_delegate_home.html" %}{% endif %}
+      {% if can.owner %}
+      <div class="grid-2 rubric-pair">
+        {% include "manage/_join.html" %}
+        {% include "manage/_entries.html" %}
+      </div>
+      <div class="grid-2 rubric-pair">
+        {% include "manage/_presence.html" %}
+        {% include "manage/_access.html" %}
+      </div>
+      {% include "manage/_codes.html" %}
+      {% elif can.headcount %}
+      {% include "manage/_presence.html" %}
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if screen_rubric %}
+    <section class="rubric" id="tab-screen" data-rubric{% if landing == "screen" %} data-default{% endif %} aria-labelledby="tab-screen-title">
+      <h2 class="rubric-title" id="tab-screen-title">{{ _("Projection screen") }}</h2>
+      {% if delegate_landing == "screen" %}{% include "manage/_delegate_home.html" %}{% endif %}
+      {% if can.owner %}
+      <div class="grid-2 rubric-pair">
+        {% include "manage/_links.html" %}
+        {% include "manage/_screen_recap.html" %}
+      </div>
+      {% elif can.screen %}
+      {% include "manage/_screen_recap.html" %}
+      {% endif %}
+      {% if can.timer and not can.owner %}{% include "manage/_timer.html" %}{% endif %}
+    </section>
+    {% endif %}
+
+    {% if can.owner %}
+    <section class="rubric" id="tab-documents" data-rubric aria-labelledby="tab-documents-title">
+      <h2 class="rubric-title" id="tab-documents-title">{{ _("Documents") }}</h2>
+      {% include "manage/_exports.html" %}
+      {% include "manage/_public_results.html" %}
+    </section>
+
+    <section class="rubric" id="tab-settings" data-rubric aria-labelledby="tab-settings-title">
+      <h2 class="rubric-title" id="tab-settings-title">{{ _("Settings") }}</h2>
+      {% include "manage/_delegates.html" %}
+
+      <details class="card" id="log">
+        <summary><strong>{{ icon("history") }} {{ _("Session log") }}</strong></summary>
+        <div class="table-wrap">
+          <table class="data">
+            <tbody>
+            {% for entry in state.log %}
+              {% set delegate_name = delegates_names.get(entry.details.get("delegate")) %}
+              <tr><td class="nowrap muted">{{ entry.at | short_datetime }}</td><td>{{ action_label(entry.action) }}{% if entry.details.get("title") %} · {{ entry.details.get("title") }}{% endif %}
+                {%- if entry.actor == "delegate" %} · <span class="muted">{{ _("by %(name)s, delegate link", name=delegate_name or "?") }}</span>{% elif delegate_name %} · {{ delegate_name }}{% endif %}</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      {% if not in_session %}
+      <section class="card danger-zone" id="danger">
+        <h2>{{ _("Delete the session") }}</h2>
+        <form method="post" action="/manage/{{ assembly.public_id }}/delete" class="stack" data-leaves-console>
+          {{ csrf() }}
+          <label class="checkbox"><input type="checkbox" name="confirm" value="yes" required> {{ _("I understand that the session, its polls, ballots and results will be deleted for good.") }}</label>
+          <button type="submit" class="button danger">{{ _("Delete the session") }}</button>
+        </form>
+      </section>
+      {% endif %}
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static_url('js/manage.js') }}" defer></script>{% endblock %}

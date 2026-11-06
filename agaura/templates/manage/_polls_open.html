@@ -1,0 +1,18 @@
+{#- Polls open now, at the top of Polls during the session (FR-91): a poll pushed from Polls stays
+    in view there, each a tile folded by default (_live_poll_tiles.html); Steering keeps the whole
+    cockpit, at one click. The list is the "poll-tiles" live part, Steering's #live-panel the
+    "polls" one: manage.js refreshes both from GET /manage/{id}/panel, shows this card only
+    while it lists a poll (data-shown-with),
+    and shows the hint when a timer closes a poll. Part of the Polls rubric, so of the polls
+    right only. Ids of its own, none of the cockpit card's. The way to Steering is a quiet
+    button: a cross-link, not a step (R12). Needs panel. -#}
+<p class="alert alert-notice" data-refresh-hint hidden>{{ _("A poll has closed.") }} <a href="/manage/{{ assembly.public_id }}#results">{{ _("Refresh the page") }}</a></p>
+<section class="card polls-open" id="polls-open" aria-labelledby="polls-open-title" data-shown-with=".open-poll"{% if not panel.open_polls %} hidden{% endif %}>
+  <div class="card-head">
+    <h2 id="polls-open-title">{{ _("Polls open now") }}</h2>
+    <a class="button small quiet" href="#live">{{ _("Go to Steering") }}</a>
+  </div>
+  <div data-live-part="poll-tiles" aria-live="polite">
+    {% include "manage/_live_poll_tiles.html" %}
+  </div>
+</section>

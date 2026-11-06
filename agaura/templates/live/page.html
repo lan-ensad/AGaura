@@ -1,0 +1,34 @@
+{% extends "layouts/voter.html" %}
+{% set title_heading = true %}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import voter_icon as icon with context %}
+{% block title %}{{ assembly.title }} · AGaura{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/live.css') }}">{% endblock %}
+{% block session_title %}{{ assembly.title }}{% endblock %}
+{% block content %}
+{# Announces each poll that appears after the page was loaded (live.js); never moves focus. #}
+<div class="visually-hidden" role="status" aria-live="polite" data-announce
+  data-msg-new-poll="{{ _('New vote open: %(title)s', title='{title}') }}"></div>
+<div id="live" class="live" data-live-url="/{{ public_id }}/live" data-events-url="/{{ public_id }}/events"
+  data-msg-network="{{ _('Connection problem: your vote was not sent. Check your network and try again.') }}">
+{% include "live/_content.html" %}
+</div>
+<noscript><p><a class="button wide" href="/{{ public_id }}">{{ _("Refresh") }}</a></p></noscript>
+<details class="leave">
+  <summary>{{ _("Leave") }}</summary>
+  <p class="hint">{{ _("Ends the session on this device, for example before handing it to someone else.") }}</p>
+  <form method="post" action="/{{ public_id }}/leave">
+    {{ csrf() }}
+    <button type="submit" class="button danger wide">{{ _("Leave the session on this device") }}</button>
+  </form>
+</details>
+{# Lost connection (FR-42): a status live.js fills after 5 s without the live stream or a
+   successful refresh, then "Connexion rétablie" for 3 s once the network is back. Always in
+   place and empty otherwise, so that screen readers hear each change; fixed at the bottom of
+   the screen, it never moves the page. #}
+<div class="net-banner" role="status" data-net-banner
+  data-msg-lost="{{ _('Connection lost, reconnecting…') }}"
+  data-msg-help="{{ _('The ballot you started stays in place.') }}"
+  data-msg-back="{{ _('Connection restored') }}">{{ icon("wifi-off") }}<p data-net-text></p></div>
+{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/live.js') }}" defer></script>{% endblock %}

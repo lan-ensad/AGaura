@@ -1,0 +1,36 @@
+{# Form helpers. Every form posts a CSRF token. #}
+
+{% macro csrf() -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+{%- endmacro %}
+
+{#- ``error_id``: the id of the message that refused this field (the page's alert, ``alerts``):
+    the field is then marked invalid, described by it, and takes the focus, so a keyboard or a
+    screen reader lands on what to correct. -#}
+{% macro field(name, label, type="text", value="", required=false, autocomplete=none, hint=none, attrs={}, id=none, error_id=none) -%}
+{% set field_id = id or "field-" ~ name %}
+{% set described = [field_id ~ "-hint" if hint else none, error_id] | select | join(" ") %}
+<div class="field">
+  <label for="{{ field_id }}">{{ label }}</label>
+  {% if hint %}<p class="hint" id="{{ field_id }}-hint">{{ hint }}</p>{% endif %}
+  <input id="{{ field_id }}" name="{{ name }}" type="{{ type }}" value="{{ value if value is not none else '' }}"
+    {%- if required %} required{% endif %}
+    {%- if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}
+    {%- if described %} aria-describedby="{{ described }}"{% endif %}
+    {%- if error_id %} aria-invalid="true" autofocus{% endif %}
+    {%- for key, val in attrs.items() %} {{ key }}="{{ val }}"{% endfor %}>
+</div>
+{%- endmacro %}
+
+{% macro alerts(error=none, notice=none) -%}
+{% if error %}<div class="alert alert-error" role="alert" id="page-error">{{ error }}</div>{% endif %}
+{% if notice %}<div class="alert alert-notice" role="status">{{ notice }}</div>{% endif %}
+{%- endmacro %}
+
+{#- Help folded to one line: the short text, then "Learn more" opening the detail in place. -#}
+{% macro help(short, more) -%}
+<details class="help">
+  <summary><span class="help-short">{{ short }}</span> <span class="help-toggle">{{ _("Learn more") }}</span></summary>
+  <p class="hint">{{ more }}</p>
+</details>
+{%- endmacro %}

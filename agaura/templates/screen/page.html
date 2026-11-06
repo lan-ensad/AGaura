@@ -1,0 +1,19 @@
+{# Projection screen (FR-70 to FR-74): its own full-viewport layout, no navigation, no form. #}
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon with context %}
+{% block title %}{{ view.assembly.title }} · AGaura{% endblock %}
+{% block head %}
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="{{ static_url('css/screen.css') }}">
+{% endblock %}
+{% block body_class %}screen{% endblock %}
+{% block body %}
+<div id="screen" class="screen" data-state-url="{{ screen_url }}/state" data-events-url="{{ screen_url }}/events" data-server-time="{{ server_time }}">
+{% include "screen/_state.html" %}
+</div>
+<button type="button" class="screen-fullscreen" data-fullscreen hidden>{{ icon("maximize") }} {{ _("Full screen") }}</button>
+{#- The mark of AGaura, discreet in the lower left corner: its sign (decorative) and its name, in
+    a landmark of its own, since the page already has its header, main and footer. #}
+<aside class="screen-brand" aria-label="AGaura">{{ icon("agaura") }}AGaura{% if view.assembly.is_demo %} · {{ _("Demonstration") }}{% endif %}</aside>
+<script src="{{ static_url('js/screen.js') }}" defer></script>
+{% endblock %}

@@ -1,0 +1,107 @@
+{#- Session notes (console card, in its own rubric, Session notes, in every state, D-A): a timestamped feed
+    attached to the agenda item under discussion, shown in the minutes unless internal. During
+    the session Steering also shows the command "Quick note" (compact: true, #cmd-notes): the
+    same form and the last note. Works without JavaScript (POST/redirect/GET: each add form posts
+    to the copy it came from, #notes or #cmd-notes); notes.js sends with fetch, keeps the unsent
+    draft of each form on the device and follows other consoles. Rendered alone, both copies, by
+    GET /manage/{id}/notes (_notes_alone.html, agaura/web/manage/notes.py). During the session,
+    "Add" is a secondary button: a tool, not the next step of the session; it leads outside the
+    session, or for a delegate with the notes alone (R12), in the command. The delegation of the
+    head (R13, D-G), outside the parts notes.js replaces, says who holds the notes. The script
+    tag comes with the card only. -#}
+{% from "macros/forms.html" import csrf, help with context %}
+{% from "macros/delegates.html" import hand_over with context %}
+{% from "macros/console.html" import command_head with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set base = "/manage/" ~ assembly.public_id ~ "/notes" %}
+{% set current_position, current_title = notes_current %}
+{% set is_compact = compact is defined and compact %}
+{% set lone = can is defined and can.lone_tool %}
+{% set lead = lone if is_compact else (assembly.status.value != "in_session" or lone) %}
+{% macro current_hint(id) -%}
+<p class="hint" id="{{ id }}" data-notes-current>{% if current_position %}{{ _("Attached to the item under discussion: %(number)s. %(title)s", number=current_position, title=current_title) }}{% else %}{{ _("No item under discussion: the note will be outside the agenda.") }}{% endif %}</p>
+{%- endmacro %}
+{% if is_compact %}
+<section class="card cmd cmd-note notes-card" id="cmd-notes" aria-labelledby="cmd-notes-title" data-notes-url="{{ base }}" data-notes-draft="agaura-note-draft:{{ assembly.public_id }}:cmd">
+  {{ command_head("notebook-pen", _("Quick note"), "notes", "notes", _("All the notes"), "cmd-notes-title", control=hand_over("notes", "cmd-notes")) }}
+  <form method="post" action="{{ base }}#cmd-notes" class="notes-form" data-notes-add>
+    {{ csrf() }}
+    <label for="cmd-note-text" class="visually-hidden">{{ _("New note") }}</label>
+    <textarea id="cmd-note-text" name="text" rows="2" maxlength="{{ notes_max_length }}" required aria-describedby="cmd-note-current"></textarea>
+    {{ current_hint("cmd-note-current") }}
+    <div class="notes-actions">
+      <label class="checkbox"><input type="checkbox" name="internal" value="1"> {{ _("Internal note") }} <span class="muted small">{{ _("(left out of the minutes)") }}</span></label>
+      <button type="submit" class="button{{ ' primary' if lead }}">{{ _("Add") }}</button>
+    </div>
+    <p class="meeting-error" role="alert" data-notes-error hidden></p>
+  </form>
+  <p class="cmd-state" data-notes-last>{% if notes_items %}{% set note = notes_items[0] %}{{ _("Last note, %(when)s:", when=note.when) }} <strong>{{ note.text | truncate(160) }}</strong>{% if note.internal %} <span class="badge warning">{{ _("Internal") }}</span>{% endif %}{% else %}{{ _("No note yet.") }}{% endif %}</p>
+</section>
+{% else %}
+<section class="card meeting notes-card" id="notes" aria-labelledby="notes-title" data-notes-url="{{ base }}" data-notes-draft="agaura-note-draft:{{ assembly.public_id }}">
+  <div class="card-head">
+    <h2 id="notes-title">{{ icon("notebook-pen") }} {{ _("Session notes") }}</h2>
+    {{ hand_over("notes", "notes") }}
+  </div>
+
+  <form method="post" action="{{ base }}#notes" class="notes-form" data-notes-add>
+    {{ csrf() }}
+    <label for="note-text" class="visually-hidden">{{ _("New note") }}</label>
+    <textarea id="note-text" name="text" rows="3" maxlength="{{ notes_max_length }}" required aria-describedby="note-current"></textarea>
+    {{ current_hint("note-current") }}
+    <div class="notes-actions">
+      <label class="checkbox"><input type="checkbox" name="internal" value="1"> {{ _("Internal note") }} <span class="muted small">{{ _("(left out of the minutes)") }}</span></label>
+      <button type="submit" class="button{{ ' primary' if lead }}">{{ _("Add") }}</button>
+    </div>
+    <p class="hint" data-notes-shortcut hidden>{{ _("Ctrl+Enter adds the note.") }}</p>
+    <p class="meeting-error" role="alert" data-notes-error hidden></p>
+  </form>
+
+  <div data-notes-list>
+    {% if notes_items %}
+    <ol class="notes-list">
+      {% for note in notes_items %}
+      <li class="note{% if note.internal %} is-internal{% endif %}" id="note-{{ note.id }}">
+        <p class="note-meta"><time datetime="{{ note.at.isoformat() }}">{{ note.when }}</time>
+          · {% if note.item %}{{ note.item }}. {{ note.item_title }}{% else %}{{ _("Outside the agenda") }}{% endif %}
+          {% if note.internal %} <span class="badge warning">{{ _("Internal") }}</span>{% endif %}
+          {% if note.edited %} <span class="muted">· {{ _("edited") }}</span>{% endif %}</p>
+        <p class="note-text">{{ note.text }}</p>
+        <details class="note-edit">
+          <summary>{{ _("Edit") }}</summary>
+          <form method="post" action="{{ base }}/edit#note-{{ note.id }}" class="stack" data-notes-action>
+            {{ csrf() }}
+            <input type="hidden" name="note" value="{{ note.id }}">
+            <div class="field">
+              <label for="note-text-{{ note.id }}">{{ _("Text of the note") }}</label>
+              <textarea id="note-text-{{ note.id }}" name="text" rows="4" maxlength="{{ notes_max_length }}" required>{{ note.text }}</textarea>
+            </div>
+            <div class="field">
+              <label for="note-item-{{ note.id }}">{{ _("Agenda item") }}</label>
+              <select id="note-item-{{ note.id }}" name="item">
+                <option value="">{{ _("Outside the agenda") }}</option>
+                {% for title in notes_agenda %}
+                <option value="{{ loop.index }}"{% if note.item == loop.index %} selected{% endif %}>{{ loop.index }}. {{ title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <label class="checkbox"><input type="checkbox" name="internal" value="1"{% if note.internal %} checked{% endif %}> {{ _("Internal note") }} <span class="muted small">{{ _("(left out of the minutes)") }}</span></label>
+            <button type="submit" class="button small">{{ _("Save") }}</button>
+          </form>
+          <form method="post" action="{{ base }}/delete#notes" class="note-delete" data-notes-action data-confirm="{{ _('Delete this note?') }}">
+            {{ csrf() }}
+            <input type="hidden" name="note" value="{{ note.id }}">
+            <button type="submit" class="button small">{{ _("Delete the note") }}</button>
+          </form>
+        </details>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="muted">{{ _("No note yet.") }}</p>
+    {% endif %}
+  </div>
+  {{ help(_("Notes appear in the minutes, except internal ones."), _("Each note keeps its time and its agenda item. Voters never see the notes, nor does the projection screen or the public results page.")) }}
+</section>
+<script src="{{ static_url('js/notes.js') }}" defer></script>
+{% endif %}

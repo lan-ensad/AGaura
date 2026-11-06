@@ -1,0 +1,10 @@
+/* Accounts area: signup anti-robot status, account settings. */
+
+.pow-status { margin: 0; color: var(--muted); }
+.pow[data-state="powDone"] .pow-status { color: var(--success); }
+.pow[data-state="powFailed"] .pow-status { color: var(--danger); font-weight: 600; }
+
+.account-unverified p { margin-bottom: 0.6rem; }
+.account-log td { font-size: 0.95rem; }
+.danger-zone { border-color: #f0c2bf; }
+.danger-zone h2 { color: var(--danger); }

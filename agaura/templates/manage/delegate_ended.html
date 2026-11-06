@@ -1,0 +1,16 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf with context %}
+{#- A delegate cookie that no longer opens the console (FR-92): the link was revoked or the session
+    closed. Says nothing about the session itself. -#}
+{% block title %}{{ _("Delegate access ended") }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Delegate access ended") }}</h1>
+  <p>{{ _("This link no longer opens the console: the tribune revoked it, or the session is closed.") }}</p>
+  <p class="muted">{{ _("To go on, ask the tribune for a new link.") }}</p>
+  <form method="post" action="/manage/{{ public_id }}/delegate/leave" class="inline">
+    {{ csrf() }}
+    <button type="submit" class="button">{{ _("Remove it from this device") }}</button>
+  </form>
+</section>
+{% endblock %}

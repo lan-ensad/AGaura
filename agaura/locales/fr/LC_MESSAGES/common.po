@@ -1,0 +1,577 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-11-02 22:39+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: main.py:31
+msgid "Access refused"
+msgstr "Accès refusé"
+
+#: main.py:32
+msgid "The page expired or the request was refused. Go back, reload the page and try again."
+msgstr "La page a expiré ou la demande a été refusée. Revenez en arrière, rechargez la page et réessayez."
+
+#: main.py:34 main.py:35
+msgid "Page not found"
+msgstr "Page introuvable"
+
+#: main.py:34 main.py:35 web/messages.py:14
+msgid "This page does not exist or is not available."
+msgstr "Cette page n'existe pas ou n'est pas disponible."
+
+#: templates/error.html:7
+msgid "Back to the home page"
+msgstr "Retour à l'accueil"
+
+#: templates/layouts/admin.html:8
+msgid "Main menu"
+msgstr "Menu principal"
+
+#: templates/layouts/admin.html:10
+msgid "Dashboard"
+msgstr "Mes sessions"
+
+#: templates/layouts/admin.html:11
+msgid "Account"
+msgstr "Compte"
+
+#: templates/layouts/admin.html:14
+msgid "Log out"
+msgstr "Se déconnecter"
+
+#: templates/layouts/admin.html:17 templates/public/home.html:31 templates/public/login.html:3
+msgid "Log in"
+msgstr "Se connecter"
+
+#: templates/layouts/admin.html:18
+msgid "Sign up"
+msgstr "Créer un compte"
+
+#: templates/layouts/admin.html:28
+msgid "Voting for in-person general assemblies"
+msgstr "Le vote des assemblées générales en présentiel"
+
+#: templates/public/home.html:4
+msgid "Vote in your general assembly, from your phone"
+msgstr "Votez en assemblée générale, depuis votre téléphone"
+
+#: templates/public/home.html:5
+msgid ""
+"The tribune pushes each vote in real time; members answer in a few seconds, with no app to "
+"install. Ballots stay secret."
+msgstr ""
+"La tribune lance chaque vote en direct ; les membres répondent en quelques secondes, "
+"sans application à installer. Le vote reste secret."
+
+#: templates/public/home.html:10
+msgid "Join a session"
+msgstr "Rejoindre une session"
+
+#: templates/public/home.html:13
+msgid "Session ID"
+msgstr "Identifiant de la session"
+
+#: templates/public/home.html:14
+msgid "Six characters, shown in the room (e.g. K7M4QX)."
+msgstr "Six caractères, affichés dans la salle (par exemple K7M4QX)."
+
+#: templates/public/home.html:18
+msgid "Join"
+msgstr "Rejoindre"
+
+#: templates/public/home.html:23
+msgid "Organize a session"
+msgstr "Organiser une session"
+
+#: templates/public/home.html:25
+msgid "Create a session and prepare its polls from your dashboard."
+msgstr "Créez une session et préparez ses votes depuis votre tableau de bord."
+
+#: templates/public/home.html:26
+msgid "Go to the dashboard"
+msgstr "Aller au tableau de bord"
+
+#: templates/public/home.html:28
+msgid "An account is needed to create sessions. It is free."
+msgstr "Un compte est nécessaire pour créer des sessions. Il est gratuit."
+
+#: templates/public/home.html:30 templates/public/login.html:14
+msgid "Create an account"
+msgstr "Créer un compte"
+
+#: templates/public/login.html:10
+msgid "Email address"
+msgstr "Adresse e-mail"
+
+#: templates/public/login.html:11
+msgid "Password"
+msgstr "Mot de passe"
+
+#: templates/public/login.html:14
+msgid "Forgot your password?"
+msgstr "Mot de passe oublié ?"
+
+#: web/messages.py:15
+msgid "This field is required."
+msgstr "Ce champ est obligatoire."
+
+#: web/messages.py:16
+msgid "This text is too long."
+msgstr "Ce texte est trop long."
+
+msgid "This text contains invisible control characters."
+msgstr "Ce texte contient des caractères de contrôle invisibles."
+
+#: web/messages.py:18
+msgid "Enter the quorum as a number of people (50) or a share (1/4)."
+msgstr "Indiquez le quorum en nombre de personnes (50) ou en proportion (1/4)."
+
+#: web/messages.py:19
+msgid "The number of registered members must be at least 1."
+msgstr "Le nombre de membres inscrits doit être d'au moins 1."
+
+#: web/messages.py:20
+msgid "The session has not started yet."
+msgstr "La session n'a pas encore commencé."
+
+#: web/messages.py:21
+msgid "Not possible while the session is in session."
+msgstr "Impossible pendant que la session est en cours."
+
+#: web/messages.py:22
+msgid "The session is closed."
+msgstr "La session est terminée."
+
+#: web/messages.py:23
+msgid "Close the open polls before closing the session."
+msgstr "Clôturez les votes ouverts avant de terminer la session."
+
+#: web/messages.py:24
+msgid ""
+"Close the open polls before changing the access mode: someone who already "
+"voted could vote again."
+msgstr ""
+"Clôturez les votes ouverts avant de changer le mode d'accès : une personne "
+"qui a déjà voté pourrait voter une seconde fois."
+
+#: web/messages.py:28
+msgid ""
+"Close the open polls before generating codes: someone who already voted "
+"could vote again with a new code."
+msgstr ""
+"Clôturez les votes ouverts avant de générer des codes : une personne qui a "
+"déjà voté pourrait voter une seconde fois avec un nouveau code."
+
+#: web/messages.py:24
+msgid "You have reached the maximum number of sessions not yet closed."
+msgstr "Vous avez atteint le nombre maximal de sessions non terminées."
+
+#: web/messages.py:25
+msgid "This session has reached the maximum number of polls."
+msgstr "Cette session a atteint le nombre maximal de votes."
+
+#: web/messages.py:26
+msgid "This session has reached the maximum number of codes, revoked codes included."
+msgstr "Cette session a atteint le nombre maximal de codes, codes révoqués compris."
+
+#: web/messages.py:28
+msgid "This session is not open for voting."
+msgstr "Cette session n'est pas ouverte au vote."
+
+#: web/messages.py:29
+msgid "Entries are closed. Ask the tribune to let you in."
+msgstr "Les entrées sont fermées. Demandez à la tribune de vous faire entrer."
+
+#: web/messages.py:31
+msgid "This session has reached its maximum number of accesses: no new device can join. Ask the tribune."
+msgstr "Cette session a atteint son nombre maximal d'accès : aucun nouvel appareil ne peut la rejoindre. Adressez-vous à la tribune."
+
+#: web/messages.py:30
+msgid "Incorrect password or code."
+msgstr "Mot de passe ou code incorrect."
+
+#: web/messages.py:31
+msgid "Your access to this session is no longer valid. Join again."
+msgstr "Votre accès à cette session n'est plus valable. Rejoignez-la à nouveau."
+
+#: web/messages.py:32
+msgid "Too many attempts. Wait a few minutes and try again."
+msgstr "Trop de tentatives. Patientez quelques minutes puis réessayez."
+
+#: web/messages.py:33
+msgid "The headcount must be a positive number."
+msgstr "L'effectif compté doit être un nombre positif."
+
+msgid "The headcount cannot exceed the number of codes a session may hold."
+msgstr "L'effectif compté ne peut pas dépasser le nombre de codes autorisé par session."
+
+#: web/messages.py:34
+msgid "The number of codes must be between 1 and 2,000."
+msgstr "Le nombre de codes doit être compris entre 1 et 2 000."
+
+#: web/messages.py:35
+msgid "This password is too long."
+msgstr "Ce mot de passe est trop long."
+
+#: web/messages.py:37
+msgid "This poll has not been pushed yet."
+msgstr "Ce vote n'a pas encore été lancé."
+
+#: web/messages.py:38
+msgid "This poll is open."
+msgstr "Ce vote est ouvert."
+
+#: web/messages.py:39
+msgid "This poll is closed."
+msgstr "Ce vote est clos."
+
+#: web/messages.py:40
+msgid "The result of this poll is published."
+msgstr "Le résultat de ce vote est publié."
+
+#: web/messages.py:41
+msgid "This poll was cancelled."
+msgstr "Ce vote a été annulé."
+
+#: web/messages.py:42
+msgid "Voting on this poll is closed."
+msgstr "Le vote est clos."
+
+#: web/messages.py:43
+msgid "The timer must be between 1 and 1,440 minutes."
+msgstr "La minuterie doit être comprise entre 1 et 1 440 minutes."
+
+#: web/messages.py:44
+msgid "The order of the drafts has changed meanwhile; reload the page."
+msgstr "L'ordre des brouillons a changé entre-temps ; rechargez la page."
+
+#: web/messages.py:45
+msgid "Choose where to show the result."
+msgstr "Choisissez où afficher le résultat."
+
+#: web/messages.py:46
+msgid "Two options have the same label."
+msgstr "Deux options portent le même intitulé."
+
+#: web/messages.py:47
+msgid "A poll needs between 2 and 30 options."
+msgstr "Un vote doit comporter entre 2 et 30 options."
+
+#: web/messages.py:48
+msgid "Unknown voting method."
+msgstr "Mode de scrutin inconnu."
+
+#: web/messages.py:49 web/messages.py:51
+msgid "A setting of the poll is invalid."
+msgstr "Un réglage du vote est invalide."
+
+#: web/messages.py:50
+msgid "A setting of the poll is missing."
+msgstr "Un réglage du vote est manquant."
+
+#: web/messages.py:53
+msgid "Your vote has already been recorded."
+msgstr "Vote déjà enregistré."
+
+#: web/messages.py:54
+msgid "This ballot could not be read. Reload the page and vote again."
+msgstr "Ce bulletin n'a pas pu être lu. Rechargez la page et votez à nouveau."
+
+#: web/messages.py:55
+msgid "This ballot contains an unknown option."
+msgstr "Ce bulletin contient une option inconnue."
+
+#: web/messages.py:56
+msgid "Choose at least one option, or vote blank."
+msgstr "Choisissez au moins une option, ou votez blanc."
+
+#: web/messages.py:57
+msgid "An option was chosen twice."
+msgstr "Une option a été choisie deux fois."
+
+#: web/messages.py:58
+msgid "Too many options checked."
+msgstr "Trop d'options cochées."
+
+#: web/messages.py:59
+msgid "A grade is invalid."
+msgstr "Une mention est invalide."
+
+#: web/messages.py:61
+msgid "This email address is invalid."
+msgstr "Cette adresse e-mail est invalide."
+
+#: web/messages.py:62
+msgid "An account already exists with this email address."
+msgstr "Un compte existe déjà avec cette adresse e-mail."
+
+#: web/messages.py:63
+msgid "The password is too short."
+msgstr "Le mot de passe est trop court."
+
+#: web/messages.py:64
+msgid "Incorrect email or password."
+msgstr "Adresse e-mail ou mot de passe incorrect."
+
+#: web/messages.py:68
+msgid "You are logged in."
+msgstr "Vous êtes connecté·e."
+
+#: web/messages.py:69
+msgid "You are logged out."
+msgstr "Vous êtes déconnecté·e."
+
+#: web/messages.py:70
+msgid "You have left the session on this device."
+msgstr "Vous avez quitté la session sur cet appareil."
+
+#: web/messages.py:73
+msgid "This action is not possible."
+msgstr "Cette action n'est pas possible."
+
+#: templates/macros/results.html:6
+msgid "Ballots cast"
+msgstr "Bulletins déposés"
+
+#: templates/macros/results.html:8
+msgid "Valid votes"
+msgstr "Suffrages exprimés"
+
+#: templates/macros/results.html:19
+msgid "Adopted"
+msgstr "Adoptée"
+
+#: templates/macros/results.html:21
+msgid "Rejected"
+msgstr "Rejetée"
+
+#: templates/macros/results.html:23
+msgid "Tie: apply your bylaws"
+msgstr "Égalité : appliquez vos statuts"
+
+#: templates/macros/results.html:26
+#, python-format
+msgid "Result: %(option)s"
+msgstr "Résultat : %(option)s"
+
+#: templates/macros/results.html:28 templates/macros/results.html:32 templates/macros/results.html:36
+#, python-format
+msgid "Elected: %(names)s"
+msgstr "Élus : %(names)s"
+
+#: templates/macros/results.html:30
+#, python-format
+msgid "Tie between %(names)s: apply your bylaws"
+msgstr "Égalité entre %(names)s : appliquez vos statuts"
+
+#: templates/macros/results.html:49 templates/macros/results.html:77
+msgid "Option"
+msgstr "Option"
+
+#: templates/macros/results.html:49
+msgid "Votes"
+msgstr "Voix"
+
+#: templates/macros/results.html:62
+msgid "Candidate"
+msgstr "Candidat·e"
+
+#: templates/macros/results.html:62
+msgid "Approvals"
+msgstr "Approbations"
+
+#: templates/macros/results.html:62 web/labels.py:48
+msgid "of valid votes"
+msgstr "des suffrages exprimés"
+
+#: templates/macros/results.html:67
+msgid "Elected"
+msgstr "Élu·e"
+
+#: templates/macros/results.html:77
+msgid "Rank"
+msgstr "Rang"
+
+#: templates/macros/results.html:77
+msgid "Majority grade"
+msgstr "Mention majoritaire"
+
+#: templates/macros/results.html:89
+#, python-format
+msgid "%(above)s better, %(below)s worse"
+msgstr "%(above)s au-dessus, %(below)s en dessous"
+
+#: web/labels.py:11
+msgid "Very good"
+msgstr "Très bien"
+
+#: web/labels.py:12
+msgid "Good"
+msgstr "Bien"
+
+#: web/labels.py:13
+msgid "Fairly good"
+msgstr "Assez bien"
+
+#: web/labels.py:14
+msgid "Passable"
+msgstr "Passable"
+
+#: web/labels.py:15
+msgid "Insufficient"
+msgstr "Insuffisant"
+
+#: web/labels.py:16
+msgid "Reject"
+msgstr "À rejeter"
+
+#: web/labels.py:20
+msgid "Single choice"
+msgstr "Choix unique"
+
+#: web/labels.py:21
+msgid "Approval vote"
+msgstr "Vote par approbation"
+
+#: web/labels.py:22
+msgid "Majority judgment"
+msgstr "Jugement majoritaire"
+
+#: web/labels.py:26
+msgid "In preparation"
+msgstr "En préparation"
+
+#: web/labels.py:27
+msgid "In session"
+msgstr "En cours"
+
+#: web/labels.py:28 web/labels.py:34
+msgid "Closed"
+msgstr "Terminée"
+
+#: web/labels.py:32
+msgid "Draft"
+msgstr "Brouillon"
+
+#: web/labels.py:33
+msgid "Open"
+msgstr "En cours"
+
+#: web/labels.py:35
+msgid "Published"
+msgstr "Publié"
+
+#: web/labels.py:36
+msgid "Cancelled"
+msgstr "Annulé"
+
+#: web/labels.py:40
+msgid "Decided"
+msgstr "Décidé"
+
+#: web/labels.py:41
+msgid "Tie"
+msgstr "Égalité"
+
+#: web/labels.py:42
+msgid "No option reaches the required threshold"
+msgstr "Aucune option n'atteint le seuil requis"
+
+#: web/labels.py:43
+msgid "Some seats remain unfilled"
+msgstr "Des sièges restent à pourvoir"
+
+#: web/labels.py:44
+msgid "No valid vote"
+msgstr "Aucun suffrage exprimé"
+
+#: web/labels.py:49
+msgid "of ballots cast"
+msgstr "des bulletins déposés"
+
+#: web/labels.py:50
+msgid "of attendees"
+msgstr "des présents"
+
+#: web/labels.py:59
+#, python-format
+msgid "Grade %(number)s"
+msgstr "Mention %(number)s"
+
+#: web/labels.py:85
+msgid "Blank vote"
+msgstr "Vote blanc"
+
+#: web/labels.py
+msgid "Voting closed"
+msgstr "Clos"
+
+#: templates/layouts/admin.html:11 templates/superadmin/accounts.html:3 templates/superadmin/accounts.html:6
+msgid "Accounts"
+msgstr "Comptes"
+
+#: templates/layouts/admin.html:12
+msgid "My account"
+msgstr "Mon compte"
+
+#: templates/public/home.html:25
+msgid "Your account manages the accounts of the platform."
+msgstr "Votre compte gère les comptes de la plateforme."
+
+#: templates/public/home.html:26
+msgid "Manage the accounts"
+msgstr "Gérer les comptes"
+
+#: templates/public/home.html:40 templates/account/signup_closed.html:9
+msgid "To get an account, write to %(email)s."
+msgstr "Pour obtenir un compte, écrivez à %(email)s."
+
+#: templates/macros/forms.html:28
+msgid "Learn more"
+msgstr "En savoir plus"
+
+#: main.py:35
+msgid "Too many attempts"
+msgstr "Trop de tentatives"
+
+#: main.py:42
+msgid "Server busy"
+msgstr "Serveur occupé"
+
+#: main.py:43
+msgid "Another PDF document is being generated. Try again in a moment."
+msgstr "Un autre document PDF est en cours de création. Réessayez dans un instant."
+
+#: main.py:46
+msgid "Too many documents"
+msgstr "Trop de documents"
+
+#: main.py:47
+msgid "Too many PDF documents were requested in a short time. Wait a few minutes and try again."
+msgstr "Trop de documents PDF ont été demandés en peu de temps. Patientez quelques minutes puis réessayez."
+
+msgid "Condorcet method"
+msgstr "Méthode Condorcet"
+
+msgid "Not ranked"
+msgstr "Non classée"
+
+msgid "1st choice"
+msgstr "1er choix"
+
+msgid "Choice %(rank)s"
+msgstr "%(rank)se choix"
+
+msgid "A rank is invalid."
+msgstr "Un rang est invalide."

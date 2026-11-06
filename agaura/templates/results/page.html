@@ -1,0 +1,41 @@
+{#- Public results of a session (FR-17), opened by members on their phones from a secret link.
+    Published results and cancellations only; refreshed by hand. -#}
+{% extends "layouts/voter.html" %}
+{% from "macros/results.html" import result_block %}
+{% block title %}{{ _("Results") }} · {{ assembly.title }} · AGaura{% endblock %}
+{% block head %}
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="{{ static_url('css/results.css') }}">
+{% endblock %}
+{% block session_title %}{{ assembly.title }}{% endblock %}
+{% block content %}
+<section class="results-head">
+  <p class="eyebrow">{{ _("Results") }}</p>
+  <h1>{{ assembly.title }}</h1>
+  {% if assembly.date or assembly.place %}
+  <p class="muted">{{ assembly.date | long_date }}{% if assembly.date and assembly.place %} · {% endif %}{{ assembly.place or "" }}</p>
+  {% endif %}
+  {% if assembly.status.value == "in_session" %}
+  <p class="muted small">{{ _("The session is in progress: other results may follow.") }} <a href="{{ request.url.path }}">{{ _("Refresh") }}</a></p>
+  {% endif %}
+</section>
+
+{% for poll in polls %}
+<section class="card result-card public-result" aria-labelledby="result-{{ poll.id }}-title">
+  <h2 id="result-{{ poll.id }}-title">{{ poll.title }}</h2>
+  {% if poll.description %}<p class="poll-description">{{ poll.description }}</p>{% endif %}
+  <p class="muted small">{{ poll_method_label(poll) }}{% if poll.closed_at %} · {{ _("closed at %(time)s", time=poll.closed_at | time_of_day) }}{% endif %}</p>
+  {% if poll.status.value == "cancelled" %}
+  <p class="alert alert-warning">{{ _("Cancelled: %(reason)s", reason=poll.cancel_reason) }}</p>
+  {% elif poll.result %}
+  {{ result_block(poll, poll.result.data, show_turnout=true) }}
+  <p class="muted small mono digest">SHA-256 {{ poll.result.ballots_sha256 }}</p>
+  {% endif %}
+</section>
+{% else %}
+<section class="card">
+  <p>{{ _("No result has been published yet.") }}</p>
+  <p><a class="button wide" href="{{ request.url.path }}">{{ _("Refresh") }}</a></p>
+</section>
+{% endfor %}
+{% endblock %}

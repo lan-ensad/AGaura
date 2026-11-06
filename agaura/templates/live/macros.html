@@ -1,0 +1,334 @@
+{# Sections of the voter live page. Each top-level section carries a ``data-key`` that changes
+   whenever its content must be replaced; live.js keeps sections whose key is unchanged, so a
+   ballot being filled in is never wiped by a refresh. Import ``with context`` (needs
+   ``public_id`` and ``csrf_token``). Headings: the session title is the page's ``h1`` (top
+   bar), poll titles and group titles ``h2``, the steps of a ballot and published results
+   ``h3``. #}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import voter_icon as icon with context %}
+{% from "macros/results.html" import result_block %}
+
+{% macro poll_head(poll, focus=false) -%}
+<div class="poll-head">
+  <h2 id="poll-{{ poll.id }}-title"{% if focus %} tabindex="-1" data-focus{% endif %}>{{ poll.title }}</h2>
+  {% if poll.closes_at %}<p class="timer">{{ _("Closes at %(time)s", time=poll.closes_at | clock_time) }}</p>{% endif %}
+</div>
+{% if poll.description %}<p class="poll-description">{{ poll.description }}</p>{% endif %}
+{%- endmacro %}
+
+{% macro option_text(option) -%}
+<span class="choice-text">{{ option.label }}{% if option.description %}<span class="choice-hint">{{ option.description }}</span>{% endif %}</span>
+{%- endmacro %}
+
+{# The blank vote of every method (SPEC §6.1, §6.6): the last choice of the ballot, at the
+   level of the options and drawn like them, always named ``blank_label(poll)`` ("Vote blanc",
+   "Abstention" for a resolution). A radio button of the options' group in single choice; a box
+   (``data-blank``) elsewhere, which live.js keeps exclusive (checking it clears the options,
+   grades and ranks; choosing one of those unchecks it) and the server refuses with other
+   choices (FR-44): a row like the options' in approval, one more button like the grades'
+   after the last option in Majority Judgment (``blank_grade``), one more row of the ranking
+   with a box in place of the list of ranks in Condorcet (``blank_rank``). #}
+{% macro blank_choice(poll, type, name, value, checked) -%}
+<label class="choice"><input type="{{ type }}" name="{{ name }}" value="{{ value }}" data-blank
+  {%- if checked %} checked{% endif %}><span class="choice-text">{{ blank_label(poll) }}</span></label>
+{%- endmacro %}
+
+{% macro blank_grade(poll, checked) -%}
+<div class="mj-option mj-blank">
+  <div class="grades"><label class="grade-choice"><input type="checkbox" name="blank" value="1" data-blank
+    {%- if checked %} checked{% endif %}><span class="grade-pill">{{ blank_label(poll) }}</span></label></div>
+</div>
+{%- endmacro %}
+
+{% macro blank_rank(poll, checked) -%}
+<label class="rank-option rank-blank"><span class="rank-name">{{ blank_label(poll) }}</span><input type="checkbox" name="blank" value="1" data-blank
+  {%- if checked %} checked{% endif %}></label>
+{%- endmacro %}
+
+{% macro single_choice_ballot(poll, choice) -%}
+<fieldset class="choices">
+  <legend class="visually-hidden">{{ _("Your choice") }}</legend>
+  {% for option in poll.options %}
+  <label class="choice"><input type="radio" name="choice" value="{{ ballot_number(option.position) }}"
+    {%- if choice and choice.chose(option.position) %} checked{% endif %}{% if loop.first %} required{% endif %}>{{ option_text(option) }}</label>
+  {% endfor %}
+  {{ blank_choice(poll, "radio", "choice", ballot_blank_choice, choice and choice.blank) }}
+</fieldset>
+<button type="submit" class="button primary wide">{{ _("Continue") }}</button>
+{%- endmacro %}
+
+{# The counter of an approval ballot, right after its last choice (the blank vote), written in
+   what remains (SPEC §6.5): "Encore 1 choix possible", then "Maximum atteint" with the way
+   out. live.js fills it, picking ``-one`` or ``-other`` with the plural rule of the catalogs
+   (singular up to 1) and putting the count in place of ``{n}``; at the maximum it blocks the
+   option boxes left unchecked, never the blank one (``aria-disabled``: still focusable,
+   described by this counter). Empty and hidden without JavaScript, where the server refuses
+   an over-vote (FR-44); the same for every choice, so it never changes the size of a ballot
+   step. #}
+{% macro approval_counter(poll, max) -%}
+<p class="counter" id="poll-{{ poll.id }}-counter" role="status" data-counter
+{%- if max %} data-max="{{ max }}"
+  data-left-one="{{ ngettext('%(num)s more choice possible.', '%(num)s more choices possible.', 1, num='{n}') }}"
+  data-left-other="{{ ngettext('%(num)s more choice possible.', '%(num)s more choices possible.', 2, num='{n}') }}"
+  data-full="{{ ngettext('Maximum reached: %(num)s choice of %(num)s.', 'Maximum reached: %(num)s choices of %(num)s.', max) }}"
+  data-help="{{ _('Uncheck an option to choose another one.') }}"
+  data-over-one="{{ ngettext('Too many choices: uncheck %(num)s.', 'Too many choices: uncheck %(num)s.', 1, num='{n}') }}"
+  data-over-other="{{ ngettext('Too many choices: uncheck %(num)s.', 'Too many choices: uncheck %(num)s.', 2, num='{n}') }}"
+{%- else %}
+  data-count-one="{{ ngettext('%(num)s option checked.', '%(num)s options checked.', 1, num='{n}') }}"
+  data-count-other="{{ ngettext('%(num)s option checked.', '%(num)s options checked.', 2, num='{n}') }}"
+{%- endif %} hidden></p>
+{%- endmacro %}
+
+{% macro approval_ballot(poll, choice) -%}
+{% set max = poll.params.get("max_choices") %}
+<fieldset class="choices" aria-describedby="poll-{{ poll.id }}-rule">
+  <legend class="visually-hidden">{{ _("Your choice") }}</legend>
+  <p class="hint" id="poll-{{ poll.id }}-rule">
+    {%- if max %}{{ ngettext("Check up to %(num)s option.", "Check up to %(num)s options.", max) }}
+    {%- else %}{{ _("Check as many options as you wish.") }}{% endif %}</p>
+  {% for option in poll.options %}
+  <label class="choice"><input type="checkbox" aria-describedby="poll-{{ poll.id }}-counter" name="approved" value="{{ ballot_number(option.position) }}"
+    {%- if choice and choice.approves(option.position) %} checked{% endif %}>{{ option_text(option) }}</label>
+  {% endfor %}
+  {{ blank_choice(poll, "checkbox", "blank", "1", choice and choice.blank and not choice.implicit_blank) }}
+  {{ approval_counter(poll, max) }}
+</fieldset>
+<button type="submit" class="button primary wide">{{ _("Continue") }}</button>
+{%- endmacro %}
+
+{# The counter of graded options, right after the last choice (the blank vote): live.js picks
+   ``data-one`` or ``data-other`` with the plural rule of the catalogs (singular up to 1), puts
+   the count in place of ``{n}`` and marks it complete once every option has a grade
+   (``data-total``). #}
+{% macro graded_counter(poll, choice) -%}
+{% set total = poll.options | length %}
+{% set graded = choice.content.get("grades", {}) | length if choice and choice.content else 0 %}
+<p class="counter" role="status" data-graded data-total="{{ total }}"
+  data-one="{{ ngettext('%(num)s option of %(total)s graded', '%(num)s options of %(total)s graded', 1, num='{n}', total=total) }}"
+  data-other="{{ ngettext('%(num)s option of %(total)s graded', '%(num)s options of %(total)s graded', 2, num='{n}', total=total) }}" hidden>
+  {{- ngettext('%(num)s option of %(total)s graded', '%(num)s options of %(total)s graded', graded, total=total) -}}
+</p>
+{%- endmacro %}
+
+{% macro majority_judgment_ballot(poll, choice) -%}
+{% set count = poll.params.get("grade_count", 6) %}
+<p class="hint">{{ _("Give each option a grade. An option left without a grade gets “%(grade)s”.", grade=grade_label(count - 1, count)) }}</p>
+{% for option in poll.options %}
+<fieldset class="mj-option">
+  <legend>{{ option.label }}</legend>
+  {% if option.description %}<p class="hint">{{ option.description }}</p>{% endif %}
+  <div class="grades">
+    {% for grade in range(count) %}
+    <label class="grade-choice"><input type="radio" name="{{ ballot_grade_name(option.position) }}" value="{{ grade }}"
+      {%- if choice and choice.grade_of(option.position) == grade %} checked{% endif %}><span class="grade-pill g{{ grade if count == 6 else 'x' }}">{{ grade_label(grade, count) }}</span></label>
+    {% endfor %}
+  </div>
+</fieldset>
+{% endfor %}
+{{ blank_grade(poll, choice and choice.blank) }}
+{{ graded_counter(poll, choice) }}
+<button type="submit" class="button primary wide">{{ _("Continue") }}</button>
+{%- endmacro %}
+
+{# The counter of ranked options, right after the last choice, the blank vote ("2 options sur 5
+   classées"): live.js fills it like the counter of graded options and marks it complete once
+   every option has a rank. Empty and hidden in every answer, so it never changes the size of a
+   ballot step; without JavaScript there is nothing to count. #}
+{% macro ranked_counter(poll) -%}
+{% set total = poll.options | length %}
+<p class="counter" role="status" data-ranked data-total="{{ total }}"
+  data-one="{{ ngettext('%(num)s option of %(total)s ranked', '%(num)s options of %(total)s ranked', 1, num='{n}', total=total) }}"
+  data-other="{{ ngettext('%(num)s option of %(total)s ranked', '%(num)s options of %(total)s ranked', 2, num='{n}', total=total) }}" hidden></p>
+{%- endmacro %}
+
+{# Condorcet (SPEC §6.5): one list per option, from "1er choix" to the last rank, and "Non
+   classée" first, its default. Several options may share a rank; an option left unranked
+   comes after the ranked ones. Exactly the ranks chosen carry ``selected``, whatever they are,
+   so a ballot sent back changes its size only by their number (padding._extremes). #}
+{% macro condorcet_ballot(poll, choice) -%}
+{% set count = poll.options | length %}
+<fieldset class="choices ranks" aria-describedby="poll-{{ poll.id }}-rule">
+  <legend class="visually-hidden">{{ _("Your ranking") }}</legend>
+  <p class="hint" id="poll-{{ poll.id }}-rule">{{ _("Give each option its rank, 1st choice for the one you prefer. Options you like as much may share a rank; an option left unranked comes after the ranked ones.") }}</p>
+  {% for option in poll.options %}
+  <div class="rank-option">
+    <label for="poll-{{ poll.id }}-rank-{{ option.position }}"><span class="rank-name">{{ option.label }}</span>{% if option.description %}<span class="choice-hint">{{ option.description }}</span>{% endif %}</label>
+    <select id="poll-{{ poll.id }}-rank-{{ option.position }}" name="{{ ballot_rank_name(option.position) }}">
+      <option value="{{ ballot_unranked }}">{{ rank_label(none) }}</option>
+      {% for rank in range(1, count + 1) %}<option value="{{ ballot_number(rank) }}"{% if choice and choice.rank_of(option.position) == rank %} selected{% endif %}>{{ rank_label(rank) }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endfor %}
+  {{ blank_rank(poll, choice and choice.blank) }}
+  {{ ranked_counter(poll) }}
+</fieldset>
+<button type="submit" class="button primary wide">{{ _("Continue") }}</button>
+{%- endmacro %}
+
+{% macro ballot(poll, choice=none) -%}
+<form method="post" action="/{{ public_id }}/polls/{{ poll.id }}/review" class="ballot ballot-{{ poll.method }}" data-live-form data-pad="{{ ballot_request_size(poll, csrf_token) }}">
+  {{ csrf() }}
+  {% if poll.method == "single_choice" %}{{ single_choice_ballot(poll, choice) }}
+  {% elif poll.method == "approval" %}{{ approval_ballot(poll, choice) }}
+  {% elif poll.method == "condorcet" %}{{ condorcet_ballot(poll, choice) }}
+  {% else %}{{ majority_judgment_ballot(poll, choice) }}{% endif %}
+</form>
+{%- endmacro %}
+
+{# "A, B and C". #}
+{% macro listing(labels) -%}
+{% if labels | length > 1 %}{{ _("%(items)s and %(last)s", items=labels[:-1] | join(", "), last=labels[-1]) }}
+{%- else %}{{ labels[0] }}{% endif %}
+{%- endmacro %}
+
+{% macro summary(poll, choice) -%}
+{% set labels = option_labels(poll) %}
+{% set count = poll.params.get("grade_count", 6) %}
+{% set ungraded = choice.ungraded(poll) %}
+<form method="post" action="/{{ public_id }}/polls/{{ poll.id }}" class="review" data-live-form data-pad="{{ ballot_request_size(poll, csrf_token) }}">
+  {{ csrf() }}
+  {% for name, value in choice.fields(poll) %}<input type="hidden" name="{{ name }}" value="{{ value }}">
+  {% endfor %}
+  {# Not in the ballot box yet (R11): the amber pair of the green "Vote enregistré". #}
+  <p class="pending-flag">{{ _("Ballot not cast yet") }}</p>
+  <h3>{{ _("Check your vote") }}</h3>
+  {% if choice.blank %}
+  {# The words of the ballot's blank choice, unchanged. #}
+  <p class="summary-main">{{ blank_label(poll) }}</p>
+  {% if choice.implicit_blank %}<p class="hint">{{ _("No option checked: this counts as a blank vote.") }}</p>{% endif %}
+  {% elif poll.method == "single_choice" %}
+  <p class="summary-main">{{ labels[choice.content.choice] }}</p>
+  {% elif poll.method == "approval" %}
+  <ul class="summary-list">
+    {% for position in choice.content.approved %}<li>{{ labels[position] }}</li>{% endfor %}
+  </ul>
+  {% elif poll.method == "condorcet" %}
+  {# Best first, every option once with its rank; options of one rank read the same rank, and
+     those left unranked come last, their "Non classée" dashed (``is-default``). No mark that
+     depends on the groups: the size of the summary depends on each option's rank alone. #}
+  <ol class="summary-ranks">
+    {% for rank, option in choice.by_rank(poll) %}
+    <li><span class="rank{{ ' is-default' if rank is none }}">{{ rank_label(rank) }}</span> <span class="rank-label">{{ option.label }}</span></li>
+    {% endfor %}
+  </ol>
+  {% if choice.unranked(poll) %}<p class="hint">{{ _("The options not ranked come after the others, tied together.") }}</p>{% endif %}
+  {% else %}
+  <dl class="summary-grades">
+    {% for option in poll.options %}
+    {% set given = choice.grade_of(option.position) %}
+    {# An option left without a grade gets the worst one, drawn dashed so that it never reads
+       as chosen (``is-default``). #}
+    <div><dt>{{ option.label }}</dt><dd>
+      {%- if given is none %}<span class="grade is-default">{{ grade_label(count - 1, count) }}</span> <span class="muted small">{{ _("(not graded)") }}</span>
+      {%- else %}<span class="grade grade-{{ given if count == 6 else 'x' }}">{{ grade_label(given, count) }}</span>{% endif %}</dd></div>
+    {% endfor %}
+  </dl>
+  {% endif %}
+  <p class="secret-line">{{ icon("shield-check") }} {{ _("Once confirmed, your vote cannot be changed.") }}</p>
+  {% if ungraded %}
+  {# SPEC §6.4: an option left without a grade counts as the worst grade. #}
+  <p class="alert alert-warning ungraded" id="poll-{{ poll.id }}-ungraded">{{ ngettext("%(names)s has no grade: it will count as “%(grade)s”.", "%(names)s have no grade: they will count as “%(grade)s”.", ungraded | length, names=listing(ungraded), grade=grade_label(count - 1, count)) }}</p>
+  {% endif %}
+  <div class="stack">
+    <button type="submit" class="button primary wide"{% if ungraded %} aria-describedby="poll-{{ poll.id }}-ungraded"{% endif %}>{{ _("Confirm my vote") }}</button>
+    <button type="submit" class="button wide" formaction="/{{ public_id }}/polls/{{ poll.id }}/review" name="action" value="edit">{{ _("Change my vote") }}</button>
+  </div>
+</form>
+{%- endmacro %}
+
+{# A poll this device has voted on, on one line: the page shows it so, and the full
+   confirmation (``poll_section`` in state "voted") only right after the ballot. #}
+{% macro recorded_line(poll) -%}
+<section class="poll poll-recorded" id="poll-{{ poll.id }}" data-key="poll-{{ poll.id }}-recorded" aria-labelledby="poll-{{ poll.id }}-title">
+  <h2 id="poll-{{ poll.id }}-title"><span class="recorded-mark" aria-hidden="true">✓</span> {{ poll.title }} <span class="recorded-state">· {{ _("vote recorded") }}</span></h2>
+  <p class="hint">{{ _("Your ballot is secret and final.") }}</p>
+</section>
+{%- endmacro %}
+
+{# The steps of the ballot box, under the poll's title at the review and after the deposit,
+   never on a ballot being filled in: "Choisir", "Vérifier" (current at the review), "Déposé
+   dans l'urne". #}
+{% macro steps(state) -%}
+<ol class="stepper" aria-label="{{ _('Steps of the vote') }}">
+  <li class="is-done">{{ _("Choose") }}</li>
+  <li{% if state == "review" %} aria-current="step"{% else %} class="is-done"{% endif %}>{{ _("Review") }}</li>
+  <li{% if state == "voted" %} class="is-done"{% endif %}>{{ _("In the ballot box") }}</li>
+</ol>
+{%- endmacro %}
+
+{# Right after a vote: the next poll still to vote, on this page (an anchor, FR-41, FR-43).
+   live.js fills and shows it from the summary of the open polls; the server always sends it
+   empty, so the poll that follows never changes the size of a ballot step. #}
+{% macro next_vote() -%}
+<p class="next-vote" data-next-vote hidden><a class="button primary wide" href="#main"
+  data-msg="{{ _('Next vote: %(title)s', title='{title}') }}"><span></span>{{ icon("arrow-down") }}</a></p>
+{%- endmacro %}
+
+{# ``state``: "ballot", "review", "voted", "closed", or "recorded" (``recorded_line``, never a
+   ballot step's answer). The ballot steps pad this section to one size per poll
+   (``agaura.web.live.padding``): keep its variable parts to the choice, the step and the
+   message, and update ``padding._extremes`` with any new one. ``data-pad``: the size live.js
+   brings ballot-step requests to. ``message`` of the state "voted": only when the vote was
+   already recorded (the heading says the rest). #}
+{% macro poll_section(poll, state, choice=none, error=none, message=none, focus=false) -%}
+{% if state == "recorded" %}{{ recorded_line(poll) }}{% else %}
+{% set phase = state if state in ("voted", "closed") else "open" %}
+<section class="card poll poll-{{ state }}" id="poll-{{ poll.id }}" data-key="poll-{{ poll.id }}-{{ phase }}" aria-labelledby="poll-{{ poll.id }}-title">
+  {{ poll_head(poll, focus=focus and state != "voted") }}
+  {% if state in ("review", "voted") %}{{ steps(state) }}{% endif %}
+  {% if state == "voted" %}
+  <h3 class="voted-mark"{% if focus %} tabindex="-1" data-focus{% endif %}>{{ icon("circle-check") }} {{ _("Vote recorded") }}</h3>
+  {% if message %}<p role="status">{{ message }}</p>{% endif %}
+  <p class="secret-line">{{ icon("shield-check") }} {{ _("Your ballot is secret and can no longer be changed.") }}</p>
+  {{ next_vote() }}
+  {% elif state == "closed" %}
+  <p class="alert alert-warning" role="alert">{{ message }}</p>
+  {% else %}
+  {% if error %}<p class="alert alert-error" role="alert">{{ error }}</p>{% endif %}
+  {% if state == "review" %}{{ summary(poll, choice) }}{% else %}{{ ballot(poll, choice) }}{% endif %}
+  {% endif %}
+</section>
+{% endif %}
+{%- endmacro %}
+
+{# Shown when two or more polls are open (FR-41): what remains to vote, with a link to each
+   poll on this page. Its key follows the polls still to vote and the number recorded. A poll
+   whose summary waits for its confirmation on this device (known to live.js only) reads
+   ``data-msg-review`` ("À confirmer · …"). #}
+{% macro open_summary(view) -%}
+{% set pending = view.open_polls | rejectattr("id", "in", view.voted) | list %}
+{% set recorded = view.open_polls | length - pending | length %}
+<nav class="live-summary" data-summary data-key="summary-{{ pending | map(attribute='id') | join('.') }}-{{ recorded }}" aria-label="{{ _('Open votes') }}"
+  data-msg-review="{{ _('To confirm · %(title)s', title='{title}') }}">
+  <p class="summary-counts"><span class="live-dot" aria-hidden="true"></span>{{ _("To vote: %(pending)s · Recorded: %(recorded)s", pending=pending | length, recorded=recorded) }}</p>
+  {% if pending %}
+  <ul class="summary-links">
+    {% for poll in pending %}<li><a href="#poll-{{ poll.id }}">{{ poll.title }}</a></li>{% endfor %}
+  </ul>
+  {% endif %}
+</nav>
+{%- endmacro %}
+
+{% macro results_title() -%}
+<h2 class="group-title" id="results-title" data-key="results-title">{{ _("Published results") }}</h2>
+{%- endmacro %}
+
+{% macro result_section(poll) -%}
+<section class="card result-card" data-key="result-{{ poll.id }}" aria-labelledby="result-{{ poll.id }}-title">
+  <h3 id="result-{{ poll.id }}-title">{{ poll.title }}</h3>
+  {{ result_block(poll, poll.result.data) }}
+</section>
+{%- endmacro %}
+
+{% macro waiting() -%}
+<section class="waiting" data-key="waiting">
+  <span class="waiting-mark" aria-hidden="true"></span>
+  <h2>{{ _("Waiting for the next vote") }}</h2>
+  <p class="muted">{{ _("The next vote will appear here.") }}</p>
+  {# Only a device holding a credential sees the live page: the first worry of a voter who
+     waits. #}
+  <p class="waiting-joined">{{ icon("circle-check") }} {{ _("You have joined the session") }}</p>
+</section>
+{%- endmacro %}

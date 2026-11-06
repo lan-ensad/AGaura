@@ -1,0 +1,292 @@
+{# Result of a closed poll, for the console, the voter page and the public results page; the
+   projection screen draws its own night card (screen/macros.html) from the rules, names and
+   merit bars here, the PDF minutes their own tables from the same rules and duel tables. ``poll`` has its options loaded; ``data`` is ``poll.result.data``.
+
+   Strict CSP: no style attribute. Bars are <progress> elements; the merit profile of Majority
+   Judgment is an inline SVG whose viewBox is as wide as the number of valid votes, so every
+   segment's x and width are whole vote counts (exact) and the median line sits at half of it.
+   Colours are SVG presentation attributes, which the CSP allows; a text equivalent always
+   accompanies them (labels, aria-label, table of votes per grade). Ties are reported, never
+   broken. #}
+
+{# Fill of a grade in the merit profile. Six grades: the --grade-0 to --grade-5 tokens of
+   app.css, written again here for the PDF minutes, which load no stylesheet of the site (the
+   tests compare both). Other scales pick from a ten-step ramp with the same ends. #}
+{% macro grade_color(grade, grade_count) -%}
+{% if grade_count == 6 %}
+{{- ["#14623a", "#3a8228", "#8aa82d", "#d9a514", "#dc7426", "#c0392b"][grade] -}}
+{% else %}
+{{- ["#14623a", "#2f8336", "#4f9a2f", "#8aa82d", "#bfae1c", "#d9a514", "#e08c22", "#dc7426", "#cf5527", "#c0392b"][(grade * 9) // (grade_count - 1)] -}}
+{% endif %}
+{%- endmacro %}
+
+{# Blank ballots go by the words of the ballot's blank choice ("Abstention", "Vote blanc"):
+   the counts use the word the ballot used (``blank_count_label``, also in the PDF minutes). #}
+{% macro counts(poll, data, show_turnout=false) -%}
+{% set attendees = data.get("attendees") %}
+<dl class="kpis result-counts">
+  <div class="kpi"><dt>{{ _("Ballots cast") }}</dt><dd><strong>{{ data.counts.cast }}</strong></dd></div>
+  <div class="kpi"><dt>{{ blank_count_label(poll) }}</dt><dd><strong>{{ data.counts.blank }}</strong></dd></div>
+  <div class="kpi"><dt>{{ _("Valid votes") }}</dt><dd><strong>{{ data.counts.valid }}</strong></dd></div>
+  {% if show_turnout and attendees is not none %}
+  <div class="kpi"><dt>{{ _("Turnout") }}</dt><dd><strong>{{ _("%(cast)s / %(attendees)s", cast=data.counts.cast, attendees=attendees) }}</strong>
+    {% if attendees > 0 %}<span>{{ _("%(share)s of attendees", share=(data.counts.cast ~ "/" ~ attendees) | percent) }}</span>{% endif %}</dd></div>
+  {% endif %}
+</dl>
+{%- endmacro %}
+
+{% macro names(ids, labels) -%}
+{% for id in ids %}{{ labels[id] }}{% if not loop.last %}, {% endif %}{% endfor %}
+{%- endmacro %}
+
+{% macro verdict(poll, outcome, labels) -%}
+{% if poll.method == "single_choice" and "adopt_option" in poll.params and outcome.status != "no_valid_votes" %}
+  {% if outcome.adopted is true %}
+  <p class="verdict success">{{ _("Adopted") }}</p>
+  {% elif outcome.adopted is false %}
+  <p class="verdict danger">{{ _("Rejected") }}</p>
+  {% else %}
+  <p class="verdict warning">{{ _("Tie: apply your bylaws") }}</p>
+  {% endif %}
+{% elif outcome.status == "decided" and outcome.winner is defined and outcome.winner is not none %}
+  <p class="verdict success">{{ _("Result: %(option)s", option=labels[outcome.winner]) }}</p>
+{% elif outcome.status == "decided" and outcome.elected is defined %}
+  <p class="verdict success">{{ _("Elected: %(names)s", names=names(outcome.elected, labels)) }}</p>
+{% elif outcome.status == "tie" %}
+  <p class="verdict warning">{{ _("Tie between %(names)s: apply your bylaws", names=names(outcome.tied, labels)) }}</p>
+  {% if outcome.elected is defined and outcome.elected %}
+  <p>{{ _("Elected: %(names)s", names=names(outcome.elected, labels)) }}</p>
+  {% endif %}
+  {% if outcome.seats_in_tie is defined and outcome.seats_in_tie %}
+  <p>{{ ngettext("%(num)s seat remains for the tied candidates.", "%(num)s seats remain for the tied candidates.", outcome.seats_in_tie) }}</p>
+  {% endif %}
+{% elif outcome.status == "seats_unfilled" %}
+  <p class="verdict warning">{{ outcome_label(outcome.status) }}</p>
+  {% if outcome.elected %}<p>{{ _("Elected: %(names)s", names=names(outcome.elected, labels)) }}</p>{% endif %}
+{% else %}
+  <p class="verdict warning">{{ outcome_label(outcome.status) }}</p>
+{% endif %}
+{%- endmacro %}
+
+{# The rule a single choice poll applies, e.g. "more than half of valid votes". #}
+{% macro single_choice_rule(poll, outcome) -%}
+{% set threshold = poll.params.get("threshold", "majority" if poll.options | length == 2 else "plurality") %}
+{% set base = base_label(outcome.base) %}
+{% if threshold == "plurality" %}{{ _("Rule: the option with the most votes wins, if it is alone at the top.") }}
+{% elif threshold == "majority" %}{{ _("Required: more than half %(base)s.", base=base) }}
+{% elif threshold == "two_thirds" %}{{ _("Required: at least two thirds %(base)s.", base=base) }}
+{% elif threshold == "three_quarters" %}{{ _("Required: at least three quarters %(base)s.", base=base) }}
+{% elif threshold.get("strict") %}{{ _("Required: more than %(share)s %(base)s.", share=threshold.fraction | string | percent, base=base) }}
+{% else %}{{ _("Required: at least %(share)s %(base)s.", share=threshold.fraction | string | percent, base=base) }}
+{% endif %}
+{%- endmacro %}
+
+{% macro approval_rule(poll, outcome) -%}
+{{ ngettext("%(num)s seat to fill.", "%(num)s seats to fill.", outcome.seats) }}
+{% set min_share = poll.params.get("min_share") %}
+{% if min_share %}
+{% set share = min_share.fraction | string | percent %}
+{% if min_share.get("strict") %}{{ _("Elected candidates need more than %(share)s of valid votes.", share=share) }}
+{% else %}{{ _("Elected candidates need at least %(share)s of valid votes.", share=share) }}{% endif %}
+{% endif %}
+{%- endmacro %}
+
+{% macro profile_text(profile, grade_count) -%}
+{% for count in profile %}{{ _("%(grade)s: %(count)s", grade=grade_label(loop.index0, grade_count), count=count) }}{% if not loop.last %}, {% endif %}{% endfor %}
+{%- endmacro %}
+
+{# Merit profile of one option: one stacked bar, best grade on the left, and a mark at half of
+   the votes. ``print`` drops what WeasyPrint does not support (non-scaling strokes); ``night``
+   draws it for the night card of the projection screen (segments parted by a night-blue line,
+   a white mark at half of the votes). #}
+{% macro merit_bar(row, grade_count, valid, print=false, night=false) -%}
+<svg class="merit" viewBox="0 0 {{ valid }} 1" preserveAspectRatio="none" width="100%" height="18" shape-rendering="crispEdges" role="img" aria-label="{{ profile_text(row.profile, grade_count) }}">
+{% set ns = namespace(x=0) %}
+{% for count in row.profile %}
+{% if count %}
+<rect class="merit-g{{ loop.index0 }}" x="{{ ns.x }}" y="0" width="{{ count }}" height="1" fill="{{ grade_color(loop.index0, grade_count) }}"{% if not print %} stroke="{{ '#12306f' if night else '#fff' }}" stroke-width="{{ 2 if night else 1 }}" vector-effect="non-scaling-stroke"{% endif %}/>
+{% set ns.x = ns.x + count %}
+{% endif %}
+{% endfor %}
+{% if print %}
+<rect class="merit-median" x="{{ valid / 2 - valid / 400 }}" y="0" width="{{ valid / 200 }}" height="1" fill="#1b1f24"/>
+{% else %}
+<line class="merit-median" x1="{{ valid / 2 }}" y1="0" x2="{{ valid / 2 }}" y2="1" stroke="{{ '#fff' if night else '#1b1f24' }}" stroke-width="3" vector-effect="non-scaling-stroke"/>
+{% endif %}
+</svg>
+{%- endmacro %}
+
+{% macro merit_legend(grade_count) -%}
+<p class="merit-legend small" aria-hidden="true">
+{% for grade in range(grade_count) %}
+<span class="merit-key"><svg width="12" height="12" viewBox="0 0 1 1"><rect width="1" height="1" fill="{{ grade_color(grade, grade_count) }}"/></svg>&nbsp;{{ grade_label(grade, grade_count) }}</span>
+{% endfor %}
+<span class="merit-key"><svg width="4" height="12" viewBox="0 0 1 1" preserveAspectRatio="none"><rect width="1" height="1" fill="#1b1f24"/></svg>&nbsp;{{ _("half of the votes") }}</span>
+</p>
+{%- endmacro %}
+
+{# Votes per grade for every option: the text equivalent of the merit profiles. A list rather
+   than a table, so that it wraps on a phone whatever the page's stylesheet. #}
+{% macro merit_list(outcome, labels) -%}
+<ul class="merit-list">
+{% for row in outcome.options %}
+  <li><strong>{{ labels[row.option] }}</strong><br>
+  {% for count in row.profile %}{% set text = _("%(grade)s: %(count)s", grade=grade_label(loop.index0, outcome.grade_count), count=count) %}{% if loop.index0 == row.majority_grade %}<strong>{{ text }}</strong>{% else %}{{ text }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}</li>
+{% endfor %}
+</ul>
+<p class="muted small">{{ _("In bold: the majority grade of each option.") }}</p>
+{%- endmacro %}
+
+{# The rule of a Condorcet poll, and what the duels found: a Condorcet winner, or a cycle that
+   the strongest chains of duels settle. #}
+{% macro condorcet_rule() -%}
+{{ _("Rule: the option preferred to each of the others, one on one, wins; a cycle is settled by the strongest chains of duels won (Schulze).") }}
+{%- endmacro %}
+
+{% macro condorcet_finding(outcome, labels) -%}
+{% if outcome.condorcet_winner is not none %}{{ _("%(option)s wins every duel (Condorcet winner).", option=labels[outcome.condorcet_winner]) }}
+{%- elif outcome.status != "no_valid_votes" %}{{ _("No option wins every duel: the strongest chains of duels won decide (Schulze).") }}{% endif %}
+{%- endmacro %}
+
+{# A matrix of a Condorcet result (``pairwise`` or ``strongest_paths``), rows and columns in
+   the order of the ranking, the options numbered by their place in it: the column heads give
+   the numbers (and, for screen readers, the labels), the row heads the number and the label.
+   In bold, the cells larger than the reverse: text, never colour alone. ``print``: for the
+   PDF minutes, which load no stylesheet of the site (no visually hidden text). #}
+{% macro duel_table(outcome, labels, matrix, print=false) -%}
+{% set order = [] %}
+{% set index = {} %}
+{% for row in outcome.options %}{% set unused = index.update({row.option: loop.index0}) %}{% endfor %}
+{% for group in outcome.ranking %}{% for id in group %}{% set unused = order.append(id) %}{% endfor %}{% endfor %}
+<table class="data duel-table">
+  <thead><tr><td></td>{% for id in order %}<th scope="col" class="num">{% if print %}{{ loop.index }}{% else %}<span aria-hidden="true">{{ loop.index }}</span><span class="visually-hidden">{{ labels[id] }}</span>{% endif %}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for id in order %}
+  {% set i = index[id] %}
+  <tr><th scope="row"><span class="duel-key">{{ loop.index }}</span> {{ labels[id] }}</th>
+    {%- for other in order %}{% set j = index[other] %}
+    {%- if other == id %}<td class="num muted">–</td>
+    {%- elif matrix[i][j] > matrix[j][i] %}<td class="num is-won"><strong>{{ matrix[i][j] }}</strong></td>
+    {%- else %}<td class="num">{{ matrix[i][j] }}</td>{% endif %}
+    {%- endfor %}</tr>
+  {% endfor %}
+  </tbody>
+</table>
+{%- endmacro %}
+
+{% macro duel_note() -%}
+{{ _("Each cell: the ballots that prefer the option of its row to the option of its column. In bold: the duels won.") }}
+{%- endmacro %}
+
+{% macro path_note() -%}
+{{ _("Each cell: the strength of the strongest chain of duels won from the option of its row to the option of its column, that of its weakest duel. In bold: the chains stronger than the reverse, which set the ranking.") }}
+{%- endmacro %}
+
+{# Options in ranking order with their competition rank (1, 1, 3…); every option once. #}
+{% macro ranked(outcome) -%}
+{% set ns = namespace(rank=1, seen=[]) %}
+{% for group in outcome.ranking %}
+{% for id in group %}{{ caller(id, ns.rank, group | length > 1) }}{% endfor %}
+{% set ns.rank = ns.rank + group | length %}
+{% set ns.seen = ns.seen + group | list %}
+{% endfor %}
+{% for row in outcome.options if row.option not in ns.seen %}{{ caller(row.option, none, false) }}{% endfor %}
+{%- endmacro %}
+
+{% macro result_block(poll, data, show_counts=true, show_turnout=false) -%}
+{% set labels = option_labels(poll) %}
+{% set outcome = data.outcome %}
+{% set rows = {} %}
+{% for row in outcome.options %}{% set unused = rows.update({row.option: row}) %}{% endfor %}
+<div class="result result-{{ poll.method }}">
+  {{ verdict(poll, outcome, labels) }}
+  {% if poll.method == "single_choice" %}
+  <p class="muted small result-rule">{{ single_choice_rule(poll, outcome) }}</p>
+  <table class="data result-table">
+    <thead><tr><th>{{ _("Option") }}</th><th class="num">{{ _("Votes") }}</th><th class="num">{{ base_label(outcome.base) }}</th></tr></thead>
+    <tbody>
+    {% for row in outcome.options %}
+      <tr>
+        <td>{% if row.option == outcome.winner %}<strong>{{ labels[row.option] }}</strong>{% else %}{{ labels[row.option] }}{% endif %}
+          {% if row.option in outcome.tied %} <span class="badge warning">{{ _("Tie") }}</span>{% endif %}
+          <progress class="bar{{ ' win' if row.option == outcome.winner }}" max="{{ [outcome.base_count, 1] | max }}" value="{{ row.votes }}">{{ row.votes }}</progress></td>
+        <td class="num">{{ row.votes }}</td>
+        <td class="num">{{ row.share | percent }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% elif poll.method == "approval" %}
+  <p class="muted small result-rule">{{ approval_rule(poll, outcome) }}</p>
+  <table class="data result-table">
+    <thead><tr><th>{{ _("Candidate") }}</th><th class="num">{{ _("Approvals") }}</th><th class="num">{{ _("of valid votes") }}</th></tr></thead>
+    <tbody>
+    {% call(id, rank, tied) ranked(outcome) %}
+      {% set row = rows[id] %}
+      <tr>
+        <td>{{ labels[id] }}{% if id in outcome.elected %} <span class="badge success">{{ _("Elected") }}</span>{% elif id in outcome.tied %} <span class="badge warning">{{ _("Tie") }}</span>{% endif %}
+          <progress class="bar{{ ' win' if id in outcome.elected }}" max="{{ [data.counts.valid, 1] | max }}" value="{{ row.approvals }}">{{ row.approvals }}</progress></td>
+        <td class="num">{{ row.approvals }}</td>
+        <td class="num">{{ row.share | percent }}</td>
+      </tr>
+    {% endcall %}
+    </tbody>
+  </table>
+  {% elif poll.method == "condorcet" %}
+  {% set valid = data.counts.valid %}
+  <p class="muted small result-rule">{{ condorcet_rule() }}</p>
+  {% if valid > 0 %}<p class="small">{{ condorcet_finding(outcome, labels) }}</p>{% endif %}
+  <table class="data result-table">
+    <thead><tr><th class="num">{{ _("Rank") }}</th><th>{{ _("Option") }}</th><th class="num">{{ _("Duels won") }}</th><th class="num">{{ _("Duels lost") }}</th></tr></thead>
+    <tbody>
+    {% call(id, rank, tied) ranked(outcome) %}
+      {% set row = rows[id] %}
+      <tr>
+        <td class="num">{{ rank if rank is not none else "–" }}{% if tied %} ={% endif %}</td>
+        <td>{% if id == outcome.winner %}<strong>{{ labels[id] }}</strong>{% else %}{{ labels[id] }}{% endif %}</td>
+        <td class="num">{{ row.wins }}</td>
+        <td class="num">{{ row.losses }}</td>
+      </tr>
+    {% endcall %}
+    </tbody>
+  </table>
+  {% if valid > 0 %}
+  <details class="merit-details duel-details">
+    <summary>{{ _("Duels one on one") }}</summary>
+    <div class="table-wrap">{{ duel_table(outcome, labels, outcome.pairwise) }}</div>
+    <p class="muted small">{{ duel_note() }}</p>
+    {% if outcome.condorcet_winner is none %}
+    <p class="label">{{ _("Strongest chains of duels won") }}</p>
+    <div class="table-wrap">{{ duel_table(outcome, labels, outcome.strongest_paths) }}</div>
+    <p class="muted small">{{ path_note() }}</p>
+    {% endif %}
+  </details>
+  {% endif %}
+  {% else %}
+  {% set valid = data.counts.valid %}
+  <table class="data result-table">
+    <thead><tr><th class="num">{{ _("Rank") }}</th><th>{{ _("Option") }}</th><th>{{ _("Majority grade") }}</th></tr></thead>
+    <tbody>
+    {% call(id, rank, tied) ranked(outcome) %}
+      {% set row = rows[id] %}
+      <tr>
+        <td class="num">{{ rank if rank is not none else "–" }}{% if tied %} ={% endif %}</td>
+        <td>{% if id == outcome.winner %}<strong>{{ labels[id] }}</strong>{% else %}{{ labels[id] }}{% endif %}
+          {% if valid > 0 %}{{ merit_bar(row, outcome.grade_count, valid) }}
+          <span class="muted small">{{ _("%(above)s better, %(below)s worse", above=row.share_above | percent, below=row.share_below | percent) }}</span>{% endif %}</td>
+        <td>{% if row.majority_grade is not none %}<span class="grade grade-{{ row.majority_grade if outcome.grade_count == 6 else 'x' }}">{{ grade_label(row.majority_grade, outcome.grade_count) }}</span>{% else %}–{% endif %}</td>
+      </tr>
+    {% endcall %}
+    </tbody>
+  </table>
+  {% if valid > 0 %}
+  {{ merit_legend(outcome.grade_count) }}
+  <details class="merit-details">
+    <summary>{{ _("Votes per grade") }}</summary>
+    {{ merit_list(outcome, labels) }}
+  </details>
+  {% endif %}
+  {% endif %}
+  {% if show_counts %}{{ counts(poll, data, show_turnout) }}{% endif %}
+</div>
+{%- endmacro %}

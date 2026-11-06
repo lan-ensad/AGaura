@@ -1,0 +1,83 @@
+{# Content of the projection screen (FR-70 to FR-75), replaced as a whole by screen.js.
+   Layout: one block takes the stage (``view.hero``: the open votes, with the latest result
+   shown next to them; else that result; else how to join, the chronometer, the agenda, the
+   questions already put to the vote, or a message); the others stack in a side column
+   (``view.side``). A result only when the tribune shows it, for a closed poll (FR-72, FR-75):
+   the latest in the main place, the earlier ones in one line of the questions put to the vote. #}
+{% from "screen/macros.html" import entries_status, join_panel, timer_face, agenda_block, poll_card, past_list, result_card %}
+{% set assembly = view.assembly %}
+{% set hero = view.hero.value %}
+{% set side = view.side | map(attribute="value") | list %}
+{% set open_count = view.open_polls | length %}
+{% set stage_result = view.stage_result %}
+{% set items = open_count + (1 if stage_result else 0) %}
+<header class="screen-head">
+  <h1 class="screen-title">{{ assembly.title }}</h1>
+  <div class="screen-status">
+    {% if view.in_session %}
+    <dl class="screen-stats">
+      <div class="stat"><dt>{{ _("Attendees") }}</dt><dd data-attendees>{{ view.attendees }}</dd></div>
+      {% if view.quorum is not none %}
+      <div class="stat quorum {{ 'reached' if view.quorum_reached else 'missing' }}"><dt>{{ _("Quorum") }}</dt><dd>{{ view.quorum }} <span class="quorum-state">{{ _("reached") if view.quorum_reached else _("not reached") }}</span></dd></div>
+      {% endif %}
+    </dl>
+    {% endif %}
+    {{ entries_status(view) }}
+  </div>
+</header>
+<main class="screen-stage hero-{{ hero }}{{ ' has-side' if side }}{{ ' is-closed' if view.closed }}">
+  <div class="screen-hero">
+    {% if hero == "questions" %}
+    {% if open_count %}
+    {#- One row for up to three cards (each gets the whole height), two by two for four. -#}
+    <div class="screen-items columns-{{ items if items <= 3 else (2 if items == 4 else 3) }}">
+      {% for item in view.open_polls %}{{ poll_card(item, view.attendees) }}
+      {% endfor %}
+      {% if stage_result %}{{ result_card(stage_result) }}{% endif %}
+    </div>
+    {% if view.past_listed %}{{ past_list(view, view.past_listed, 3, "strip") }}{% endif %}
+    {% else %}
+    {{ past_list(view, view.past_listed, 10, "large", waiting=view.in_session) }}
+    {% endif %}
+    {% elif hero == "result" %}
+    {{ result_card(stage_result) }}
+    {% if view.past_listed %}{{ past_list(view, view.past_listed, 3, "strip") }}{% endif %}
+    {% elif hero == "join" %}
+    {{ join_panel(view, address_base, public_id, join_qr, "stage") }}
+    {% elif hero == "timer" %}
+    {{ timer_face(view.timer, large=true) }}
+    {% elif hero == "agenda" %}
+    {{ agenda_block(view, 9, large=true) }}
+    {% else %}
+    <section class="screen-message" data-fit data-fit-min="-2">
+      {% if view.closed %}
+      <h2>{{ _("The session is closed.") }}</h2>
+      <p>{{ _("Thank you for taking part.") }}</p>
+      {% elif view.in_session %}
+      <h2>{{ _("Waiting for the next vote") }}</h2>
+      {% else %}
+      <h2>{{ _("The session will start shortly.") }}</h2>
+      {% endif %}
+    </section>
+    {% endif %}
+  </div>
+  {% if side %}
+  {#- Beside other blocks, the way to join takes one short row: the agenda leaves it out of
+      the blocks that share the column when it chooses the number of its lines. -#}
+  {% set crowd = side | length - (1 if "join" in side and side | length > 1 else 0) %}
+  <div class="screen-side">
+    {% for part in side %}
+    {% if part == "timer" %}{{ timer_face(view.timer, large=false) }}
+    {% elif part == "join" %}{{ join_panel(view, address_base, public_id, join_qr, "column" if side | length == 1 else "row") }}
+    {% elif part == "agenda" %}{{ agenda_block(view, [9 - 2 * crowd, 3] | max, large=false) }}
+    {% elif part == "questions" %}{{ past_list(view, view.past_listed, 4 if side | length > 1 else 6, "side") }}
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</main>
+{% if not view.join_shown and not view.closed %}
+<footer class="screen-foot">
+  <p>{{ _("Address") }} : <strong>{{ address_base }}{{ public_id }}</strong></p>
+</footer>
+{% endif %}

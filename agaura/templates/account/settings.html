@@ -1,0 +1,127 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf, field with context %}
+{% from "macros/demo.html" import limits with context %}
+{% block title %}{{ _("Your account") }} · AGaura{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/account.css') }}">{% endblock %}
+{% block content %}
+<h1>{{ _("Your account") }}</h1>
+
+{% if not user.email_verified_at and not user.is_superadmin %}
+<div class="alert alert-warning account-unverified">
+  <p>{{ _("Your email address is not confirmed yet. Open the link sent to %(email)s to confirm it: you need it to create a session.", email=user.email) }}</p>
+  <form method="post" action="/account/verify/resend" class="inline">
+    {{ csrf() }}
+    <button type="submit" class="button small">{{ _("Send a new link") }}</button>
+  </form>
+</div>
+{% endif %}
+
+{% if user.is_demo %}
+<section class="card" aria-labelledby="account-demo">
+  <h2 id="account-demo">{{ _("Demonstration account") }}</h2>
+  <p>{{ _("This account has no email address and no password. It is deleted with its sessions 2 hours after the last action, at the latest 24 hours after the demonstration opened.") }}</p>
+  <h3>{{ _("Limits of the demonstration") }}</h3>
+  {{ limits() }}
+  <form method="post" action="/logout">
+    {{ csrf() }}
+    <button type="submit" class="button danger">{{ _("End the demonstration and delete everything") }}</button>
+  </form>
+</section>
+{% else %}
+<div class="grid-2">
+  <section class="card" aria-labelledby="account-name">
+    <h2 id="account-name">{{ _("Name") }}</h2>
+    <form method="post" action="/account/name" class="stack">
+      {{ csrf() }}
+      {{ field("display_name", _("Display name (optional)"), value=form.display_name, autocomplete="name",
+               attrs={"maxlength": "100"}) }}
+      <button type="submit" class="button">{{ _("Save the name") }}</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="account-email">
+    <h2 id="account-email">{{ _("Email address") }}</h2>
+    <p>{{ _("Current address:") }} <strong>{{ user.email }}</strong>
+      {% if user.email_verified_at %}<span class="badge success">{{ _("Confirmed") }}</span>
+      {% else %}<span class="badge warning">{{ _("Not confirmed") }}</span>{% endif %}
+    </p>
+    {% if pending_email %}
+    <p class="hint">{{ _("Waiting for confirmation from %(email)s.", email=pending_email) }}</p>
+    {% endif %}
+    <form method="post" action="/account/email" class="stack">
+      {{ csrf() }}
+      {{ field("new_email", _("New email address"), type="email", value=form.new_email, required=true,
+               autocomplete="email", hint=_("The change applies once the link sent to the new address is opened."),
+               attrs={"maxlength": "254"}) }}
+      {{ field("email_password", _("Current password"), type="password", required=true,
+               autocomplete="current-password") }}
+      <button type="submit" class="button">{{ _("Change the email address") }}</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="account-password">
+    <h2 id="account-password">{{ _("Password") }}</h2>
+    <form method="post" action="/account/password" class="stack">
+      {{ csrf() }}
+      {{ field("current_password", _("Current password"), type="password", required=true,
+               autocomplete="current-password") }}
+      {{ field("new_password", _("New password"), type="password", required=true, autocomplete="new-password",
+               hint=_("At least %(count)s characters. Your other devices will be logged out.", count=min_password_length),
+               attrs={"minlength": min_password_length, "maxlength": "256"}) }}
+      {{ field("new_password_confirm", _("Confirm the new password"), type="password", required=true,
+               autocomplete="new-password", attrs={"minlength": min_password_length, "maxlength": "256"}) }}
+      <button type="submit" class="button">{{ _("Change the password") }}</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="account-devices">
+    <h2 id="account-devices">{{ _("Logged-in devices") }}</h2>
+    <p>{{ _("A forgotten computer or a lost phone? Log out on every device where your account is open, this one included.") }}</p>
+    <form method="post" action="/account/logout-everywhere">
+      {{ csrf() }}
+      <button type="submit" class="button">{{ _("Log out everywhere") }}</button>
+    </form>
+  </section>
+</div>
+
+<section class="card" aria-labelledby="account-log">
+  <h2 id="account-log">{{ _("Account log") }}</h2>
+  {% if log %}
+  <div class="table-wrap">
+    <table class="data account-log">
+      <thead><tr><th scope="col">{{ _("Date") }}</th><th scope="col">{{ _("Event") }}</th></tr></thead>
+      <tbody>
+        {% for line in log %}
+        <tr>
+          <td class="nowrap">{{ line.at | short_datetime }}</td>
+          <td>{{ line.label }}{% if line.detail %} <span class="muted">({{ line.detail }})</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="muted">{{ _("No event yet.") }}</p>
+  {% endif %}
+</section>
+
+{% endif %}
+
+{% if user.is_superadmin %}
+<section class="card" aria-labelledby="account-superadmin">
+  <h2 id="account-superadmin">{{ _("Super-admin account") }}</h2>
+  <p>{{ _("This account manages the accounts of the platform and has no access to sessions. It can only be deleted on the server, by the platform operator.") }}</p>
+</section>
+{% elif not user.is_demo %}
+<section class="card danger-zone" aria-labelledby="account-delete">
+  <h2 id="account-delete">{{ _("Delete the account") }}</h2>
+  <p>{{ _("Deleting the account also deletes all its sessions, with their polls, results and exports. This cannot be undone.") }}</p>
+  <form method="post" action="/account/delete" class="stack">
+    {{ csrf() }}
+    {{ field("delete_password", _("Password, to confirm"), type="password", required=true,
+             autocomplete="current-password") }}
+    <button type="submit" class="button danger">{{ _("Delete the account and all its sessions") }}</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

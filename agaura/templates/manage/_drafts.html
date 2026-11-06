@@ -1,0 +1,85 @@
+{#- Drafts of the Polls rubric, in their order (FR-32), each with the icon and name of its voting
+    method (editor.kind_of: a resolution says so). During the session, "Push to voters" of the
+    first draft is the primary button, the next step; the others are secondary (R12). The head says
+    who holds the polls right and offers to hand it over in place (R13, D-G), then leads to the
+    creation page, "the method first" (D-C), where the polls of a past session are copied too. A
+    trial vote of the checklist (D-I) carries the pill "Essai". Each draft is a tile folded by
+    default, like every poll of the rubric: its title and state, the rest (method, options, order,
+    actions) unfolded (macros/polls.html). -#}
+{% from "macros/forms.html" import csrf, field with context %}
+{% from "macros/delegates.html" import hand_over with context %}
+{% from "macros/icons.html" import icon with context %}
+{% from "macros/polls.html" import tile_head with context %}
+{% set in_session = assembly.status.value == "in_session" %}
+{% set preparation = assembly.status.value == "preparation" %}
+{% set closed = assembly.status.value == "closed" %}
+<section class="card" id="drafts" aria-labelledby="drafts-title">
+  <div class="card-head">
+    <h2 id="drafts-title">{{ _("Drafts") }} <span class="muted small">{{ _("invisible to voters") }}</span></h2>
+    {% if not closed %}<div class="row">{{ hand_over("polls", "drafts") }}<a class="button small" href="/manage/{{ assembly.public_id }}/polls/new">{{ icon("plus") }} {{ _("New poll") }}</a></div>{% endif %}
+  </div>
+  {% if state.drafts %}
+  <ol class="poll-list draft-list">
+    {% for poll in state.drafts %}
+    <li>
+    <details class="poll-item poll-tile" id="draft-{{ poll.id }}">
+      {{ tile_head(poll, trial=poll.trial) }}
+      <div class="draft-head">
+        {% if not closed %}
+        <div class="draft-move" role="group" aria-label="{{ _('Order') }}">
+          <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/move" class="inline">
+            {{ csrf() }}<input type="hidden" name="direction" value="up">
+            <button type="submit" class="button small move" aria-label="{{ _('Move up: %(title)s', title=poll.title) }}"{% if loop.first %} disabled{% endif %}>&uarr;</button>
+          </form>
+          <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/move" class="inline">
+            {{ csrf() }}<input type="hidden" name="direction" value="down">
+            <button type="submit" class="button small move" aria-label="{{ _('Move down: %(title)s', title=poll.title) }}"{% if loop.last %} disabled{% endif %}>&darr;</button>
+          </form>
+        </div>
+        {% endif %}
+        <div class="draft-text">
+          {% set kind = poll_kind(poll) %}
+          <p class="muted small">{{ icon(kind.icon, size="sm") }} {{ _(kind.label) }} · {% for option in poll.options %}{{ option.label }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+        </div>
+      </div>
+      {#- One visible action: push during the session, edit before; the others in the "⋯" menu
+          (a details element: works without script; manage.js closes it on a click elsewhere). -#}
+      <div class="draft-actions">
+        {% if in_session %}
+        <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/open" class="inline">
+          {{ csrf() }}
+          <button type="submit" class="button{{ ' primary' if loop.first }} small">{{ _("Push to voters") }}</button>
+        </form>
+        {% elif not closed %}
+        <a class="button small" href="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/edit">{{ _("Edit") }}</a>
+        {% endif %}
+        <details class="menu" data-menu>
+          <summary class="button small menu-toggle" aria-label="{{ _('More actions: %(title)s', title=poll.title) }}" title="{{ _('More actions') }}"><span aria-hidden="true">&#8943;</span></summary>
+          <div class="menu-panel">
+            {% if in_session %}
+            <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/open" class="menu-timer">
+              {{ csrf() }}
+              <label class="inline-field">{{ _("Timer (minutes)") }} <input type="number" name="minutes" min="1" max="1440" inputmode="numeric" class="short" required></label>
+              <button type="submit" class="button small">{{ _("Push with this timer") }}</button>
+            </form>
+            <a class="menu-item" href="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/edit">{{ _("Edit") }}</a>
+            {% endif %}
+            {% if not closed %}
+            <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/duplicate">
+              {{ csrf() }}<button type="submit" class="menu-item">{{ _("Duplicate") }}</button>
+            </form>
+            {% endif %}
+            <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/delete" data-confirm="{{ _('Delete this draft?') }}">
+              {{ csrf() }}<button type="submit" class="menu-item danger">{{ _("Delete") }}</button>
+            </form>
+          </div>
+        </details>
+      </div>
+    </details>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="muted">{{ _("No draft.") }}{% if preparation %} {{ _("Prepare polls in advance, or create them during the session.") }}{% endif %}</p>
+  {% endif %}
+</section>

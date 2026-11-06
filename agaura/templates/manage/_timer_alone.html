@@ -1,0 +1,7 @@
+{#- The chronometer alone, for timer.js (GET /manage/{id}/timer): the card of the Projection
+    screen rubric and, during the session, the command of Steering, so one answer refreshes
+    both copies of the page. -#}
+{% include "manage/_timer.html" %}
+{% if assembly.status.value == "in_session" %}
+{% with compact = true %}{% include "manage/_timer.html" %}{% endwith %}
+{% endif %}

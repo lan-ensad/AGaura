@@ -1,0 +1,15 @@
+{% extends "layouts/admin.html" %}
+{% block title %}{{ _("Link not valid") }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Link not valid") }}</h1>
+  <p>{{ message }}</p>
+  {% if expired %}
+  <p class="muted">{{ _("Links sent by email work only for a limited time, and only once.") }}</p>
+  {% else %}
+  <p class="muted">{{ _("Each link works only once, and only the most recent link sent works.") }}</p>
+  {% endif %}
+  {% if hint %}<p>{{ hint }}</p>{% endif %}
+  <p class="actions"><a class="button primary" href="{{ retry_url }}">{{ retry_label }}</a></p>
+</section>
+{% endblock %}

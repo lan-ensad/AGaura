@@ -1,0 +1,181 @@
+{#- Chronometer and countdown of the projection screen (FR-74), usable on a phone. Its card lives
+    in the Meeting rubric, above the tribune, in every state (D-A; the owner's request,
+    2026-11-06), and in Projection screen for a delegate link holding it, which never sees
+    Meeting; during the session Steering also shows the command (compact: true, #cmd-timer),
+    the same state and controls without the settings, whose link leads to that card.
+
+    Card, stopped at zero: one setup form with the only "Start" button. The last choice (mode,
+    duration, label) shows as a line above it; the settings (mode, duration of a countdown,
+    label, display) fold under "Change the settings", and the radios submit with the form even
+    folded. Running or paused: the time and its controls; "Reset" brings the setup form back.
+    Command: stopped, the line of the last choice and "Start" with those settings in hidden
+    fields; running or paused, the time and the same controls. Their forms post to the address
+    to come back to (#timer, #cmd-timer): the routes redirect without an anchor.
+    timer.js shows the durations only for a countdown and the minutes and seconds only with
+    "Other duration", keeps the line in step with the settings, counts on, and replaces the
+    state-dependent part ([data-timer-status]) of each copy when another console changes it
+    (GET …/timer answers both copies, _timer_alone.html). Hidden once the session is closed:
+    the screen no longer shows it. During the session its buttons are secondary, a tool and
+    not the next step of the session; "Start", "Pause" or "Resume" leads outside the session,
+    or for a delegate with the chronometer alone (R12). The title and the delegation (R13,
+    D-G) stand above the part timer.js replaces, which renders the card alone without them;
+    can gives that copy the same button levels. The script tag comes with the card only. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/delegates.html" import hand_over with context %}
+{% from "macros/console.html" import command_head with context %}
+{% from "macros/icons.html" import icon with context %}
+{% if assembly.status.value != "closed" %}
+{% set t = timer_state %}
+{% set is_compact = compact is defined and compact %}
+{% set lone = can is defined and can.lone_tool %}
+{% set lead = lone if is_compact else (assembly.status.value != "in_session" or lone) %}
+{% set level = "button primary" if lead else "button" %}
+{% set base = "/manage/" ~ assembly.public_id ~ "/timer" %}
+{% set back = "#cmd-timer" if is_compact else "#timer" %}
+{% set mode_name = _("Chronometer") if t.counting_up else _("Countdown from %(time)s", time=t.duration_display) %}
+{#- Default mode: the one used last; a countdown when nothing was set up yet. -#}
+{% set countdown = t.duration is not none or (t.label is none and not t.shown) %}
+{% set chosen = t.duration if t.duration in timer_presets else ("custom" if t.duration else timer_default) %}
+{% if is_compact %}
+<section class="card cmd timer-card" id="cmd-timer" aria-labelledby="cmd-timer-title" data-timer-url="{{ base }}" data-server-time="{{ timer_now_ms }}">
+  {% if can is defined and can.owner %}
+  {{ command_head("timer", _("Chronometer"), "meeting", "timer", _("Settings, in Meeting"), "cmd-timer-title", control=hand_over("timer", "cmd-timer")) }}
+  {% else %}
+  {{ command_head("timer", _("Chronometer"), "screen", "timer", _("Settings, in Screen"), "cmd-timer-title", control=hand_over("timer", "cmd-timer")) }}
+  {% endif %}
+  <div data-timer-status>
+    {% if t.ready %}
+    <form method="post" action="{{ base }}/start{{ back }}" class="cmd-line">
+      {{ csrf() }}
+      <input type="hidden" name="mode" value="{{ 'countdown' if countdown else 'up' }}">
+      <input type="hidden" name="duration" value="{{ chosen }}">
+      {% if chosen == "custom" %}<input type="hidden" name="minutes" value="{{ t.duration // 60 }}"><input type="hidden" name="seconds" value="{{ t.duration % 60 }}">{% endif %}
+      <input type="hidden" name="label" value="{{ t.label or '' }}">
+      <input type="hidden" name="show" value="1">
+      <p class="timer-summary">
+        <strong>{{ _("Countdown") if countdown else _("Chronometer") }}</strong>
+        {% if countdown %}<span>{% if chosen == "custom" %}{{ t.duration_display }}{% else %}{{ _("%(num)s min", num=chosen // 60) }}{% endif %}</span>{% endif %}
+        {% if t.label %}<span class="timer-summary-label">{{ t.label }}</span>{% endif %}
+      </p>
+      <button type="submit" class="{{ level }}">{{ icon("play") }} {{ _("Start") }}</button>
+    </form>
+    {% if t.shown %}
+    <form method="post" action="{{ base }}/show{{ back }}" class="timer-hide">
+      {{ csrf() }}<input type="hidden" name="shown" value="0">
+      <span class="hint">{{ _("The screen shows %(time)s, stopped.", time=t.display) }}</span>
+      <button type="submit" class="button small">{{ icon("eye-off") }} {{ _("Hide from the screen") }}</button>
+    </form>
+    {% endif %}
+    {% else %}
+    <div class="cmd-line">
+      <p class="cmd-clock{{ ' is-paused' if not t.running }}{{ ' is-overtime' if t.overtime }}" data-timer data-timer-duration="{{ t.duration if t.duration is not none else '' }}" data-timer-elapsed="{{ t.base_elapsed }}" data-timer-started="{{ t.started_ms if t.started_ms is not none else '' }}">
+        <span class="clock" data-timer-clock>{{ t.display }}</span>
+        <span class="muted small">{{ t.label or mode_name }} · <strong>{{ _("Running") if t.running else _("Paused") }}</strong> <span class="cmd-over" data-timer-over{{ ' hidden' if not t.overtime }}>{{ _("Time is up") }}</span></span>
+      </p>
+      {% if t.shown %}<span class="badge success">{{ icon("presentation") }}{{ _("Shown on the screen") }}</span>{% else %}<span class="badge neutral">{{ _("Not on the screen") }}</span>{% endif %}
+    </div>
+    <div class="cmd-actions">
+      {% if t.running %}
+      <form method="post" action="{{ base }}/pause{{ back }}">{{ csrf() }}<button type="submit" class="{{ level }} small">{{ icon("pause") }} {{ _("Pause") }}</button></form>
+      {% else %}
+      <form method="post" action="{{ base }}/resume{{ back }}">{{ csrf() }}<button type="submit" class="{{ level }} small">{{ icon("play") }} {{ _("Resume") }}</button></form>
+      {% endif %}
+      {% if not t.counting_up %}
+      <form method="post" action="{{ base }}/add{{ back }}">{{ csrf() }}<button type="submit" class="button small">{{ _("+1 min") }}</button></form>
+      {% endif %}
+      <form method="post" action="{{ base }}/reset{{ back }}">{{ csrf() }}<button type="submit" class="button small">{{ icon("rotate-ccw") }} {{ _("Reset") }}</button></form>
+      <form method="post" action="{{ base }}/show{{ back }}">
+        {{ csrf() }}<input type="hidden" name="shown" value="{{ '0' if t.shown else '1' }}">
+        <button type="submit" class="button small">{{ icon("eye-off" if t.shown else "presentation") }} {{ _("Hide from the screen") if t.shown else _("Show on the screen") }}</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% else %}
+<section class="card timer-card" id="timer" aria-labelledby="timer-title" data-timer-url="{{ base }}" data-server-time="{{ timer_now_ms }}">
+  <div class="card-head">
+    <h2 id="timer-title">{{ icon("timer") }} {{ _("Chronometer and countdown") }}</h2>
+    {{ hand_over("timer", "timer") }}
+  </div>
+  <div data-timer-status>
+    <p>{% if t.shown %}<span class="badge success">{{ _("Shown on the screen") }}</span>{% else %}<span class="badge neutral">{{ _("Not on the screen") }}</span>{% endif %}</p>
+    {% if t.ready %}
+    {% if t.shown %}
+    <form method="post" action="{{ base }}/show{{ back }}" class="timer-hide">
+      {{ csrf() }}<input type="hidden" name="shown" value="0">
+      <span class="hint">{{ _("The screen shows %(time)s, stopped.", time=t.display) }}</span>
+      <button type="submit" class="button small">{{ _("Hide from the screen") }}</button>
+    </form>
+    {% endif %}
+    <form method="post" action="{{ base }}/start{{ back }}" class="timer-setup" data-timer-setup>
+      {{ csrf() }}
+      <p class="timer-summary" data-timer-summary>
+        <strong data-summary-mode>{{ _("Countdown") if countdown else _("Chronometer") }}</strong>
+        <span data-summary-duration{{ ' hidden' if not countdown }}>{% if chosen == "custom" %}{{ t.duration_display }}{% else %}{{ _("%(num)s min", num=chosen // 60) }}{% endif %}</span>
+        <span class="timer-summary-label" data-summary-label{{ ' hidden' if not t.label }}>{{ t.label or "" }}</span>
+      </p>
+      <details class="timer-settings" data-timer-settings>
+      <summary>{{ _("Change the settings") }}</summary>
+      <div class="timer-settings-body">
+      <fieldset class="timer-modes">
+        <legend>{{ _("Mode") }}</legend>
+        <div class="segments">
+          <label class="segment"><input type="radio" name="mode" value="countdown"{{ ' checked' if countdown }}><span><strong>{{ _("Countdown") }}</strong> <small>{{ _("from a duration down to zero") }}</small></span></label>
+          <label class="segment"><input type="radio" name="mode" value="up"{{ ' checked' if not countdown }}><span><strong>{{ _("Chronometer") }}</strong> <small>{{ _("counts the elapsed time") }}</small></span></label>
+        </div>
+      </fieldset>
+      <fieldset class="timer-durations" data-countdown-fields>
+        <legend>{{ _("Duration of the countdown") }}</legend>
+        <div class="chips">
+          {% for seconds in timer_presets %}
+          <label class="chip"><input type="radio" name="duration" value="{{ seconds }}"{{ ' checked' if chosen == seconds }}><span>{{ _("%(num)s min", num=seconds // 60) }}</span></label>
+          {% endfor %}
+          <label class="chip"><input type="radio" name="duration" value="custom"{{ ' checked' if chosen == "custom" }}><span>{{ _("Other duration") }}</span></label>
+        </div>
+        <div class="timer-custom" data-custom-fields>
+          <label class="inline-field"><input type="number" name="minutes" min="0" max="600" inputmode="numeric" class="short" value="{{ t.duration // 60 if chosen == 'custom' else '' }}" aria-label="{{ _('Minutes') }}"> {{ _("min") }}</label>
+          <label class="inline-field"><input type="number" name="seconds" min="0" max="59" inputmode="numeric" class="short" value="{{ t.duration % 60 if chosen == 'custom' else '' }}" aria-label="{{ _('Seconds') }}"> {{ _("s") }}</label>
+          <span class="hint" data-no-script-hint>{{ _("with “Other duration”") }}</span>
+        </div>
+      </fieldset>
+      <div class="field">
+        <label for="timer-label">{{ _("Label (optional)") }}</label>
+        <input type="text" id="timer-label" name="label" maxlength="100" value="{{ t.label or '' }}" placeholder="{{ _('Speaking time') }}" autocomplete="off">
+      </div>
+      <label class="checkbox"><input type="checkbox" name="show" value="1" checked> {{ _("Show on the screen") }}</label>
+      </div>
+      </details>
+      <button type="submit" class="{{ level }} wide">{{ _("Start") }}</button>
+    </form>
+    {% else %}
+    <div class="timer-face is-{{ 'running' if t.running else 'paused' }}{{ ' is-overtime' if t.overtime }}" data-timer data-timer-duration="{{ t.duration if t.duration is not none else '' }}" data-timer-elapsed="{{ t.base_elapsed }}" data-timer-started="{{ t.started_ms if t.started_ms is not none else '' }}">
+      <p class="timer-face-label">{{ t.label or mode_name }}</p>
+      <p class="timer-face-clock" data-timer-clock>{{ t.display }}</p>
+      <p class="timer-face-state">
+        <span data-timer-over{{ ' hidden' if not t.overtime }}>{{ _("Time is up") }}</span>
+        <span>{{ _("Running") if t.running else _("Paused") }}</span>
+        {% if t.label %}<span class="muted">{{ mode_name }}</span>{% endif %}
+      </p>
+    </div>
+    <div class="timer-controls">
+      {% if t.running %}
+      <form method="post" action="{{ base }}/pause{{ back }}">{{ csrf() }}<button type="submit" class="{{ level }}">{{ _("Pause") }}</button></form>
+      {% else %}
+      <form method="post" action="{{ base }}/resume{{ back }}">{{ csrf() }}<button type="submit" class="{{ level }}">{{ _("Resume") }}</button></form>
+      {% endif %}
+      {% if not t.counting_up %}
+      <form method="post" action="{{ base }}/add{{ back }}">{{ csrf() }}<button type="submit" class="button">{{ _("+1 min") }}</button></form>
+      {% endif %}
+      <form method="post" action="{{ base }}/reset{{ back }}">{{ csrf() }}<button type="submit" class="button">{{ _("Reset") }}</button></form>
+      <form method="post" action="{{ base }}/show{{ back }}">
+        {{ csrf() }}<input type="hidden" name="shown" value="{{ '0' if t.shown else '1' }}">
+        <button type="submit" class="button">{{ _("Hide from the screen") if t.shown else _("Show on the screen") }}</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+  <script src="{{ static_url('js/timer.js') }}" defer></script>
+</section>
+{% endif %}
+{% endif %}

@@ -1,0 +1,26 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf, field with context %}
+{% block title %}{{ _("Create an account") }} · AGaura{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/account.css') }}">{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Create an account") }}</h1>
+  <p class="muted">{{ _("An account lets you create sessions and run their votes. It is free.") }}</p>
+  <form method="post" action="/signup" class="stack">
+    {{ csrf() }}
+    {{ field("email", _("Email address"), type="email", value=email, required=true, autocomplete="email",
+             hint=_("A confirmation link will be sent to this address."), attrs={"maxlength": "254"}) }}
+    {{ field("display_name", _("Name (optional)"), value=display_name, autocomplete="name",
+             attrs={"maxlength": "100"}) }}
+    {{ field("password", _("Password"), type="password", required=true, autocomplete="new-password",
+             hint=_("At least %(count)s characters.", count=min_password_length),
+             attrs={"minlength": min_password_length, "maxlength": "256"}) }}
+    {{ field("password_confirm", _("Confirm the password"), type="password", required=true,
+             autocomplete="new-password", attrs={"minlength": min_password_length, "maxlength": "256"}) }}
+    {% include "account/pow_widget.html" %}
+    <button type="submit" class="button primary" disabled>{{ _("Create the account") }}</button>
+  </form>
+  <p class="muted form-links">{{ _("Already have an account?") }} <a href="/login">{{ _("Log in") }}</a></p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/pow.js') }}" defer></script>{% endblock %}

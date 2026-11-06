@@ -1,0 +1,41 @@
+{#- Details of the session (title, date, place, registered members, quorum), at the head of the
+    Meeting rubric (D-B) and of the minutes; the owner's only (FR-92). Read only once the
+    session is open; in preparation, the edit form folds under them, open while the date or the
+    place is missing (the checklist leads here, #details). -#}
+{% from "macros/forms.html" import csrf, field with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set preparation = assembly.status.value == "preparation" %}
+{% set quorum = state.panel.quorum %}
+<section class="card meeting" id="details" aria-labelledby="details-title">
+  <div class="card-head">
+    <h2 id="details-title">{{ icon("calendar") }} {{ _("Details") }}</h2>
+    <span class="muted small">{{ _("at the head of the minutes") }}</span>
+  </div>
+  <dl class="summary-figures details-figures">
+    <div><dt>{{ _("Title") }}</dt><dd>{{ assembly.title }}</dd></div>
+    <div><dt>{{ _("Date") }}</dt><dd>{% if assembly.date %}{{ assembly.date | long_date }}{% else %}<span class="check-missing">{{ _("Date missing") }}</span>{% endif %}</dd></div>
+    <div><dt>{{ _("Place") }}</dt><dd>{% if assembly.place %}{{ assembly.place }}{% else %}<span class="check-missing">{{ _("Place missing") }}</span>{% endif %}</dd></div>
+    {% if assembly.registered_count is not none %}<div><dt>{{ _("Registered members") }}</dt><dd>{{ assembly.registered_count }}</dd></div>{% endif %}
+    {% if assembly.quorum_rule %}<div><dt>{{ _("Quorum") }}</dt><dd>{% if quorum is not none and quorum | string != assembly.quorum_rule %}{{ _("%(rule)s, that is %(num)s", rule=assembly.quorum_rule, num=quorum) }}{% else %}{{ assembly.quorum_rule }}{% endif %}</dd></div>{% endif %}
+  </dl>
+  {% if preparation %}
+  <details class="meeting-edit" id="details-edit"{% if not (assembly.date and assembly.place) %} open{% endif %}>
+    <summary>{{ _("Edit the details") }}</summary>
+    <form method="post" action="/manage/{{ assembly.public_id }}/details#details" class="stack">
+      {{ csrf() }}
+      {{ field("title", _("Title"), value=assembly.title, required=true, attrs={"maxlength": "200"}, id="details-title-field") }}
+      <div class="grid-2">
+        {{ field("date", _("Date"), type="date", value=assembly.date.isoformat() if assembly.date else "", id="details-date") }}
+        {{ field("place", _("Place"), value=assembly.place or "", attrs={"maxlength": "200"}, id="details-place") }}
+      </div>
+      <div class="grid-2">
+        {{ field("registered_count", _("Registered members"), type="number", value=assembly.registered_count if assembly.registered_count is not none else "", attrs={"min": "1"}, id="details-registered") }}
+        {{ field("quorum_rule", _("Quorum"), value=assembly.quorum_rule or "", hint=_("Optional: a number (50) or a share of members (1/4)."), attrs={"maxlength": "20"}, id="details-quorum") }}
+      </div>
+      <button type="submit" class="button">{{ _("Save") }}</button>
+    </form>
+  </details>
+  {% else %}
+  <p class="hint">{{ _("Editable before the opening only: the number of members sets the access cap.") }}</p>
+  {% endif %}
+</section>

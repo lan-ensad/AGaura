@@ -1,0 +1,9 @@
+{% extends "layouts/admin.html" %}
+{% block title %}{{ title }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ title }}</h1>
+  <p>{{ message }}</p>
+  <p><a class="button" href="/">{{ _("Back to the home page") }}</a></p>
+</section>
+{% endblock %}

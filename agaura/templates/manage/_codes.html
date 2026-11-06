@@ -1,0 +1,36 @@
+{% from "macros/forms.html" import csrf, field, help with context %}
+{% if assembly.access_mode.value == "codes" or state.batches %}
+<section class="card" id="codes" aria-labelledby="codes-title">
+  <h2 id="codes-title">{{ _("Individual codes") }}</h2>
+  {{ help(_("Codes are shown only once, when they are generated."), _("Download the card PDF (10 cards per A4 page, with cut marks) and keep it safe, or print the page right away. A lost PDF or page is handled by revoking its codes and generating new ones.")) }}
+  {% if assembly.status.value != "closed" %}
+  <form method="post" action="/manage/{{ assembly.public_id }}/codes" class="codes-form">
+    {{ csrf() }}
+    <label class="inline-field">{{ _("Number of codes") }} <input type="number" name="count" min="1" max="2000" required inputmode="numeric" class="short"></label>
+    <div class="actions">
+      <button type="submit" name="output" value="pdf" class="button primary small">{{ _("Download the card PDF") }}</button>
+      <button type="submit" name="output" value="page" class="button small">{{ _("Generate and print") }}</button>
+    </div>
+  </form>
+  {% endif %}
+  {% if state.batches %}
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>{{ _("Batch") }}</th><th class="num">{{ _("Codes") }}</th><th>{{ _("Created") }}</th><th>{{ _("Status") }}</th><th></th></tr></thead>
+    <tbody>
+    {% for batch in state.batches %}
+      <tr>
+        <td>#{{ batch.id }}</td><td class="num">{{ batch.size }}</td><td>{{ batch.created_at | short_datetime }}</td>
+        <td>{% if batch.status.value == "active" %}<span class="badge success">{{ _("Active") }}</span>{% else %}<span class="badge danger">{{ _("Revoked") }}</span>{% endif %}</td>
+        <td>{% if batch.status.value == "active" %}
+          <form method="post" action="/manage/{{ assembly.public_id }}/codes/{{ batch.id }}/revoke" class="inline" data-confirm="{{ _('Revoke these codes? People using them lose access.') }}">
+            {{ csrf() }}<button type="submit" class="button small">{{ _("Revoke") }}</button>
+          </form>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% endif %}
+</section>
+{% endif %}

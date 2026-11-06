@@ -1,0 +1,100 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf, field with context %}
+{% from "macros/icons.html" import icon with context %}
+{#- Mes sessions (FR-10, FR-11, D-J): the account's sessions grouped by state, in session first,
+    then in preparation, then over, most recent first within each group (console.summaries);
+    each row is one link to its console (the title, stretched over the row), with its ID, date,
+    place, state and figures. Then the new session form, reached from the button at the top;
+    the access mode is two choice cards (.mode-card of manage.css: real radios, hidden but
+    focusable, whose focus rings the card). Icons are decorative. -#}
+{% block title %}{{ _("Dashboard") }} · AGaura{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/manage.css') }}">{% endblock %}
+{% block content %}
+{% set groups = [
+  ("in_session", _("Sessions in progress")),
+  ("preparation", _("Sessions in preparation")),
+  ("closed", _("Sessions over")),
+] %}
+<div class="spread dashboard-head">
+  <h1>{{ _("My sessions") }}</h1>
+  <a class="button primary" href="#create">{{ icon("plus") }} {{ _("New session") }}</a>
+</div>
+
+{% if user.email_verified_at is none %}
+<div class="alert alert-warning" role="status">
+  <p>{{ _("Confirm your email address to create sessions: open the link we sent to %(email)s.", email=user.email) }}</p>
+  <form method="post" action="/account/verify/resend" class="inline">
+    {{ csrf() }}
+    <button type="submit" class="button small">{{ _("Send the link again") }}</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="dashboard">
+  <section class="card" aria-labelledby="sessions-title">
+    <h2 id="sessions-title" class="visually-hidden">{{ _("Sessions") }}</h2>
+    {% if summaries %}
+    <div class="session-groups">
+      {% for status, heading in groups %}
+      {% set items = summaries | selectattr("assembly.status.value", "equalto", status) | list %}
+      {% if items %}
+      <section class="session-group" aria-labelledby="sessions-{{ status }}">
+        <h3 id="sessions-{{ status }}">{{ heading }}</h3>
+        <ul class="session-list">
+          {% for item in items %}
+          {% set assembly = item.assembly %}
+          <li class="session-row">
+            <div class="session-text">
+              <a href="/manage/{{ assembly.public_id }}">{{ assembly.title }}</a>
+              <p class="session-meta">
+                <span class="mono">{{ assembly.public_id }}</span>
+                {%- if assembly.date %}<span>{{ icon("calendar", size="sm") }} {{ assembly.date | long_date }}</span>{% endif %}
+                {%- if assembly.place %}<span>{{ icon("map-pin", size="sm") }} {{ assembly.place }}</span>{% endif %}
+              </p>
+            </div>
+            <span class="badge status-{{ status }}">{{ assembly_status_label(assembly.status) }}</span>
+            <p class="session-figures">
+              {%- if status == "preparation" %}{{ ngettext("%(num)s draft", "%(num)s drafts", item.polls) }}
+              {%- else %}{{ ngettext("%(num)s poll", "%(num)s polls", item.polls) }} · {{ ngettext("%(num)s attendee", "%(num)s attendees", item.attendees) }}{% endif -%}
+            </p>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted">{{ _("No session yet. Create your first one.") }}</p>
+    {% endif %}
+  </section>
+
+  <section class="card" id="create" aria-labelledby="create-title">
+    <h2 id="create-title">{{ icon("plus") }} {{ _("New session") }}</h2>
+    <form method="post" action="/dashboard" class="stack">
+      {{ csrf() }}
+      {{ field("title", _("Title"), value=form.title, required=true, attrs={"maxlength": "200"}) }}
+      <div class="grid-2">
+        {{ field("date", _("Date"), type="date", value=form.date) }}
+        {{ field("place", _("Place"), value=form.place, attrs={"maxlength": "200"}) }}
+      </div>
+      <fieldset class="plain-fieldset">
+        <legend>{{ _("How voters join") }}</legend>
+        <div class="mode-cards">
+          <label class="mode-card"><input type="radio" name="access_mode" value="password" {{ "checked" if form.access_mode != "codes" }}>
+            <span class="mode-icon">{{ icon("rectangle-ellipsis") }}</span>
+            <span class="mode-name">{{ _("Session password") }}</span>
+            <span class="mode-line">{{ _("Shown in the room, with a QR code. One vote per phone.") }}</span>
+          </label>
+          <label class="mode-card"><input type="radio" name="access_mode" value="codes" {{ "checked" if form.access_mode == "codes" }}>
+            <span class="mode-icon">{{ icon("ticket") }}</span>
+            <span class="mode-name">{{ _("Printed individual codes") }}</span>
+            <span class="mode-line">{{ _("One card per person, handed out at the entrance. One vote per person.") }}</span>
+          </label>
+        </div>
+      </fieldset>
+      <button type="submit" class="button primary" {{ "disabled" if user.email_verified_at is none }}>{{ _("Create the session") }}</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,623 @@
+/* Session console and dashboard. */
+
+/* Mes sessions: the sessions grouped by state, the new session form beside them on a computer.
+   minmax(0, …): a column never grows past the screen. Each row is one link (its title,
+   stretched over the row); on a phone the state and the figures go under the title. */
+.dashboard { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 960px) { .dashboard { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; } }
+.dashboard-head { margin-bottom: 1rem; }
+.dashboard-head h1 { margin: 0; }
+.session-groups { display: grid; gap: 1.25rem; }
+.session-group h3 { margin: 0 0 0.5rem; font-size: var(--fs-sm); color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+.session-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.session-row {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.2rem 1rem;
+  padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.session-row:hover { border-color: var(--accent); }
+.session-row:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.session-text { grid-row: span 2; min-width: 0; }
+.session-row a { display: inline-block; min-height: 24px; color: var(--text); font-weight: 700; text-decoration: none; overflow-wrap: anywhere; }
+.session-row a::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius-sm); }
+.session-row a:focus-visible { outline: none; }
+.session-meta { display: flex; flex-wrap: wrap; gap: 0.15rem 1rem; margin: 0; color: var(--muted); font-size: var(--fs-sm); }
+.session-meta span { display: inline-flex; align-items: center; gap: 0.3rem; overflow-wrap: anywhere; }
+.session-row .badge { align-self: start; justify-self: end; }
+.session-figures { justify-self: end; margin: 0; color: var(--muted); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 559px) {
+  .session-row { grid-template-columns: minmax(0, 1fr); }
+  .session-text { grid-row: auto; }
+  .session-row .badge, .session-figures { justify-self: start; }
+}
+fieldset.plain-fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+fieldset.plain-fieldset > legend { padding: 0; margin-bottom: 0.5rem; }
+/* The access mode of a new session, two choice cards (charter v2, the look of the method cards of
+   the poll editor): icon, name, one line in plain words. The whole card is the label of a radio
+   hidden but focusable, whose focus rings the card; the choice shows by a thicker frame and a
+   check mark after the name, not by colour alone. */
+.mode-cards { display: grid; gap: 0.75rem; }
+.mode-card {
+  position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.15rem 0.9rem; align-content: start;
+  padding: 1rem 1.1rem; border: 1px solid var(--border-strong); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); cursor: pointer;
+}
+.mode-card:hover, .mode-card:focus-within { border-color: var(--accent); background: var(--accent-soft); }
+.mode-card:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.mode-card input[type="radio"] { position: absolute; top: 0; left: 0; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.mode-icon {
+  grid-row: 1 / span 2; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: var(--radius-sm);
+  background: var(--accent-soft); color: var(--accent-strong);
+}
+.mode-icon svg.icon { width: 1.6rem; height: 1.6rem; }
+.mode-card:hover .mode-icon, .mode-card:focus-within .mode-icon, .mode-card:has(input:checked) .mode-icon { background: var(--surface); }
+.mode-name { grid-column: 2; font-size: var(--fs-lg); font-weight: 700; line-height: 1.3; }
+.mode-line { grid-column: 2; color: var(--muted); font-size: var(--fs-sm); }
+.mode-card:has(input:checked) { border: 2px solid var(--accent); background: var(--accent-soft); padding: calc(1rem - 1px) calc(1.1rem - 1px); }
+.mode-card:has(input:checked) .mode-name::after { content: "\00a0\2713"; content: "\00a0\2713" / ""; color: var(--accent-strong); }
+
+.badge.status-preparation { background: var(--accent-soft); color: var(--accent-strong); }
+/* In session: the plum of what runs now, with its dot (charter v2). */
+.badge.status-in_session { background: var(--live-soft); color: var(--live); }
+.badge.status-in_session::before { content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.4em; border-radius: 50%; background: currentColor; vertical-align: 0.08em; }
+.badge.status-closed { background: var(--neutral-soft); color: var(--neutral-ink); }
+
+/* --- Console layout: sidebar of rubrics (tabs at the bottom of a phone), status bar, one
+   rubric at a time (manage.js); without script the rubrics stay stacked. --- */
+.console-page .page, .console-page .topbar-inner { max-width: 1360px; }
+.console { display: grid; gap: 1rem; }
+@media (min-width: 960px) { .console { grid-template-columns: 14.5rem minmax(0, 1fr); gap: 1.5rem; align-items: start; } }
+.console-main { min-width: 0; }
+
+.console-side { display: grid; gap: 1.25rem; align-content: start; }
+@media (min-width: 960px) { .console-side { position: sticky; top: 1rem; } }
+.console-session p { margin: 0; }
+.console-session h1 { font-size: 1.2rem; margin: 0.1rem 0 0.2rem; overflow-wrap: anywhere; }
+
+.rubric-nav { display: none; }
+@media (min-width: 960px) { .rubric-nav { display: block; } }
+.rubric-nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+/* Each link: the icon of the rubric (20 px, grey; blue on the rubric shown), its name, and a
+   count at the right end. */
+.rubric-nav a {
+  display: flex; align-items: center; gap: 0.65rem; min-height: 2.6rem;
+  padding: 0.45rem 0.75rem; border-radius: 8px; color: var(--text); text-decoration: none; font-weight: 500;
+}
+.rubric-nav a:hover { background: #e9edf3; color: var(--text); }
+.rubric-nav a[aria-current] { background: var(--accent-soft); color: var(--accent-strong); font-weight: 700; }
+.rubric-nav a svg.icon { width: var(--icon-md); height: var(--icon-md); color: var(--muted); }
+.rubric-nav a[aria-current] svg.icon { color: var(--accent-strong); }
+.nav-count { flex: none; font-size: 0.8rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rubric-nav .nav-count { margin-left: auto; }
+.rubric-nav a[aria-current] .nav-count { color: var(--accent-strong); }
+.nav-count.is-live, .rubric-nav a[aria-current] .nav-count.is-live { padding: 0.05rem 0.5rem; border-radius: 999px; background: var(--live); color: #fff; }
+
+/* Phone: tabs fixed at the bottom, a 24 px icon above a short label; the tab shown puts its
+   icon in a pale blue pill. "More" opens the other rubrics above them. The tabs share the
+   width, however many there are (a delegate link has one per rubric of its rights). Icons stay
+   on one row from the top of each tab: below about 400 px "Ordre du jour" takes two lines. */
+.tab-bar {
+  position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+  padding: 0.25rem max(0.25rem, env(safe-area-inset-right, 0px)) calc(0.3rem + env(safe-area-inset-bottom, 0px)) max(0.25rem, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-top: 1px solid var(--border); box-shadow: var(--shadow-bar);
+}
+@media (min-width: 960px) { .tab-bar { display: none; } }
+@media (max-width: 959px) { body.console-page { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)); } }
+.tab-bar a, .tab-more > summary {
+  display: grid; justify-items: center; align-content: start; gap: 0.15rem; min-height: 3.1rem; padding: 0.2rem 0.1rem;
+  border-radius: 8px; color: var(--muted); font-size: var(--fs-xs); font-weight: 600; line-height: 1.15; text-align: center;
+  text-decoration: none; cursor: pointer; list-style: none;
+}
+.tab-more > summary::-webkit-details-marker { display: none; }
+.tab-more[open] > summary { margin-bottom: 0; }
+.tab-bar > a svg.icon, .tab-more > summary svg.icon {
+  width: 3.25rem; height: 1.85rem; padding: 0.2rem 0.9rem; border-radius: 999px; box-sizing: border-box;
+}
+.tab-bar a[aria-current], .tab-more.is-current > summary { color: var(--accent-strong); }
+.tab-bar > a[aria-current] svg.icon, .tab-more.is-current > summary svg.icon { background: var(--accent-soft); color: var(--accent-strong); }
+.tab-bar .nav-count { display: none; }
+.tab-more { position: relative; }
+.tab-more ul {
+  position: absolute; right: 0; bottom: calc(100% + 0.6rem); min-width: 14rem; margin: 0; padding: 0.35rem; list-style: none;
+  display: grid; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+}
+.tab-more ul a { display: flex; align-items: center; gap: 0.6rem; min-height: var(--tap); padding: 0.75rem 0.85rem; color: var(--text); font-size: 0.95rem; text-align: left; }
+.tab-more ul a svg.icon { width: var(--icon-md); height: var(--icon-md); color: var(--muted); }
+.tab-more ul a[aria-current] svg.icon { color: var(--accent-strong); }
+.tab-more ul a[aria-current] { background: var(--accent-soft); color: var(--accent-strong); }
+
+/* Status bar: on every rubric, kept in view on a computer, on one line at 1280 px: the state,
+   the figures ("Bulletins" while a single poll is open), the entries and their lock, the
+   running chronometer, opening or closing the session. On a phone, one compact block; closing
+   the session moves to the foot of Steering (.session-end), the bar keeps the opening. */
+.status-bar { margin-bottom: 1rem; padding: 0.6rem 0.9rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+@media (min-width: 960px) { .status-bar { position: sticky; top: 0; z-index: 20; } }
+.status-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
+.status-figures { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; }
+@media (max-width: 959px) {
+  .status-bar { padding: 0.45rem 0.7rem; }
+  .status-row { gap: 0.35rem 0.9rem; }
+  .status-figures { gap: 0.15rem 0.9rem; }
+  [data-status="in_session"] > .status-action { display: none; }
+}
+/* The count of open polls is a link: a 24 px box at least (WCAG 2.5.8), not the width of one
+   digit. */
+.status-figures a { display: inline-block; min-width: 24px; min-height: 24px; }
+.status-figures div { display: grid; }
+.status-figures dt, .status-label { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.status-figures dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.status-ballots dd, .status-figures .status-ballots a { color: var(--live); }
+.status-ok { color: var(--success); }
+.status-warn { color: var(--warning); }
+.status-entries { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0; }
+.status-entries .status-label svg.icon { color: var(--muted); }
+.status-timer {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.45rem; align-items: center; min-width: 0;
+  padding: 0.15rem 0.65rem; border-radius: 8px; background: var(--bg); color: var(--text); text-decoration: none;
+}
+.status-timer svg.icon { grid-row: 1 / span 2; width: var(--icon-md); height: var(--icon-md); }
+.status-timer .status-label { max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-clock { font-size: 1.1rem; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.status-timer.is-paused .status-clock { color: var(--muted); }
+.status-timer.is-overtime { background: var(--danger); color: #fff; }
+.status-timer.is-overtime .status-label { color: #fde2e0; }
+.status-action { margin-left: auto; }
+.status-action form { margin: 0; }
+/* Closing the session at the foot of Steering, on a phone only (the status bar has it on a
+   computer). */
+.session-end {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; justify-content: space-between;
+  margin-top: 1rem; padding: 0.85rem 1rem; border: 1px dashed var(--border-strong); border-radius: var(--radius);
+}
+.session-end p { margin: 0; color: var(--muted); font-size: var(--fs-sm); }
+@media (min-width: 960px) { .session-end { display: none; } }
+.status-alert { margin: 0.6rem 0 0; }
+
+/* Rubrics. */
+.rubric { display: grid; gap: 1rem; align-content: start; }
+.rubric + .rubric { margin-top: 2.5rem; }
+.rubric > .card, .rubric > details.card { margin: 0; }
+.rubric-title { margin: 0; font-size: 1.35rem; }
+.rubric[hidden] { display: none; }
+html.console-js:not(.console-ready) [data-rubric]:not([data-default]) { display: none; }
+html.console-ready .rubric + .rubric { margin-top: 0; }
+@media (min-width: 960px) { .console-main [id] { scroll-margin-top: 7rem; } }
+
+/* Before the opening: the recap at the head of Meeting, one short line per step. The mark gives
+   its state (a tick when ready, amber when to do, dashed when optional), the note what it lacks
+   (amber) or holds, and a step whose card sits in another rubric ends with that rubric's icon
+   and short name. The whole line is one link to the card, or, for the trial vote not created
+   yet, a form whose button creates it. Two columns on a wide screen; on a phone the note goes
+   under the name. */
+.checklist-card > .card-head { margin-bottom: 0.35rem; }
+.checklist { list-style: none; margin: 0 0 0.5rem; padding: 0; }
+@media (min-width: 1200px) { .checklist { columns: 2; column-gap: 1.5rem; } }
+.check-step { break-inside: avoid; }
+.check-step a, .check-form {
+  display: grid; grid-template-columns: 1.1rem auto minmax(0, 1fr) auto; gap: 0.1rem 0.6rem; align-items: center; min-height: 2.25rem;
+  margin: 0 -0.5rem; padding: 0.2rem 0.5rem; border-radius: 6px; color: var(--text); text-decoration: none;
+}
+.check-step a:hover { background: var(--accent-soft); color: var(--text); }
+.check-label { font-weight: 600; }
+.check-note { min-width: 0; color: var(--muted); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+.check-home { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--accent); font-size: var(--fs-sm); font-weight: 600; white-space: nowrap; }
+.check-home svg.icon { color: var(--accent-strong); }
+.check-missing { color: var(--warning); font-weight: 700; }
+@media (max-width: 559px) {
+  .check-step a, .check-form { grid-template-columns: 1.1rem minmax(0, 1fr) auto; }
+  .check-note { grid-column: 2 / -1; grid-row: 2; }
+}
+.check-mark { box-sizing: border-box; width: 1.1rem; height: 1.1rem; border: 2px solid var(--warning); border-radius: 50%; display: grid; place-items: center; font-size: 0.7rem; font-weight: 800; line-height: 1; }
+.is-done .check-mark { background: var(--success); border-color: var(--success); color: #fff; }
+.is-done .check-mark::before { content: "\2713"; }
+.is-optional .check-mark { border-color: var(--border-strong); border-style: dashed; }
+
+/* Steering during the session: commands (D-A), compact cards that act at once and lead to their
+   card ("Dans Séance ›"). Head: the icon and name of the command, the delegation, the way to
+   the card; body: the state in one line and one or two actions. */
+.cmd { display: grid; gap: 0.6rem; align-content: start; }
+.cmd-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem; }
+.cmd-head h2 { display: inline-flex; align-items: center; gap: 0.5rem; margin: 0; font-size: var(--fs-lg); }
+.cmd-head h2 svg.icon { flex: none; width: var(--icon-md); height: var(--icon-md); color: var(--accent-strong); }
+/* The way to the card of a feature ("Dans Votes ›", "Exports de ce vote, dans Documents ›"):
+   the icon of its rubric, the words, a chevron; a 24 px box at least (WCAG 2.5.8). */
+.to-home { display: inline-flex; align-items: center; gap: 0.3rem; min-height: 24px; font-size: var(--fs-sm); font-weight: 600; text-decoration: none; }
+.to-home:hover span { text-decoration: underline; }
+.cmd-head .to-home { margin-left: auto; }
+.cmd-state { margin: 0; color: var(--muted); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+.cmd-state strong { color: var(--text); }
+.cmd-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.cmd-actions form, .cmd-line form, .cmd form.row { margin: 0; }
+.cmd-line { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; align-items: center; justify-content: space-between; margin: 0; }
+/* The body of a command refreshed live (data-live-part: #agenda-now, #ready): laid out as if its
+   children sat in the command itself. */
+.cmd-part { display: grid; gap: 0.6rem; align-content: start; min-width: 0; }
+.cmd-part > :last-child { margin-bottom: 0; }
+.cmd .verdict { margin: 0; }
+.cmd .alert { margin: 0; }
+.cmd .agenda-now-item { font-size: 1.25rem; }
+.cmd .agenda-track { margin: 0.2rem 0 0; }
+.cmd .ready-item { padding: 0.45rem 0.65rem; }
+.cmd .timer-summary { flex: 1 1 10rem; padding: 0.45rem 0.65rem; }
+.cmd .timer-hide { margin: 0; }
+.cmd-clock { display: grid; margin: 0; }
+.cmd-clock .clock { font-size: 2rem; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cmd-clock.is-paused .clock { color: var(--muted); }
+.cmd-clock.is-overtime .clock { color: var(--danger); }
+.cmd-over { padding: 0 0.45rem; border-radius: 999px; background: var(--danger); color: #fff; font-weight: 800; }
+.cmd-over[hidden] { display: none; }
+.cmd-note textarea { min-height: 3.2rem; }
+.cmd-note .notes-actions { margin-top: 0.25rem; }
+.cmd-note .notes-form .hint { margin-top: 0.25rem; }
+.cmd-join { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.75rem; align-items: center; }
+.cmd-join .qr { width: 96px; }
+.cmd-join .secret { font-size: 1.35rem; }
+.cmd-join p, .cmd .join-address { margin: 0; }
+
+/* Steering during the session: cockpit. */
+.cockpit { display: grid; gap: 1rem; align-items: start; }
+@media (min-width: 1200px) { .cockpit { grid-template-columns: minmax(0, 1fr) 20rem; } }
+.cockpit-main, .cockpit-side { display: grid; gap: 1rem; align-content: start; min-width: 0; }
+.cockpit .card { margin: 0; }
+.agenda-step { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; }
+.agenda-now-text { min-width: 0; }
+.agenda-now-text p { margin: 0; }
+.agenda-now-item { font-size: 1.35rem; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+.agenda-step-buttons { display: flex; gap: 0.5rem; }
+.agenda-step-buttons .button { min-height: var(--tap); }
+@media (max-width: 559px) { .agenda-step-buttons { width: 100%; } .agenda-step-buttons .button { flex: 1; } }
+.agenda-track { list-style: none; margin: 0.8rem 0 0.5rem; padding: 0; display: flex; gap: 0.25rem; }
+.agenda-track li { flex: 1; height: 0.4rem; border-radius: 999px; background: #e1e5eb; }
+.agenda-track li.is-done { background: #a9bbe3; }
+.agenda-track li.is-current { background: var(--accent); }
+#live > h2 { margin-bottom: 0.75rem; }
+/* Card head: the title, then a quiet or secondary button, or the pill of a delegation
+   (.badge.delegate); wraps under the title when the card is narrow. */
+.card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.4rem 0.75rem; margin-bottom: 0.75rem; }
+.card-head h2 { margin: 0; }
+.rubric > .alert { margin: 0; }
+.ready-item { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.55rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; }
+.ready-text { display: grid; min-width: 0; overflow-wrap: anywhere; }
+.ready-item form { flex: none; margin: 0; }
+.ready-item .button { white-space: nowrap; }
+.join-address { overflow-wrap: anywhere; }
+
+/* Steering after the close: summary. */
+.summary-figures { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; margin: 0 0 1rem; }
+.summary-figures div { display: grid; }
+.summary-figures dt { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.summary-figures dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.access-password { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.access-password .qr { width: 180px; }
+/* Generated password in groups of digits, as on the projection screen (screen/macros.html). */
+.secret span + span { margin-left: 0.35em; }
+.access-mode { margin-top: 1rem; }
+.inline-field { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; flex-wrap: wrap; }
+.inline-field.grow { flex: 1; }
+.inline-field.grow input { flex: 1; min-width: 12rem; }
+input.short { width: 7rem; }
+details > summary { cursor: pointer; min-height: 2rem; padding: 0.2rem 0; }
+details[open] > summary { margin-bottom: 0.75rem; }
+
+
+.open-polls, .poll-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
+.open-poll, .poll-item { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; }
+.open-poll { border-left: 4px solid var(--live); }
+.open-poll progress.bar { margin: 0.5rem 0 0.25rem; }
+.finished-poll { border: 1px solid var(--border); border-radius: var(--radius); }
+/* A poll's tile in Polls (macros/polls.html): folded by default, its title and state in the
+   summary, a chevron that turns once it is unfolded; drafts, polls open now and finished polls
+   alike. */
+.poll-tile { padding: 0 0.75rem; }
+.poll-tile > summary.poll-tile-head { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; min-height: var(--tap); padding: 0.55rem 0; }
+.poll-tile > summary.poll-tile-head::-webkit-details-marker { display: none; }
+.poll-tile[open] { padding-bottom: 0.75rem; }
+.poll-tile[open] > summary.poll-tile-head { margin-bottom: 0.6rem; border-bottom: 1px solid var(--border); }
+.poll-tile-chevron { display: inline-flex; color: var(--muted); transition: transform 0.15s ease; }
+.poll-tile[open] > summary .poll-tile-chevron { transform: rotate(90deg); }
+.poll-tile-title { flex: 1 1 12rem; min-width: 0; overflow-wrap: anywhere; }
+.poll-tile-state { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
+@media (prefers-reduced-motion: reduce) { .poll-tile-chevron { transition: none; } }
+#results > .hint { margin-bottom: 1rem; }
+.finished-poll .actions { margin-top: 0.75rem; }
+.digest { word-break: break-all; }
+.cancel { margin-top: 0.5rem; }
+.danger-zone { border-color: var(--danger-line); }
+
+/* Printable code cards: 10 per A4 page, dashed borders as cut lines (FR-23). */
+.print-codes { background: #fff; }
+.codes-toolbar { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
+.code-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); max-width: 900px; margin: 0 auto 2rem; }
+.code-card { display: flex; gap: 4mm; align-items: center; padding: 4mm 5mm; border: 1px dashed #9aa1ab; min-height: 55mm; break-inside: avoid; }
+.code-card .qr { width: 34mm; flex: none; }
+.code-card-title { font-weight: 700; margin-bottom: 1mm; }
+.code-card-code { font-size: 1.5rem; font-weight: 800; letter-spacing: 0.12em; margin-bottom: 1mm; }
+.code-card-text p { margin-bottom: 1mm; }
+
+@media print {
+  @page { size: A4; margin: 10mm; }
+  .no-print { display: none; }
+  body { min-height: 0; }
+  .code-cards { grid-template-columns: 1fr 1fr; max-width: none; margin: 0; }
+  .code-card { height: 55mm; }
+}
+
+/* --- Drafts list, code generation --- */
+.draft-head { display: flex; gap: 0.6rem; align-items: flex-start; margin-bottom: 0.5rem; }
+.draft-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.draft-text p { margin: 0.15rem 0 0; }
+.draft-move { order: 2; display: flex; gap: 0.35rem; flex: none; }
+.draft-move .button.move { min-width: 44px; min-height: 44px; padding: 0; font-size: 1.15rem; }
+.draft-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.draft-actions > form { margin: 0; }
+.draft-actions .menu { margin-left: auto; }
+
+/* "⋯" menu: a details element whose panel opens under its button, aligned on the right. */
+.menu { position: relative; }
+.menu > summary { list-style: none; min-width: 44px; font-size: 1.15rem; line-height: 1; }
+.menu > summary::-webkit-details-marker { display: none; }
+.menu[open] > summary { margin-bottom: 0; background: var(--accent-soft); }
+.menu-panel {
+  position: absolute; z-index: 15; right: 0; top: calc(100% + 0.35rem); min-width: 15.5rem; max-width: calc(100vw - 2rem);
+  display: grid; gap: 0.1rem; padding: 0.4rem; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-pop);
+}
+.menu-panel form { margin: 0; }
+.menu-item {
+  display: flex; align-items: center; width: 100%; min-height: var(--tap); padding: 0.55rem 0.75rem; border: 0; border-radius: 6px;
+  background: none; color: var(--text); font: inherit; font-weight: 500; text-align: left; text-decoration: none; cursor: pointer;
+}
+.menu-item:hover { background: var(--bg); color: var(--text); }
+.menu-item.danger { color: var(--danger); }
+.menu-panel .menu-timer { display: grid; gap: 0.5rem; padding: 0.5rem 0.6rem 0.75rem; margin-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
+.codes-form { display: grid; gap: 0.75rem; margin-bottom: 1rem; }
+
+/* --- Screen: secret links (projection screen, public results) --- */
+.links > * + * { margin-top: 0.6rem; }
+.links h2 { margin-bottom: 0; }
+.link-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.link-row .link-url { flex: 1 1 14rem; min-width: 0; min-height: 36px; padding: 0.3rem 0.5rem; font-size: 0.85rem; background: var(--bg); }
+.link-row [data-copy][hidden] { display: none; }
+
+/* --- Results and exports: the way to the poll's exports (Documents), digest --- */
+.export-links { margin: 0.6rem 0 0; }
+.finished-poll .digest { margin-top: 0.75rem; }
+
+/* --- Documents (D-H): every download of the session in one place. A row per document (icon,
+   what it holds, its button), then the table "Par vote", the title of each poll as the header
+   of its row. --- */
+.doc-list { list-style: none; margin: 0 0 0.75rem; padding: 0; display: grid; gap: 0.5rem; }
+.doc-item {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.25rem 0.85rem; align-items: center;
+  padding: 0.7rem 0.85rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.doc-item > svg.icon { width: var(--icon-lg); height: var(--icon-lg); color: var(--accent-strong); }
+.doc-item p { margin: 0; }
+.doc-item .doc-what { font-weight: 700; }
+@media (max-width: 559px) {
+  .doc-item { grid-template-columns: auto minmax(0, 1fr); }
+  .doc-item > .button, .doc-item > .to-home { grid-column: 2; justify-self: start; }
+}
+table.poll-exports tbody th { color: var(--text); font-size: inherit; font-weight: 500; overflow-wrap: break-word; }
+.poll-exports th svg.icon { color: var(--muted); }
+.poll-exports td .row { gap: 0.35rem 0.9rem; }
+.poll-exports a { display: inline-flex; align-items: center; gap: 0.3rem; min-height: 24px; white-space: nowrap; }
+@media (max-width: 559px) {
+  .poll-exports thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .poll-exports, .poll-exports tbody { display: block; }
+  .poll-exports tr { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.25rem 0.6rem; padding: 0.65rem 0; border-bottom: 1px solid var(--border); }
+  table.poll-exports td, table.poll-exports th { display: block; padding: 0; border: 0; }
+  table.poll-exports td:last-child { grid-column: 2; }
+}
+
+/* --- Rubrics in pairs (Access and attendance, Projection screen): two cards side by side on a
+   computer, of the same height. --- */
+.rubric-pair > .card { margin: 0; }
+.entries-card .badge svg.icon { margin-right: 0.3em; }
+.entries-card form.actions { margin-bottom: 0.75rem; }
+
+/* --- "Ce que la salle voit": what the screen shows now, in words; what it leaves out in grey. */
+.screen-recap { list-style: none; margin: 0 0 0.75rem; padding: 0; display: grid; gap: 0.1rem; }
+.screen-recap li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.6rem; align-items: start; padding: 0.45rem 0; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.screen-recap li:last-child { border-bottom: 0; }
+.screen-recap svg.icon { margin-top: 0.2rem; color: var(--muted); }
+.screen-recap .is-off { color: var(--muted); }
+/* The button of a block, at the end of its line: hide what the screen shows, show what it
+   leaves out. */
+.screen-recap li:has(> .recap-toggle) { grid-template-columns: auto minmax(0, 1fr) auto; }
+.recap-toggle { align-self: center; }
+.recap-toggle .button { white-space: nowrap; }
+
+/* --- Steering after the session: the summary, then the commands that lead to the cards. --- */
+.after-commands { align-items: start; }
+.after-commands > .card { margin: 0; }
+
+/* --- Session: tribune and agenda --- */
+.meeting-edit { margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 0.25rem; }
+.meeting-edit > summary { font-weight: 600; min-height: var(--tap); padding: 0.7rem 0; }
+.meeting-edit[open] > summary { margin-bottom: 0.5rem; }
+.meeting-edit form > input[type="hidden"] + * { margin-top: 0; }
+.meeting-edit .alert ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+.meeting-edit .alert p { margin: 0; }
+.meeting-error { color: var(--danger); font-weight: 600; font-size: 0.9rem; margin: 0.35rem 0 0; }
+.meeting-error::before { content: "\26a0\00a0"; }
+.meeting input[aria-invalid="true"], .meeting textarea[aria-invalid="true"] { border-color: var(--danger); }
+.tribune-list { list-style: none; padding: 0; margin: 0 0 0.6rem; display: grid; gap: 0.35rem; }
+.tribune-list li { overflow-wrap: anywhere; }
+.tribune-role { color: var(--muted); }
+.tribune-rows { display: grid; gap: 0.75rem; }
+.tribune-row { border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 0 0 0.75rem; margin: 0; min-width: 0; }
+.tribune-fields { display: grid; gap: 0.5rem; }
+.tribune-fields label { font-size: 0.9rem; }
+@media (min-width: 640px) { .tribune-fields { grid-template-columns: 1fr 1fr; } }
+.tribune-add { min-width: var(--tap); padding: 0; font-size: 1.6rem; font-weight: 500; line-height: 1; }
+.tribune-add[hidden] { display: none; }
+.attendance > summary { min-height: var(--tap); padding: 0.7rem 0; }
+.attendance-table { font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.attendance-table th, .attendance-table td { padding: 0.4rem 0.35rem; }
+.attendance .hint { margin-top: 0.5rem; }
+/* Agenda card: one text area, one item per line, edited in place (agenda.js marks unsaved
+   changes); under it the choice of the item under discussion. */
+.agenda-form .hint { margin-bottom: 0.35rem; }
+.agenda-form textarea { min-height: 5rem; max-height: 60vh; }
+.agenda-errors .meeting-error { margin-top: 0.3rem; }
+.agenda-form .agenda-elsewhere { margin: 0; color: var(--warning-ink); font-weight: 600; }
+.agenda-form .agenda-elsewhere:not(:empty) { margin-top: 0.4rem; }
+.agenda-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.75rem; margin-top: 0.6rem; }
+.agenda-actions [hidden] { display: none; }
+.agenda-unsaved { color: var(--warning-ink); font-size: 0.9rem; font-weight: 600; }
+.agenda-saved { color: var(--success-ink); font-size: 0.9rem; }
+.agenda-current { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.35rem 0.5rem; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid var(--border); }
+.agenda-current label { grid-column: 1 / -1; font-weight: 600; }
+@media (min-width: 560px) {
+  .agenda-current { grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 0.75rem; }
+  .agenda-current label { grid-column: auto; }
+}
+.agenda-read { margin: 0 0 0.5rem; padding-left: 1.75rem; display: grid; gap: 0.25rem; overflow-wrap: anywhere; }
+.notes-form textarea { min-height: 5.5rem; }
+.notes-form .hint { margin-top: 0.35rem; }
+.notes-actions { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; align-items: center; justify-content: space-between; margin-top: 0.4rem; }
+.notes-actions .button { min-width: 8rem; }
+.notes-list { list-style: none; padding: 0; margin: 1rem 0 0.75rem; display: grid; gap: 0.6rem; }
+.note { border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.75rem; min-width: 0; }
+.note.is-internal { border-style: dashed; background: var(--bg); }
+.note-meta { margin: 0 0 0.25rem; font-size: 0.85rem; color: var(--muted); overflow-wrap: anywhere; }
+.note-text { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+.note-edit { margin-top: 0.25rem; }
+.note-edit > summary { font-size: 0.9rem; color: var(--accent); min-height: 2.5rem; padding: 0.45rem 0; }
+.note-delete { margin-top: 0.75rem; }
+
+/* --- Screen: chronometer card (FR-74), usable on a phone --- */
+/* The "not shown on the screen" pill, first in the part that timer.js replaces. */
+.timer-card [data-timer-status] > p:first-child { margin: 0 0 0.6rem; }
+/* The clock takes its size from the width of the card, so "10:00:00" or "+1:00:40" always fits
+   with a margin (cqi: 1 % of the face's width; older browsers keep the fixed size before it). */
+.timer-face { container-type: inline-size; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); text-align: center; }
+.timer-face-label { margin: 0; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); overflow-wrap: anywhere; }
+.timer-face-clock { margin: 0; font-size: 2.4rem; font-size: min(3rem, 16cqi); font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.timer-face-state { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; justify-content: center; margin: 0; font-size: 0.9rem; font-weight: 600; }
+.timer-face.is-paused .timer-face-clock { color: var(--muted); }
+.timer-face.is-overtime { background: var(--danger); border-color: var(--danger); color: #fff; }
+.timer-face.is-overtime .timer-face-label, .timer-face.is-overtime .muted { color: #fde2e0; }
+.timer-face.is-overtime .timer-face-clock { color: #fff; }
+.timer-face [data-timer-over] { padding: 0 0.55rem; border-radius: 999px; background: #fff; color: var(--danger); font-weight: 800; }
+.timer-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.timer-controls form { margin: 0; }
+.timer-hide { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; margin-bottom: 0.9rem; padding: 0.5rem 0.75rem; border-radius: 8px; background: var(--success-soft); }
+.timer-setup { display: grid; gap: 1rem; }
+.timer-setup fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.timer-setup legend { margin-bottom: 0.4rem; padding: 0; font-weight: 600; }
+.timer-setup .checkbox { min-height: 0; }
+/* Mode segments and duration chips: real radios (no script needed), hidden but focusable; the
+   choice shows by a check mark as well as by colour. The edge is the only outline of the
+   control: --border-strong, 3:1 (WCAG 1.4.11). */
+.segments { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.segment, .chip { position: relative; display: block; cursor: pointer; }
+.segment input, .chip input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.segment span { display: flex; flex-direction: column; justify-content: center; height: 100%; min-height: var(--tap); padding: 0.55rem 0.75rem; border: 2px solid var(--border-strong); border-radius: 8px; background: var(--surface); }
+.segment small { color: var(--muted); font-size: 0.82rem; font-weight: 500; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip span { display: inline-flex; align-items: center; min-height: var(--tap); padding: 0.4rem 0.95rem; border: 2px solid var(--border-strong); border-radius: 999px; background: var(--surface); font-weight: 600; }
+.segment input:checked + span { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.chip input:checked + span { border-color: var(--accent); background: var(--accent); color: #fff; }
+.segment input:checked + span strong::before, .chip input:checked + span::before { content: "\2713\00a0"; }
+.segment input:focus-visible + span, .chip input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.timer-custom { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.6rem; }
+.timer-custom[hidden], .timer-card [data-no-script-hint][hidden] { display: none; }
+/* Setup folded under the line of the last choice: compact in the cockpit and on a phone. */
+.timer-summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.6rem; margin: 0; padding: 0.6rem 0.75rem; border-radius: 8px; background: var(--bg); }
+.timer-summary [hidden] { display: none; }
+.timer-summary-label { color: var(--muted); overflow-wrap: anywhere; }
+.timer-settings > summary { min-height: var(--tap); padding: 0.65rem 0; color: var(--accent); font-weight: 600; }
+.timer-settings[open] > summary { margin-bottom: 0.25rem; }
+.timer-settings-body { display: grid; gap: 1rem; }
+.timer-custom input.short { width: 4.5rem; }
+
+/* --- Delegate links (FR-92) --- */
+@media (min-width: 1200px) { .cockpit.is-single { grid-template-columns: minmax(0, 1fr); max-width: 48rem; } }
+/* The card of Settings (_delegates.html): its "+" in the head, square like the tribune's; one
+   tile per link, bordered like the drafts of Polls, two side by side when the card is wide
+   enough; the tile of a new link folded (.is-folded) until the "+" makes it the target. */
+.delegates-add { width: 36px; padding: 0; }
+.delegates-add.tip::after { left: auto; right: 0; transform: none; }  /* at the card's right edge */
+.delegate-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr)); margin-top: 0.75rem; }
+.delegate-item { display: flex; flex-direction: column; gap: 0.85rem; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.85rem; }
+.delegate-item h3 { margin: 0; overflow-wrap: anywhere; }
+.delegate-head { gap: 0.25rem 0.75rem; }
+.delegate-item form { margin: 0; }
+.delegate-new { border-style: dashed; border-color: var(--border-strong); }
+.delegate-new.is-folded:not(:target) { display: none; }
+.delegate-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: space-between; margin-top: auto; }
+.delegate-actions form { margin: 0; }
+.delegate-badges { gap: 0.35rem; margin: 0; }
+.delegate-link { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+.delegate-link .qr { width: 168px; flex: none; }
+.delegate-item .delegate-link .qr { width: 120px; }
+.delegate-link .stack { flex: 1 1 16rem; min-width: 0; }
+.delegate-item .delegate-link .stack { flex-basis: 12rem; }
+.delegate-item .delegate-link .stack > * + * { margin-top: 0.5rem; }
+.delegate-rights { min-width: 0; padding: 0; border: 0; }
+.delegate-rights legend { padding: 0; margin-bottom: 0.2rem; }
+.delegate-rights-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr)); column-gap: 1rem; }
+.delegate-home p { margin: 0 0 0.5rem; }
+.delegate-join .mono { font-size: 0.9rem; }
+.topbar-delegate { font-weight: 600; color: var(--accent-strong); overflow-wrap: anywhere; }
+/* The delegation of a card's or command's head (D-G, owner only): the pill "Confié à …", a link
+   to the link in Settings, then one compact "Confier" toggle, a disclosure closed by default.
+   Open, the toggle keeps its place and size and looks pressed (filled); its panel floats over
+   the card, so opening it neither resizes the card nor moves anything in it: under the
+   toggle's line (its static position, top: auto), on the card's right edge (the card is its
+   containing block), 24rem wide on a computer, the card's width on a phone; it covers what
+   follows until the toggle, Escape or "Fermer" closes it. The panel holds the form of a new
+   link, or the link just created (address, copy, QR code). Pills keep a 24 px target (WCAG
+   2.5.8). */
+.card:has(.hand-over-slot) { position: relative; }
+.hand-over-slot { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
+.hand-over > summary {
+  display: inline-flex; align-items: center; gap: 0.35rem; min-height: 32px; margin: 0; padding: 0.2rem 0.65rem;
+  border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface);
+  color: var(--accent-strong); font-size: var(--fs-sm); font-weight: 600; list-style: none; cursor: pointer;
+}
+.hand-over > summary::-webkit-details-marker { display: none; }
+.hand-over > summary:hover { background: var(--accent-soft); }
+.hand-over > summary svg.icon { width: 1em; height: 1em; }
+.hand-over[open] > summary {
+  margin-bottom: 0; background: var(--accent-strong); border-color: var(--accent-strong); color: #fff;
+  box-shadow: inset 0 1px 3px rgb(16 24 40 / 35%);
+}
+.hand-over[open] > summary:hover { background: var(--accent); border-color: var(--accent); }
+.hand-over-panel {
+  position: absolute; z-index: 15; right: 1.25rem; width: 24rem; max-width: calc(100vw - 2rem);
+  display: grid; gap: 0.6rem; margin-top: 0.4rem; padding: 0.85rem 1rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-pop);
+  text-align: left; font-size: var(--fs-md); font-weight: 400; color: var(--text);
+  scroll-margin-bottom: 1rem;
+}
+/* Room under the panel: positioned, it lengthens the page without the page's own bottom padding,
+   so at the foot of a rubric its last line would stay under the bottom tabs of a phone. */
+.hand-over-panel::after { content: ""; position: absolute; top: 100%; left: 0; width: 1px; height: 1rem; pointer-events: none; }
+@media (max-width: 959px) {
+  .hand-over-panel { scroll-margin-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)); }
+  .hand-over-panel::after { height: calc(6rem + env(safe-area-inset-bottom, 0px)); }
+}
+@media (max-width: 599px) { .hand-over-panel { left: 0.5rem; right: 0.5rem; width: auto; } }
+.hand-over-panel .hint { margin: 0; }
+.hand-over-created [data-hand-over-close] { margin-top: 0.5rem; }
+.hand-over-created [data-hand-over-close][hidden] { display: none; }
+.hand-over-more > summary { min-height: 2rem; color: var(--accent); font-weight: 600; }
+.hand-over-more[open] > summary { margin-bottom: 0.25rem; }
+.hand-over-created p { margin: 0 0 0.5rem; }
+.hand-over-created .delegate-link .qr { width: 132px; }
+a.badge { display: inline-flex; align-items: center; min-height: 24px; text-decoration: none; }
+a.badge.delegate:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.delegate-home .delegate-badges a.badge:hover { background: var(--accent-soft); color: var(--accent-strong); }
+
+/* Meeting rubric (D-B): details and tribune side by side on a computer, then the agenda and the
+   notes. */
+.meeting-head-cards { align-items: start; }
+.meeting-head-cards > .card, .meeting-side > .card { margin: 0; }
+.meeting-side { display: grid; gap: 1rem; align-content: start; min-width: 0; }
+.details-figures { gap: 0.5rem 1.5rem; margin: 0 0 0.75rem; }
+.details-figures dd { font-weight: 600; overflow-wrap: anywhere; }
+.card-head h2 svg.icon, .card > h2 > svg.icon, details.card > summary svg.icon { color: var(--accent-strong); }

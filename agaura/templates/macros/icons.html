@@ -1,0 +1,48 @@
+{#- Icons (charter v2). One self-hosted sprite, agaura/static/icons.svg (Lucide 1.60.0, ISC;
+    licence in agaura/static/LICENSE-icons.txt; the symbols i-agaura and i-agaura-reversed are
+    AGaura's own mark), referenced with <use>: same origin, so the CSP (default-src 'self') allows
+    it, and no inline style is needed. Import with context:
+    {% from "macros/icons.html" import icon, icon_button with context %}
+
+    icon(name)               decorative: aria-hidden, the text next to it names the thing.
+    icon(name, label)        alone and meaningful (rare: a state in a table cell): role="img" and
+                             the label as its accessible name.
+    icon_button(name, label, tip=None)
+                             an icon-only button (order arrows, "⋯", remove an option, full
+                             screen): aria-label, and a visible tooltip on hover and keyboard
+                             focus (.tip, app.css) with the same words, or a shorter form of them
+                             (label "Move up: Rapport moral", tip "Move up").
+
+    voter_icon(name, label=None, size=None)
+                             the same, from icons-voter.svg: the few symbols of the voter pages,
+                             so their first load stays light (NFR-04). The voter templates import
+                             it as icon ({% from "macros/icons.html" import voter_icon as icon %}):
+                             the choice lives in the template, never in the context, so a padded
+                             vote step (agaura/web/live/padding.py) renders the very same markup.
+                             A new icon there: copy its symbol from icons.svg into icons-voter.svg.
+
+    Sizes follow the text (1.15em) unless size is "sm" (16 px), "md" (20 px) or "lg" (24 px).
+    tests/web/test_icons.py checks that every name used in the templates is a symbol of the
+    sprite they use (the voter sprite kept identical to icons.svg), and that no
+    <svg class="icon"> lacks aria-hidden or role="img". -#}
+
+{% macro _svg(sprite, name, label, size) -%}
+<svg class="icon{% if size %} icon-{{ size }}{% endif %}"
+  {%- if label %} role="img" aria-label="{{ label }}"{% else %} aria-hidden="true"{% endif %} focusable="false">
+  <use href="{{ static_url(sprite) }}#i-{{ name }}"></use></svg>
+{%- endmacro %}
+
+{% macro icon(name, label=none, size=none) -%}{{ _svg("icons.svg", name, label, size) }}{%- endmacro %}
+
+{% macro voter_icon(name, label=none, size=none) -%}{{ _svg("icons-voter.svg", name, label, size) }}{%- endmacro %}
+
+{% macro icon_button(name, label, tip=none, type="submit", classes="button small", attrs={}) -%}
+<button type="{{ type }}" class="{{ classes }} tip" aria-label="{{ label }}" data-tip="{{ tip or label }}"
+  {%- for key, value in attrs.items() %} {{ key }}="{{ value }}"{% endfor %}>{{ icon(name) }}</button>
+{%- endmacro %}
+
+{#- Examples (French UI text always comes from the catalogs through _()):
+
+  <a href="#tab-polls" data-rubric-link>{{ icon("vote") }}<span>{{ _("Polls") }}</span></a>
+  {{ icon_button("arrow-up", _("Move up: %(title)s", title=poll.title), tip=_("Move up"), attrs={"name": "direction", "value": "up"}) }}
+-#}

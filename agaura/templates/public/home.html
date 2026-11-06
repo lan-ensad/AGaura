@@ -1,0 +1,53 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/ethics.html" import ethics with context %}
+{% from "macros/demo.html" import offer with context %}
+{% block content %}
+<section class="hero">
+  <h1>{{ _("Vote in your general assembly, from your phone") }}</h1>
+  <p class="lead">{{ _("The tribune pushes each vote in real time; members answer in a few seconds, with no app to install. Ballots stay secret.") }}</p>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>{{ _("Join a session") }}</h2>
+    <form method="get" action="/join" class="stack">
+      <div class="field">
+        <label for="field-session">{{ _("Session ID") }}</label>
+        <p class="hint" id="hint-session">{{ _("Six characters, shown in the room (e.g. K7M4QX).") }}</p>
+        <input id="field-session" name="session" value="{{ session | default('') }}" required
+          autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" aria-describedby="hint-session">
+      </div>
+      <button type="submit" class="button primary">{{ _("Join") }}</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>{{ _("Organize a session") }}</h2>
+    {% if user and user.is_superadmin %}
+    <p>{{ _("Your account manages the accounts of the platform.") }}</p>
+    <p><a class="button primary" href="/superadmin">{{ _("Manage the accounts") }}</a></p>
+    {% elif user %}
+    <p>{{ _("Create a session and prepare its polls from your dashboard.") }}</p>
+    <p><a class="button primary" href="/dashboard">{{ _("Go to the dashboard") }}</a></p>
+    {% elif request.app.state.settings.signup_open %}
+    <p>{{ _("An account is needed to create sessions. It is free.") }}</p>
+    <p class="actions">
+      <a class="button primary" href="/signup">{{ _("Create an account") }}</a>
+      <a class="button" href="/login">{{ _("Log in") }}</a>
+    </p>
+    {{ offer() }}
+    {% else %}
+    {% set contact = request.app.state.settings.contact_email %}
+    {% set contact_link %}<a href="mailto:{{ contact }}">{{ contact }}</a>{% endset %}
+    <p>{{ _("To get an account, write to %(email)s.", email=contact_link) }}</p>
+    <p class="actions"><a class="button primary" href="/login">{{ _("Log in") }}</a></p>
+    {{ offer() }}
+    {% endif %}
+  </section>
+</div>
+
+<section class="card ethics-card" aria-labelledby="ethics-title">
+  <h2 id="ethics-title">{{ _("Service ethics") }}</h2>
+  {{ ethics() }}
+</section>
+{% endblock %}

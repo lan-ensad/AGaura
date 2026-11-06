@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+dist/
+build/
+*.egg-info/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local configuration and data
+.env
+.env.*
+!.env.example
+data/
+logs/
+backups/
+*.db
+*.db-*
+*.sqlite3
+*.sqlite3-*
+
+# Exports downloaded from the console during manual tests: code cards carry individual voter
+# codes, ballots CSV and JSON exports carry session data (docs/EXPORTS.md)
+agaura-*.pdf
+agaura-*.csv
+agaura-*.json
+
+# Claude Code personal settings
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store

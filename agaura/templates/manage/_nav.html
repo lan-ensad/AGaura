@@ -1,0 +1,73 @@
+{#- Console navigation (console.html): the session and one link per rubric. A sidebar from 960 px;
+    below, the session heads the page and a bar of tabs stays at the bottom of the screen: the
+    rubric the console lands on (Steering once the session is open, Meeting before), Polls,
+    Agenda and Access, then a "More" menu holding the other rubrics, in the order of the
+    sidebar. manage.js marks the rubric shown with aria-current; without script the links jump
+    to the stacked rubrics. Steering is listed once the session is open (steering_rubric of
+    console.html), with the pill "live" during it. A delegate link (FR-92) lists only the
+    rubrics of its rights (agenda_rubric, access_rubric, screen_rubric of console.html), each
+    as a tab, and no "More" menu. Each rubric has its icon, the same in the sidebar, the tabs
+    and "More" (decorative: the label names the rubric). -#}
+{% from "macros/icons.html" import icon with context %}
+{% set drafts_count = state.drafts | length %}
+{% set agenda_items = assembly.agenda or [] %}
+{% macro count(text, label=none) -%}
+<span class="nav-count"{% if label %} aria-label="{{ label }}"{% endif %}>{{ text }}</span>
+{%- endmacro %}
+{% macro steering_count() -%}
+{% if in_session %}<span class="nav-count is-live">{{ _("live") }}</span>{% endif %}
+{%- endmacro %}
+{% macro polls_count() -%}
+{% if drafts_count %}{{ count(drafts_count, ngettext("%(num)s draft", "%(num)s drafts", drafts_count)) }}{% endif %}
+{%- endmacro %}
+{% macro agenda_count() -%}
+{% if agenda_items and assembly.agenda_current %}{{ count(_("%(number)s/%(count)s", number=assembly.agenda_current, count=agenda_items | length), _("Item %(number)s of %(count)s", number=assembly.agenda_current, count=agenda_items | length)) }}
+{%- elif agenda_items %}{{ count(agenda_items | length, ngettext("%(num)s item", "%(num)s items", agenda_items | length)) }}{% endif %}
+{%- endmacro %}
+
+<aside class="console-side">
+  <div class="console-session">
+    <p class="muted small mono">{{ assembly.public_id }}</p>
+    <h1>{{ assembly.title }}</h1>
+    {% if assembly.date or assembly.place %}
+    <p class="muted small">{{ assembly.date | long_date }}{% if assembly.date and assembly.place %} · {% endif %}{{ assembly.place or "" }}</p>
+    {% endif %}
+  </div>
+  <nav class="rubric-nav" aria-label="{{ _('Session console') }}">
+    <ul>
+      {% if steering_rubric %}<li><a href="#tab-cockpit" data-rubric-link>{{ icon("ship-wheel") }}<span>{{ _("Steering") }}</span>{{ steering_count() }}</a></li>{% endif %}
+      {% if can.polls %}<li><a href="#tab-polls" data-rubric-link>{{ icon("vote") }}<span>{{ _("Polls") }}</span>{{ polls_count() }}</a></li>{% endif %}
+      {% if meeting_rubric %}<li><a href="#tab-meeting" data-rubric-link>{{ icon("calendar") }}<span>{{ _("Meeting") }}</span></a></li>{% endif %}
+      {% if agenda_rubric %}<li><a href="#tab-agenda" data-rubric-link>{{ icon("list-ordered") }}<span>{{ _("Agenda") }}</span>{{ agenda_count() }}</a></li>{% endif %}
+      {% if can.notes %}<li><a href="#tab-notes" data-rubric-link>{{ icon("notebook-pen") }}<span>{{ _("Session notes") }}</span></a></li>{% endif %}
+      {% if access_rubric %}<li><a href="#tab-access" data-rubric-link>{{ icon("door-open") }}<span>{{ _("Access and attendance") }}</span></a></li>{% endif %}
+      {% if screen_rubric %}<li><a href="#tab-screen" data-rubric-link>{{ icon("presentation") }}<span>{{ _("Projection screen") }}</span></a></li>{% endif %}
+      {% if can.owner %}
+      <li><a href="#tab-documents" data-rubric-link>{{ icon("scroll-text") }}<span>{{ _("Documents") }}</span></a></li>
+      <li><a href="#tab-settings" data-rubric-link>{{ icon("settings") }}<span>{{ _("Settings") }}</span></a></li>
+      {% endif %}
+    </ul>
+  </nav>
+</aside>
+
+<nav class="tab-bar" aria-label="{{ _('Session console') }}">
+  {% if steering_rubric %}<a href="#tab-cockpit" data-rubric-link>{{ icon("ship-wheel") }}<span>{{ _("Steering") }}</span></a>
+  {% elif meeting_rubric %}<a href="#tab-meeting" data-rubric-link>{{ icon("calendar") }}<span>{{ _("Meeting") }}</span></a>{% endif %}
+  {% if can.polls %}<a href="#tab-polls" data-rubric-link>{{ icon("vote") }}<span>{{ _("Polls") }}</span>{{ polls_count() }}</a>{% endif %}
+  {% if agenda_rubric %}<a href="#tab-agenda" data-rubric-link>{{ icon("list-ordered") }}<span>{{ _("Agenda") }}</span></a>{% endif %}
+  {% if not can.owner and can.notes %}<a href="#tab-notes" data-rubric-link>{{ icon("notebook-pen") }}<span>{{ _("Notes") }}</span></a>{% endif %}
+  {% if access_rubric %}<a href="#tab-access" data-rubric-link>{{ icon("door-open") }}<span>{{ _("Access") }}</span></a>{% endif %}
+  {% if not can.owner and screen_rubric %}<a href="#tab-screen" data-rubric-link>{{ icon("presentation") }}<span>{{ _("Screen") }}</span></a>{% endif %}
+  {% if can.owner %}
+  <details class="tab-more" data-tab-more>
+    <summary>{{ icon("ellipsis") }}<span>{{ _("More") }}</span></summary>
+    <ul>
+      {% if steering_rubric %}<li><a href="#tab-meeting" data-rubric-link>{{ icon("calendar") }}{{ _("Meeting") }}</a></li>{% endif %}
+      <li><a href="#tab-notes" data-rubric-link>{{ icon("notebook-pen") }}{{ _("Session notes") }}</a></li>
+      <li><a href="#tab-screen" data-rubric-link>{{ icon("presentation") }}{{ _("Projection screen") }}</a></li>
+      <li><a href="#tab-documents" data-rubric-link>{{ icon("scroll-text") }}{{ _("Documents") }}</a></li>
+      <li><a href="#tab-settings" data-rubric-link>{{ icon("settings") }}{{ _("Settings") }}</a></li>
+    </ul>
+  </details>
+  {% endif %}
+</nav>

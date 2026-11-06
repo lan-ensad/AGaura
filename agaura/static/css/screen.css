@@ -1,0 +1,430 @@
+/* AGaura — projection screen (FR-70 to FR-75): one 16:9 viewport, readable from 10 m.
+
+   The root font size follows the viewport, so the page looks the same at 1280×720 and
+   1920×1080 (1rem ≈ 1/28 of the height). One block takes the stage, the others stack in a
+   side column; inside each box (``data-fit``), sizes are in em and screen.js gives the box the
+   largest type at which its content fits, so the page never scrolls. Boxes get their size from
+   the layout (flex weights, grid tracks), never from their content, for the fit to mean
+   anything. This file is loaded by the screen page only. */
+
+:root { font-size: clamp(12px, min(2vw, 3.6vh), 80px); }
+
+[hidden] { display: none !important; }
+
+body.screen {
+  height: 100vh; min-height: 0; overflow: hidden;
+  background: #eef1f5; color: #0f1419; line-height: 1.25;
+}
+body.screen.idle { cursor: none; }
+
+.screen {
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100vh; height: 100dvh;
+}
+
+/* --- Header: session title, attendees, quorum, status of entries ------------ */
+
+.screen-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.35rem 0.9rem; background: #12306f; color: #fff;
+}
+.screen-title {
+  margin: 0; font-size: 1.15rem; font-weight: 800; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.screen-status { display: flex; align-items: center; gap: 0.9rem; flex: none; }
+.screen-stats { display: flex; gap: 0.9rem; margin: 0; flex: none; font-size: 0.8rem; }
+.screen-stats .stat { display: flex; align-items: baseline; gap: 0.35em; }
+.screen-stats dt { opacity: 0.85; }
+.screen-stats dd { margin: 0; font-size: 1.35em; font-weight: 800; font-variant-numeric: tabular-nums; }
+.quorum-state {
+  display: inline-block; margin-left: 0.2em; padding: 0.05em 0.45em; border-radius: 999px;
+  font-size: 0.6em; font-weight: 800; vertical-align: 0.2em;
+}
+.quorum.reached .quorum-state { background: #d6f2e1; color: #0b4d29; }
+.quorum.missing .quorum-state { background: #fde7c2; color: #5c3900; }
+
+/* Status of entries (FR-27): the text says it, the colour only repeats it. */
+.entries {
+  margin: 0; padding: 0.15em 0.75em; border-radius: 999px; white-space: nowrap;
+  font-size: 0.9rem; font-weight: 800; letter-spacing: 0.02em;
+}
+.entries::before {
+  content: ""; display: inline-block; width: 0.6em; height: 0.6em; margin-right: 0.45em;
+  border-radius: 50%; background: currentColor; vertical-align: 0.05em;
+}
+/* With its icon (door open, lock, calendar, check), the dot gives way. */
+.entries.has-icon::before { content: none; }
+.entries-open { background: #d6f2e1; color: #0b4d29; }
+.entries-locked { background: #fde7c2; color: #5c3900; }
+.entries-locked::before { border-radius: 0.1em; }
+.entries-soon { background: #dce7ff; color: #12306f; }
+.entries-ended { background: #e3e7ee; color: #2e3540; }
+
+/* --- Stage: one block on stage, the others in a side column ------------------ */
+
+/* The stage row has the height the header and the foot leave (definite), so each data-fit box
+   is sized by the layout and screen.js can see when its content overflows; with an implicit
+   auto row, a long result grew the row and was cut by the viewport instead. */
+.screen-stage {
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 0.6rem;
+  min-height: 0; padding: 0.6rem 0.9rem;
+}
+.screen-stage.has-side { grid-template-columns: minmax(0, 1fr) minmax(0, 30%); }
+/* After the session, the closing message needs little room: the questions put to the vote,
+   with their verdicts, share the stage with it. */
+.screen-stage.is-closed.has-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.screen-hero, .screen-side { display: flex; flex-direction: column; gap: 0.6rem; min-height: 0; min-width: 0; }
+.screen-hero > *, .screen-side > * { flex: 1 1 0; min-height: 0; }
+/* Below open polls, the questions already put to the vote get a strip as tall as its lines,
+   at most a third of the stage: the open polls keep the rest. */
+.screen-hero > .screen-past.is-strip { flex: 0 1 auto; max-height: 33%; }
+/* Weights of the side column: the chronometer is one line. The way to join, beside other
+   blocks, is as tall as its QR code (at most 40 % of the column, then screen.js lowers its
+   type): the chronometer and the agenda share the rest. */
+.screen-side > .screen-timer { flex-grow: 0.85; }
+.screen-side > .screen-join.is-row { flex: 0 1 auto; max-height: 40%; }
+.screen-side > .screen-agenda { flex-grow: 1.35; }
+.screen-side > .screen-past { flex-grow: 1.1; }
+
+/* Each box sizes its content in em from its own level: screen.js picks the largest level at
+   which nothing overflows. Without script, level 0 and the box scale apply. */
+[data-fit] { --fit: 1; font-size: calc(1rem * var(--scale, 1) * var(--fit)); }
+[data-fit-level="-6"] { --fit: 2.1; }
+[data-fit-level="-5"] { --fit: 1.8; }
+[data-fit-level="-4"] { --fit: 1.6; }
+[data-fit-level="-3"] { --fit: 1.45; }
+[data-fit-level="-2"] { --fit: 1.3; }
+[data-fit-level="-1"] { --fit: 1.15; }
+[data-fit-level="1"] { --fit: 0.9; }
+[data-fit-level="2"] { --fit: 0.8; }
+[data-fit-level="3"] { --fit: 0.7; }
+[data-fit-level="4"] { --fit: 0.62; }
+[data-fit-level="5"] { --fit: 0.55; }
+[data-fit-level="6"] { --fit: 0.48; }
+/* Still too much at the smallest size: let the content scroll rather than hide it. */
+[data-fit-level="6"] { overflow: auto; }
+
+.screen-items { display: grid; gap: 0.6rem; min-height: 0; grid-auto-rows: minmax(0, 1fr); }
+.screen-items.columns-2 { --scale: 0.85; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.screen-items.columns-3 { --scale: 0.7; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.screen-side { --scale: 0.8; }
+
+.screen-card, .screen-timer, .screen-agenda, .screen-past, .screen-join.is-compact {
+  min-height: 0; overflow: hidden;
+  background: #fff; border: 1px solid #c9d0da; border-radius: 0.35rem;
+}
+.screen-card { display: flex; flex-direction: column; padding: 0.55em 0.8em; }
+/* Nothing in a card shrinks to make room (a clamped description would be squashed to a few
+   pixels): the card overflows instead, and screen.js lowers its type. */
+.screen-card > * { flex-shrink: 0; }
+.screen-card h2 { margin: 0 0 0.25em; font-size: 1.45em; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+.card-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5em; flex-wrap: wrap; }
+.eyebrow {
+  margin: 0; font-size: 0.75em; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #4a5361;
+}
+.eyebrow.live { color: #8a1f8f; } /* --live of app.css: plum, 7.86:1 on white */
+.eyebrow.live::before {
+  content: ""; display: inline-block; width: 0.75em; height: 0.75em; margin-right: 0.45em;
+  border-radius: 50%; background: currentColor; vertical-align: -0.05em;
+  animation: screen-pulse 1.6s ease-in-out infinite;
+}
+@keyframes screen-pulse { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .eyebrow.live::before { animation: none; } }
+.more { margin: 0.25em 0 0; font-size: 0.8em; font-weight: 600; color: #4a5361; }
+
+/* --- Open poll: options, turnout, countdown; never a partial result (D4) ------ */
+
+.poll-description {
+  margin: 0 0 0.3em; font-size: 0.8em; color: #4a5361; white-space: pre-line;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+}
+.poll-rule { margin: 0 0 0.3em; font-size: 0.85em; font-weight: 700; color: #4a5361; }
+.screen-options {
+  list-style: none; margin: 0.15em 0 0; padding: 0; display: grid; gap: 0.22em; font-size: 0.95em;
+}
+.screen-options.many { grid-template-columns: repeat(2, minmax(0, 1fr)); font-size: 0.8em; }
+.screen-options.lots { grid-template-columns: repeat(3, minmax(0, 1fr)); font-size: 0.7em; }
+.screen-options li {
+  padding: 0.12em 0.5em; border-left: 0.22em solid #8a1f8f; background: #f7e9f7;
+  font-weight: 700; overflow-wrap: anywhere;
+}
+.screen-options li.blank { border-left-color: #9aa3af; background: transparent; color: #4a5361; font-weight: 600; }
+.turnout { margin-top: auto; padding-top: 0.35em; }
+.turnout progress.bar { display: block; height: 0.7em; }
+/* The foot of an open poll: its turnout in the plum of what runs now (--live of app.css), never
+   the blue of an option or the green of a result. */
+.screen-open .turnout progress.bar::-webkit-progress-value { background: #8a1f8f; }
+.screen-open .turnout progress.bar::-moz-progress-bar { background: #8a1f8f; }
+.turnout p { margin: 0.15em 0 0; font-size: 1.15em; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.countdown {
+  margin: 0; padding: 0.05em 0.55em; border-radius: 999px; font-size: 0.8em; font-weight: 800;
+  background: #fde7c2; color: #5c3900; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.countdown.urgent { background: #b3261e; color: #fff; }
+
+/* --- Questions already put to the vote: title and state, or the verdict of a result the
+   tribune shows (FR-75) ----------------------------------------------------------------- */
+
+.screen-past { display: flex; flex-direction: column; padding: 0.45em 0.8em; }
+.past-list { list-style: none; margin: 0.2em 0 0; padding: 0; display: grid; gap: 0.15em; }
+.past-list li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.6em;
+  padding: 0.12em 0; border-bottom: 1px solid #e3e7ee; font-weight: 700;
+}
+.past-list li:last-child { border-bottom: 0; }
+.past-title {
+  min-width: 0; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+}
+.past-state {
+  flex: none; padding: 0.05em 0.55em; border-radius: 999px; white-space: nowrap;
+  font-size: 0.62em; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  background: #e3e7ee; color: #2e3540;
+}
+.past-list li.cancelled .past-title { color: #4a5361; font-weight: 600; }
+.past-list li.cancelled .past-state { background: #fbeaea; color: #8c1d17; }
+.screen-past.is-large { padding: 0.7em 1em; }
+.screen-past.is-large .past-list { gap: 0.3em; margin-top: 0.4em; }
+.screen-past.is-large .past-list li { font-size: 1.35em; padding: 0.2em 0; }
+.past-waiting { margin: 0 0 0.2em; font-size: 1.1em; font-weight: 800; color: #12306f; }
+.screen-past.is-strip { --scale: 0.8; }
+
+/* --- Chronometer (FR-74): server values, counted on by screen.js --------------- */
+
+.screen-timer {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 0.35em 0.7em; text-align: center;
+}
+.timer-label {
+  margin: 0; max-width: 100%; font-size: 0.7em; font-weight: 800; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #4a5361; overflow-wrap: anywhere;
+}
+.timer-clock {
+  margin: 0; font-size: 3.6em; font-weight: 800; line-height: 1.02; white-space: nowrap;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+}
+.timer-note { display: flex; gap: 0.4em; justify-content: center; margin: 0.15em 0 0; min-height: 1.3em; font-size: 0.75em; font-weight: 800; }
+.timer-note span { padding: 0.05em 0.6em; border-radius: 999px; background: #e3e7ee; color: #2e3540; }
+.screen-timer.is-paused .timer-clock, .screen-timer.is-ready .timer-clock { color: #5b6470; }
+/* Past zero: red, "+m:ss" and "Time is up" — never the colour alone. */
+.screen-timer.is-overtime { background: #b3261e; border-color: #b3261e; color: #fff; }
+.screen-timer.is-overtime .timer-label { color: #fde2e0; }
+.screen-timer.is-overtime .timer-clock { color: #fff; }
+.screen-timer.is-overtime .timer-note span { background: #fff; color: #8c1d17; }
+.screen-timer.is-large .timer-label { font-size: 1.1em; }
+.screen-timer.is-large .timer-clock { font-size: 9em; }
+.screen-timer.is-large .timer-note { font-size: 1.1em; }
+
+/* --- Agenda: a window around the item under discussion --------------------------- */
+
+.screen-agenda { display: flex; flex-direction: column; padding: 0.45em 0.8em; }
+.agenda-list { list-style: none; margin: 0.25em 0 0; padding: 0; display: grid; gap: 0.15em; }
+.agenda-list li {
+  display: flex; align-items: baseline; gap: 0.5em; padding: 0.12em 0.4em; border-radius: 0.25em;
+  font-weight: 600;
+}
+.agenda-number { flex: none; min-width: 1.3em; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; color: #4a5361; }
+.agenda-title {
+  flex: 1; min-width: 0; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+}
+.agenda-list li.past { color: #5b6470; font-weight: 500; }
+.agenda-list li.current { background: #12306f; color: #fff; font-weight: 800; }
+.agenda-list li.current .agenda-number { color: #fff; }
+.agenda-list li.current .agenda-title { -webkit-line-clamp: 4; line-clamp: 4; }
+/* "Now" leads the title, so it wraps with the text instead of narrowing it. */
+.agenda-now {
+  display: inline-block; margin-right: 0.2em; padding: 0.08em 0.55em; border-radius: 999px;
+  background: #fde7c2; color: #5c3900; font-size: 0.6em; font-weight: 800; line-height: 1.3;
+  letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; vertical-align: 0.2em;
+}
+.screen-agenda.is-large { padding: 0.7em 1em; }
+.screen-agenda.is-large .agenda-list { gap: 0.25em; margin-top: 0.4em; }
+.screen-agenda.is-large .agenda-list li { font-size: 1.35em; }
+
+/* --- Join panel ------------------------------------------------------------- */
+
+.screen-join { display: flex; align-items: center; justify-content: center; min-height: 0; overflow: hidden; }
+.join-qr { flex: none; background: #fff; }
+.join-qr svg { display: block; width: 100%; height: auto; }
+.join-text { min-width: 0; }
+.join-soon {
+  display: inline-block; margin: 0 0 0.6em; padding: 0.15em 0.6em; border-radius: 0.3em;
+  background: #fde7c2; color: #5c3900; font-weight: 800; font-size: 0.9em;
+}
+.join-label {
+  margin: 0; font-size: 0.7em; font-weight: 800; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #4a5361;
+}
+.join-label svg.icon { margin-right: 0.3em; }
+.join-address { margin: 0 0 0.35em; font-size: 1.9em; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+.join-address.long { font-size: 1.35em; }
+.join-address strong { color: #1f4fbf; }
+.join-password {
+  margin: 0 0 0.15em; font-weight: 800; line-height: 1.05; letter-spacing: 0.06em;
+  font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
+  overflow-wrap: anywhere;
+}
+.join-password span + span { margin-left: 0.3em; }
+.join-password.size-s { font-size: 4em; white-space: nowrap; }
+.join-password.size-m { font-size: 2.6em; white-space: nowrap; }
+.join-password.size-l { font-size: 1.8em; }
+.join-password.size-xl { font-size: 1.2em; }
+.join-hint { margin: 0.3em 0 0; font-size: 0.75em; color: #4a5361; }
+
+/* On stage: QR code and text side by side. */
+.screen-join.is-large { gap: 1.4em; }
+.screen-join.is-large .join-qr { width: min(64vh, 40vw); padding: 0.3em; }
+.has-side .screen-join.is-large { gap: 1em; }
+.has-side .screen-join.is-large .join-qr { width: min(58vh, 30vw); }
+.screen-join.codes.is-large { text-align: center; }
+.screen-join.codes.is-large .join-address { font-size: 2.6em; }
+.screen-join.codes.is-large .join-hint { font-size: 1.1em; color: #0f1419; max-width: 26em; margin-inline: auto; }
+
+/* Alone in the side column: QR code above the text, sized in em so the fit shrinks it too. */
+.screen-join.is-compact {
+  --scale: 0.7; flex-direction: column; gap: 0.35em; padding: 0.6em; text-align: center;
+}
+.screen-join.is-compact .join-qr { width: min(100%, 11em); }
+.screen-join.is-compact .join-address { font-size: 1.6em; }
+.screen-join.is-compact .join-address.long { font-size: 1.2em; }
+.screen-join.is-compact .join-label { font-size: 0.85em; }
+.screen-join.is-compact .join-hint { font-size: 0.9em; }
+.screen-join.is-compact .join-password.size-s { font-size: 3.4em; }
+
+/* Beside other blocks of the side column: the QR code at the left of the address and the
+   password, the session ID on a line of its own; the box takes the height of its content. */
+.screen-join.is-compact.is-row { flex-direction: row; gap: 0.6em; padding: 0.45em 0.6em; text-align: left; }
+.screen-join.is-row .join-qr { width: 7em; }
+.screen-join.is-row .join-label { font-size: 0.75em; }
+.screen-join.is-row .join-address { margin-bottom: 0.25em; font-size: 1.1em; }
+.screen-join.is-row .join-address.long { font-size: 0.9em; }
+.screen-join.is-row .join-address strong { display: block; font-size: 1.15em; }
+.screen-join.is-row .join-password.size-s { font-size: 2em; }
+.screen-join.is-row .join-password.size-m { font-size: 1.5em; }
+.screen-join.is-row .join-password.size-l { font-size: 1.15em; }
+.screen-join.is-row .join-password.size-xl { font-size: 0.9em; }
+.screen-join.is-row .join-hint { font-size: 0.8em; }
+
+/* --- Messages and footer ------------------------------------------------------ */
+
+.screen-message {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; overflow: hidden;
+}
+.screen-message h2 { margin: 0 0 0.3em; font-size: 2.2em; font-weight: 800; }
+.screen-message p { margin: 0; font-size: 1.2em; color: #4a5361; }
+.screen-foot { padding: 0.25rem 0.9rem; background: #fff; border-top: 1px solid #c9d0da; font-size: 0.8rem; text-align: center; }
+.screen-foot p { margin: 0; }
+.screen-foot strong { color: #12306f; }
+
+/* --- Full screen button (shown by screen.js when the browser supports it) ----- */
+
+.screen-fullscreen {
+  position: fixed; right: 0.4rem; bottom: 0.4rem; z-index: 1;
+  padding: 0.2em 0.7em; border: 1px solid #c9d0da; border-radius: 0.3em;
+  background: #fff; color: #12306f; font: inherit; font-size: 0.45rem; font-weight: 700;
+  cursor: pointer; opacity: 0.75; transition: opacity 0.3s;
+}
+.screen-fullscreen:hover, .screen-fullscreen:focus-visible { opacity: 1; }
+body.idle .screen-fullscreen { opacity: 0; pointer-events: none; }
+.screen-fullscreen { display: inline-flex; align-items: center; gap: 0.35em; min-height: 24px; } /* WCAG 2.5.8: a 24 px target at 1280 × 720 */
+
+/* --- Icons (macros/icons.html): the size of the text they go with --------------------- */
+
+.screen svg.icon { display: inline-block; width: 1em; height: 1em; flex: none; vertical-align: -0.12em; }
+.eyebrow svg.icon { margin-right: 0.35em; width: 1.1em; height: 1.1em; }
+.entries svg.icon { margin-right: 0.35em; }
+.timer-label svg.icon { margin-right: 0.3em; }
+.past-state svg.icon { margin-right: 0.3em; }
+
+/* The mark of AGaura, in the lower left corner: small, on white, over the foot when there is
+   one; without a foot, the stage keeps room for it below its blocks. */
+.screen-brand {
+  position: fixed; left: 0.6rem; bottom: 0.4rem; z-index: 1; display: inline-flex; align-items: center; gap: 0.3em;
+  margin: 0; padding: 0.15em 0.45em; border-radius: 0.3em; background: #fff; color: #2e3540;
+  font-size: 0.45rem; font-weight: 800; line-height: 1.25;
+}
+.screen-brand svg.icon { width: 1.3em; height: 1.3em; }
+.screen > .screen-stage:last-child { padding-bottom: 1.35rem; }
+
+/* --- Results shown by the tribune (FR-75): a night card, apart from the light cards of the
+   votes in progress. The verdict first, in words and on a light pill; then the rule; then, from
+   10 ballots, one row per option (label, bar, votes, share) and the counts. Earlier results
+   still shown keep one line in the list of questions put to the vote (title + verdict). Every
+   pair of the card reaches 7:1 (charter v2), the light pills 11:1 on the night blue. --- */
+
+.screen-result {
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 0.6em 0.9em;
+  background: var(--night); color: #fff; border-radius: 0.35rem;
+}
+.screen-result .card-top { color: var(--night-ink); }
+.eyebrow.result { color: var(--night-ink); }
+.screen-result h2 { margin: 0.1em 0 0.2em; font-size: 1.45em; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+.screen-items .screen-result h2 { font-size: 1.3em; }
+.result-when { margin: 0; font-size: 0.75em; font-weight: 700; color: var(--night-ink); font-variant-numeric: tabular-nums; }
+.screen-verdict {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 0.35em; margin: 0.1em 0 0.25em;
+  padding: 0.12em 0.6em; border-radius: 0.3em; font-size: 1.35em; font-weight: 800; line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.screen-verdict svg.icon { width: 1em; height: 1em; }
+.screen-verdict.is-adopted, .screen-verdict.is-decided { background: var(--success-soft); color: var(--success-ink); }
+.screen-verdict.is-rejected { background: var(--danger-soft); color: var(--danger-ink); }
+.screen-verdict.is-tie { background: var(--warning-soft); color: var(--warning-ink); }
+.screen-verdict.is-none { background: var(--neutral-soft); color: var(--neutral-ink); }
+.screen-rule { margin: 0 0 0.35em; font-size: 0.72em; font-weight: 600; color: var(--night-ink); }
+.screen-detail-off {
+  display: flex; align-items: center; gap: 0.4em; margin: auto 0 0; padding-top: 0.4em;
+  border-top: 1px solid var(--night-track); font-size: 0.75em; font-weight: 700; color: var(--night-ink);
+}
+.screen-tally { list-style: none; margin: 0.2em 0 0; padding: 0; display: grid; gap: 0.25em; }
+.screen-tally li {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 0.05em 0.7em; align-items: baseline;
+  font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.tally-label { min-width: 0; overflow-wrap: anywhere; }
+.tally-votes { font-size: 1.05em; }
+.tally-share { min-width: 3.6em; text-align: right; color: var(--night-ink); }
+.tally-rank { font-weight: 800; color: var(--night-ink); text-align: right; }
+.screen-tally progress.bar { grid-column: 1 / -1; height: 0.5em; background: var(--night-track); }
+.screen-tally progress.bar::-webkit-progress-bar { background: var(--night-track); }
+.screen-tally progress.bar::-webkit-progress-value { background: var(--night-ink); }
+.screen-tally progress.bar::-moz-progress-bar { background: var(--night-ink); }
+.screen-tally li.is-win progress.bar::-webkit-progress-value { background: var(--night-win); }
+.screen-tally li.is-win progress.bar::-moz-progress-bar { background: var(--night-win); }
+.screen-tally .tag-win, .screen-tally .tag-tie {
+  margin-left: 0.4em; padding: 0.02em 0.45em; border-radius: 999px; font-size: 0.62em; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; vertical-align: 0.15em; white-space: nowrap;
+}
+.screen-tally .tag-win { background: var(--success-soft); color: var(--success-ink); }
+.screen-tally .tag-tie { background: var(--warning-soft); color: var(--warning-ink); }
+.screen-tally.is-mj li, .screen-tally.is-ranked li { grid-template-columns: 1.3em minmax(0, 1fr) auto; }
+.screen-tally.is-ranked .tally-share { min-width: 0; font-size: 0.85em; }
+.screen-tally.is-mj .grade { font-size: 0.8em; padding: 0.05em 0.45em; }
+.screen-tally.is-mj svg.merit { grid-column: 2 / -1; height: 0.65em; outline: 2px solid #fff; outline-offset: 0; border-radius: 0.1em; }
+.screen-counts {
+  display: flex; flex-wrap: wrap; gap: 0.15em 1.2em; margin: auto 0 0; padding-top: 0.35em;
+  border-top: 1px solid var(--night-track); font-size: 0.72em;
+}
+.screen-counts div { display: flex; gap: 0.35em; align-items: baseline; }
+.screen-counts dt { color: var(--night-ink); font-weight: 600; }
+.screen-counts dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; }
+.screen-legend { display: flex; flex-wrap: wrap; gap: 0.1em 0.8em; margin: 0.3em 0 0; font-size: 0.58em; font-weight: 600; color: var(--night-ink); }
+.screen-legend span { display: inline-flex; align-items: center; gap: 0.3em; }
+.screen-legend svg { flex: none; }
+.screen-legend .legend-key { width: 0.9em; height: 0.9em; }
+.screen-legend .legend-half { width: 0.3em; height: 0.9em; }
+
+/* Earlier results still shown: one line in the list of questions, the verdict as a small pill
+   that wraps rather than pushing the title out. */
+.past-list li .past-verdict {
+  flex: none; max-width: 60%; padding: 0.05em 0.55em; border-radius: 0.6em; text-align: right;
+  font-size: 0.7em; font-weight: 800; overflow-wrap: anywhere;
+}
+.past-verdict.is-adopted, .past-verdict.is-decided { background: var(--success-soft); color: var(--success-ink); }
+.past-verdict.is-rejected { background: var(--danger-soft); color: var(--danger-ink); }
+.past-verdict.is-tie { background: var(--warning-soft); color: var(--warning-ink); }
+.past-verdict.is-none { background: var(--neutral-soft); color: var(--neutral-ink); }

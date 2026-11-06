@@ -1,0 +1,572 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+
+#: services/emails.py:27
+msgid "Hello %(name)s,"
+msgstr "Bonjour %(name)s,"
+
+#: services/emails.py:27
+msgid "Hello,"
+msgstr "Bonjour,"
+
+#: services/emails.py:31
+msgid "AGaura · Voting for in-person general assemblies"
+msgstr "AGaura · Le vote des assemblées générales en présentiel"
+
+#: services/emails.py:37
+msgid "Confirm your email address"
+msgstr "Confirmez votre adresse e-mail"
+
+#: services/emails.py:40
+msgid "Welcome to AGaura. To confirm your email address, open this link within 24 hours:"
+msgstr "Bienvenue sur AGaura. Pour confirmer votre adresse e-mail, ouvrez ce lien dans les 24 heures :"
+
+#: services/emails.py:42
+msgid "Your address must be confirmed before you can create a session."
+msgstr "Votre adresse doit être confirmée avant de pouvoir créer une session."
+
+#: services/emails.py:43
+msgid "If you did not create this account, ignore this email."
+msgstr "Si vous n'avez pas créé ce compte, ignorez cet e-mail."
+
+#: services/emails.py:50
+msgid "Reset your password"
+msgstr "Réinitialisez votre mot de passe"
+
+#: services/emails.py:54
+msgid "A password reset was requested for your AGaura account. To choose a new password, open this link within one hour:"
+msgstr "Une réinitialisation du mot de passe a été demandée pour votre compte AGaura. Pour choisir un nouveau mot de passe, ouvrez ce lien dans l'heure :"
+
+#: services/emails.py:58
+msgid "If you did not ask for it, ignore this email: your password stays the same."
+msgstr "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : votre mot de passe reste inchangé."
+
+#: services/emails.py:65
+msgid "Confirm your new email address"
+msgstr "Confirmez votre nouvelle adresse e-mail"
+
+#: services/emails.py:69
+msgid "This address was entered as the new email address of an AGaura account. To confirm the change, open this link within 24 hours:"
+msgstr "Cette adresse a été indiquée comme nouvelle adresse e-mail d'un compte AGaura. Pour confirmer le changement, ouvrez ce lien dans les 24 heures :"
+
+#: services/emails.py:73
+msgid "If you did not ask for it, ignore this email: nothing will change."
+msgstr "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : rien ne changera."
+
+#: services/emails.py:82
+msgid "Change of your email address requested"
+msgstr "Demande de changement de votre adresse e-mail"
+
+#: services/emails.py:86
+msgid "A change of the email address of your AGaura account was requested: the new address would be %(email)s. The change applies only once the link sent to that address is opened, within 24 hours."
+msgstr "Un changement de l'adresse e-mail de votre compte AGaura a été demandé : la nouvelle adresse serait %(email)s. Le changement ne s'applique qu'une fois ouvert le lien envoyé à cette adresse, dans les 24 heures."
+
+#: services/emails.py:92
+msgid "If you did not ask for it, someone else may know your password: change it at once, from your account or with \"Forgot your password?\" on the login page. This cancels the change, and so does \"Log out everywhere\" on your account page."
+msgstr "Si vous n'êtes pas à l'origine de cette demande, quelqu'un d'autre connaît peut-être votre mot de passe : changez-le sans attendre, depuis votre compte ou avec « Mot de passe oublié ? » sur la page de connexion. Cela annule le changement, tout comme « Se déconnecter partout » sur la page de votre compte."
+
+#: services/emails.py:81
+msgid "Your email address was changed"
+msgstr "Votre adresse e-mail a été modifiée"
+
+#: services/emails.py:84
+msgid "The email address of your AGaura account is now %(email)s."
+msgstr "L'adresse e-mail de votre compte AGaura est désormais %(email)s."
+
+#: services/emails.py:86
+msgid "If you did not make this change, someone else may have access to your account: contact the AGaura operator."
+msgstr "Si vous n'êtes pas à l'origine de ce changement, quelqu'un d'autre a peut-être accès à votre compte : contactez l'exploitant d'AGaura."
+
+#: templates/account/link_invalid.html:2 templates/account/link_invalid.html:5
+msgid "Link not valid"
+msgstr "Lien non valable"
+
+#: templates/account/link_invalid.html:8
+msgid "Links sent by email work only for a limited time, and only once."
+msgstr "Les liens envoyés par e-mail ne fonctionnent qu'une fois, et pendant une durée limitée."
+
+#: templates/account/link_invalid.html:10
+msgid "Each link works only once, and only the most recent link sent works."
+msgstr "Chaque lien ne fonctionne qu'une fois, et seul le dernier lien envoyé est valable."
+
+#: templates/account/reset_form.html:10 templates/account/signup.html:16
+msgid "At least %(count)s characters."
+msgstr "Au moins %(count)s caractères."
+
+#: templates/account/reset_form.html:12 templates/account/signup.html:18
+msgid "Confirm the password"
+msgstr "Confirmez le mot de passe"
+
+#: templates/account/reset_form.html:14
+msgid "Every device logged in to your account will be logged out."
+msgstr "Tous les appareils connectés à votre compte seront déconnectés."
+
+#: templates/account/reset_form.html:15
+msgid "Save the new password"
+msgstr "Enregistrer le nouveau mot de passe"
+
+#: templates/account/reset_request.html:3 templates/account/reset_request.html:6 templates/account/reset_requested.html:2
+msgid "Forgotten password"
+msgstr "Mot de passe oublié"
+
+#: templates/account/reset_request.html:7
+msgid "Enter the email address of your account. A link to choose a new password will be sent to it."
+msgstr "Saisissez l'adresse e-mail de votre compte. Un lien pour choisir un nouveau mot de passe y sera envoyé."
+
+#: templates/account/reset_request.html:12
+msgid "Send the link"
+msgstr "Envoyer le lien"
+
+#: templates/account/reset_request.html:14 templates/account/reset_requested.html:8
+msgid "Back to the login page"
+msgstr "Retour à la page de connexion"
+
+#: templates/account/reset_requested.html:5
+msgid "Check your inbox"
+msgstr "Consultez votre messagerie"
+
+#: templates/account/reset_requested.html:6
+msgid "If an account uses this address, an email with a link to choose a new password has just been sent to it. The link is valid for one hour."
+msgstr "Si un compte utilise cette adresse, un e-mail contenant un lien pour choisir un nouveau mot de passe vient d'y être envoyé. Le lien est valable une heure."
+
+#: templates/account/reset_requested.html:7
+msgid "Nothing received after a few minutes? Check your spam folder, or try again."
+msgstr "Rien reçu après quelques minutes ? Vérifiez vos courriers indésirables, ou réessayez."
+
+#: templates/account/settings.html:3 templates/account/settings.html:6
+msgid "Your account"
+msgstr "Votre compte"
+
+#: templates/account/settings.html:10
+msgid "Your email address is not confirmed yet. Open the link sent to %(email)s to confirm it: you need it to create a session."
+msgstr "Votre adresse e-mail n'est pas encore confirmée. Ouvrez le lien envoyé à %(email)s pour la confirmer : c'est nécessaire pour créer une session."
+
+#: templates/account/settings.html:13
+msgid "Send a new link"
+msgstr "Envoyer un nouveau lien"
+
+#: templates/account/settings.html:20
+msgid "Name"
+msgstr "Nom"
+
+#: templates/account/settings.html:23
+msgid "Display name (optional)"
+msgstr "Nom affiché (facultatif)"
+
+#: templates/account/settings.html:25
+msgid "Save the name"
+msgstr "Enregistrer le nom"
+
+#: templates/account/settings.html:31
+msgid "Current address:"
+msgstr "Adresse actuelle :"
+
+#: templates/account/settings.html:32
+msgid "Confirmed"
+msgstr "Confirmée"
+
+#: templates/account/settings.html:33
+msgid "Not confirmed"
+msgstr "Non confirmée"
+
+#: templates/account/settings.html:36
+msgid "Waiting for confirmation from %(email)s."
+msgstr "En attente de confirmation depuis %(email)s."
+
+#: templates/account/settings.html:40
+msgid "New email address"
+msgstr "Nouvelle adresse e-mail"
+
+#: templates/account/settings.html:41
+msgid "The change applies once the link sent to the new address is opened."
+msgstr "Le changement s'applique dès que le lien envoyé à la nouvelle adresse est ouvert."
+
+#: templates/account/settings.html:43 templates/account/settings.html:53
+msgid "Current password"
+msgstr "Mot de passe actuel"
+
+#: templates/account/settings.html:45
+msgid "Change the email address"
+msgstr "Changer d'adresse e-mail"
+
+#: templates/account/settings.html:56
+msgid "At least %(count)s characters. Your other devices will be logged out."
+msgstr "Au moins %(count)s caractères. Vos autres appareils seront déconnectés."
+
+#: templates/account/settings.html:58
+msgid "Confirm the new password"
+msgstr "Confirmez le nouveau mot de passe"
+
+#: templates/account/settings.html:65
+msgid "Logged-in devices"
+msgstr "Appareils connectés"
+
+#: templates/account/settings.html:66
+msgid "A forgotten computer or a lost phone? Log out on every device where your account is open, this one included."
+msgstr "Un ordinateur oublié, un téléphone perdu ? Déconnectez-vous de tous les appareils où votre compte est ouvert, y compris celui-ci."
+
+#: templates/account/settings.html:69
+msgid "Log out everywhere"
+msgstr "Se déconnecter partout"
+
+#: templates/account/settings.html:75
+msgid "Account log"
+msgstr "Journal du compte"
+
+#: templates/account/settings.html:79
+msgid "Event"
+msgstr "Événement"
+
+#: templates/account/settings.html:91
+msgid "No event yet."
+msgstr "Aucun événement pour l'instant."
+
+#: templates/account/settings.html:96
+msgid "Delete the account"
+msgstr "Supprimer le compte"
+
+#: templates/account/settings.html:97
+msgid "Deleting the account also deletes all its sessions, with their polls, results and exports. This cannot be undone."
+msgstr "Supprimer le compte supprime aussi toutes ses sessions, avec leurs votes, leurs résultats et leurs exports. Cette action est irréversible."
+
+#: templates/account/settings.html:100
+msgid "Password, to confirm"
+msgstr "Mot de passe, pour confirmer"
+
+#: templates/account/settings.html:102
+msgid "Delete the account and all its sessions"
+msgstr "Supprimer le compte et toutes ses sessions"
+
+#: templates/account/signup.html:8
+msgid "An account lets you create sessions and run their votes. It is free."
+msgstr "Un compte permet de créer des sessions et d'y conduire les votes. Il est gratuit."
+
+#: templates/account/signup.html:12
+msgid "A confirmation link will be sent to this address."
+msgstr "Un lien de confirmation sera envoyé à cette adresse."
+
+#: templates/account/signup.html:13
+msgid "Name (optional)"
+msgstr "Nom (facultatif)"
+
+#: templates/account/signup.html:21 templates/account/signup.html:25
+msgid "Anti-robot check in progress…"
+msgstr "Vérification anti-robot en cours…"
+
+#: templates/account/signup.html:22
+msgid "Anti-robot check complete."
+msgstr "Vérification anti-robot terminée."
+
+#: templates/account/signup.html:23
+msgid "The anti-robot check could not run. Reload the page to try again."
+msgstr "La vérification anti-robot n'a pas pu s'exécuter. Rechargez la page pour réessayer."
+
+#: templates/account/signup.html:26
+msgid "This form needs JavaScript for its anti-robot check."
+msgstr "Ce formulaire a besoin de JavaScript pour sa vérification anti-robot."
+
+#: templates/account/signup.html:28
+msgid "Create the account"
+msgstr "Créer le compte"
+
+#: templates/account/signup.html:30
+msgid "Already have an account?"
+msgstr "Vous avez déjà un compte ?"
+
+#: web/account/access.py:132
+msgid "Ask for a new link from your account page"
+msgstr "Demander un nouveau lien depuis la page de votre compte"
+
+#: web/account/access.py:194
+msgid "Ask for a new link"
+msgstr "Demander un nouveau lien"
+
+#: web/account/common.py:20
+msgid "The anti-robot check did not succeed. Wait until it is complete, then try again."
+msgstr "La vérification anti-robot n'a pas abouti. Attendez qu'elle soit terminée, puis réessayez."
+
+#: web/account/common.py:22
+msgid "The two passwords do not match."
+msgstr "Les deux mots de passe ne correspondent pas."
+
+#: web/account/common.py:24
+msgid "This email address cannot be used. If it is yours, log in or reset your password."
+msgstr "Cette adresse e-mail ne peut pas être utilisée. Si c'est la vôtre, connectez-vous ou réinitialisez votre mot de passe."
+
+#: web/account/common.py:26
+msgid "Incorrect password."
+msgstr "Mot de passe incorrect."
+
+#: web/account/common.py:27
+msgid "This is already your email address."
+msgstr "C'est déjà votre adresse e-mail."
+
+#: web/account/common.py:28
+msgid "This link is invalid or has already been used."
+msgstr "Ce lien n'est pas valable ou a déjà été utilisé."
+
+#: web/account/common.py:29
+msgid "This link has expired."
+msgstr "Ce lien a expiré."
+
+#: web/account/common.py:31
+msgid "One of your sessions is in session. Close it before deleting your account."
+msgstr "Une de vos sessions est en cours. Terminez-la avant de supprimer votre compte."
+
+#: web/account/common.py:39
+msgid "Your account is created. Confirm your email address with the link just sent to you."
+msgstr "Votre compte est créé. Confirmez votre adresse e-mail avec le lien qui vient de vous être envoyé."
+
+#: web/account/common.py:41
+msgid "Your email address is confirmed."
+msgstr "Votre adresse e-mail est confirmée."
+
+#: web/account/common.py:42
+msgid "A new confirmation link has been sent to your email address."
+msgstr "Un nouveau lien de confirmation a été envoyé à votre adresse e-mail."
+
+#: web/account/common.py:43
+msgid "Your password has been changed. Log in with the new one."
+msgstr "Votre mot de passe a été modifié. Connectez-vous avec le nouveau."
+
+#: web/account/common.py:45
+msgid "Your password has been changed. Your other devices have been logged out."
+msgstr "Votre mot de passe a été modifié. Vos autres appareils ont été déconnectés."
+
+#: web/account/common.py:47
+msgid "Your name has been saved."
+msgstr "Votre nom a été enregistré."
+
+#: web/account/common.py:49
+msgid "A confirmation link has been sent to the new address. The change applies once it is opened."
+msgstr "Un lien de confirmation a été envoyé à la nouvelle adresse. Le changement s'applique dès qu'il est ouvert."
+
+#: web/account/common.py:52
+msgid "Your email address has been changed."
+msgstr "Votre adresse e-mail a été modifiée."
+
+#: web/account/common.py:53
+msgid "You are logged out on every device."
+msgstr "Vous êtes déconnecté·e de tous vos appareils."
+
+#: web/account/common.py:54
+msgid "Your account and all its sessions have been deleted."
+msgstr "Votre compte et toutes ses sessions ont été supprimés."
+
+#: web/account/profile.py:41
+msgid "Account created"
+msgstr "Compte créé"
+
+#: web/account/profile.py:42
+msgid "Logged in"
+msgstr "Connexion"
+
+#: web/account/profile.py:43
+msgid "Failed login"
+msgstr "Échec de connexion"
+
+#: web/account/profile.py:44
+msgid "Logged out on every device"
+msgstr "Déconnexion de tous les appareils"
+
+#: web/account/profile.py:45
+msgid "Email address confirmed"
+msgstr "Adresse e-mail confirmée"
+
+#: web/account/profile.py:46
+msgid "Password reset requested"
+msgstr "Réinitialisation du mot de passe demandée"
+
+#: web/account/profile.py:47
+msgid "Password reset"
+msgstr "Mot de passe réinitialisé"
+
+#: web/account/profile.py:48
+msgid "Password changed"
+msgstr "Mot de passe modifié"
+
+#: web/account/profile.py:49
+msgid "Email change requested"
+msgstr "Changement d'adresse e-mail demandé"
+
+#: web/account/profile.py:50
+msgid "Email address changed"
+msgstr "Adresse e-mail modifiée"
+
+#: web/account/profile.py:51
+msgid "Name changed"
+msgstr "Nom modifié"
+
+#: web/account/profile.py:52
+msgid "Account disabled"
+msgstr "Compte désactivé"
+
+#: web/account/profile.py:53
+msgid "Account enabled again"
+msgstr "Compte réactivé"
+
+#: web/account/profile.py:54
+msgid "Account limits changed"
+msgstr "Limites du compte modifiées"
+
+#: web/account/profile.py:57
+msgid "wrong password"
+msgstr "mot de passe erroné"
+
+#: web/account/profile.py:58
+msgid "account disabled"
+msgstr "compte désactivé"
+
+#: web/account/profile.py:76
+msgid "by the platform operator"
+msgstr "par l'exploitant de la plateforme"
+
+#: web/account/profile.py:220
+msgid "Go to your account"
+msgstr "Aller à votre compte"
+
+#: templates/account/reset_form.html:3 templates/account/settings.html:55
+msgid "New password"
+msgstr "Nouveau mot de passe"
+
+#: templates/account/settings.html:60
+msgid "Change the password"
+msgstr "Changer le mot de passe"
+
+#: templates/account/settings.html:79
+msgid "Date"
+msgstr "Date"
+
+#: services/emails.py:96
+msgid "Your AGaura account"
+msgstr "Votre compte AGaura"
+
+#: services/emails.py:100
+msgid "An AGaura account has been created for you with this email address. AGaura runs the votes of in-person general assemblies: with it, you can create sessions and push their polls to the members' phones."
+msgstr "Un compte AGaura a été créé pour vous avec cette adresse e-mail. AGaura organise les votes des assemblées générales en présentiel : avec ce compte, vous pouvez créer des sessions et lancer leurs votes sur les téléphones des membres."
+
+#: services/emails.py:104
+msgid "To choose your password and start using the account, open this link within 7 days:"
+msgstr "Pour choisir votre mot de passe et commencer à utiliser le compte, ouvrez ce lien dans les 7 jours :"
+
+#: services/emails.py:107
+msgid "The link works once. If it has expired, ask the person who created the account for a new one."
+msgstr "Le lien ne fonctionne qu'une fois. S'il a expiré, demandez-en un nouveau à la personne qui a créé le compte."
+
+#: services/emails.py:110
+msgid "If you did not expect this email, ignore it: the account stays inactive."
+msgstr "Si vous n'attendiez pas cet e-mail, ignorez-le : le compte reste inactif."
+
+#: templates/account/invitation.html:3
+msgid "Choose your password"
+msgstr "Choisissez votre mot de passe"
+
+#: templates/account/invitation.html:6
+msgid "Welcome to AGaura"
+msgstr "Bienvenue sur AGaura"
+
+#: templates/account/invitation.html:7
+msgid "An account has been created for you. Choose its password to start using it."
+msgstr "Un compte a été créé pour vous. Choisissez son mot de passe pour commencer à l'utiliser."
+
+#: templates/account/invitation.html:17
+msgid "Save the password and log in"
+msgstr "Enregistrer le mot de passe et se connecter"
+
+#: templates/account/settings.html:97
+msgid "Super-admin account"
+msgstr "Compte super-admin"
+
+#: templates/account/settings.html:98
+msgid "This account manages the accounts of the platform and has no access to sessions. It can only be deleted on the server, by the platform operator."
+msgstr "Ce compte gère les comptes de la plateforme et n'a accès à aucune session. Seul l'exploitant de la plateforme peut le supprimer, sur le serveur."
+
+#: templates/account/signup_closed.html:5
+msgid "Accounts are created by invitation"
+msgstr "Les comptes sont créés sur invitation"
+
+#: templates/account/signup_closed.html:6
+msgid "On this platform, accounts are not created here: the person in charge of the platform creates each account, and an email with a link lets you choose your password."
+msgstr "Sur cette plateforme, les comptes ne se créent pas ici : la personne responsable de la plateforme crée chaque compte, et un e-mail contenant un lien vous permet de choisir votre mot de passe."
+
+#: templates/account/signup_closed.html:7
+msgid "To vote in a session, no account is needed: open the address shown in the room."
+msgstr "Pour voter dans une session, aucun compte n'est nécessaire : ouvrez l'adresse affichée dans la salle."
+
+#: web/account/common.py:56
+msgid "Welcome to AGaura. Your password is saved and your email address is confirmed."
+msgstr "Bienvenue sur AGaura. Votre mot de passe est enregistré et votre adresse e-mail est confirmée."
+
+#: web/account/invitation.py:36
+msgid "Go to the login page"
+msgstr "Aller à la page de connexion"
+
+#: web/account/invitation.py:38
+msgid "If you have not chosen a password yet, ask the person who created your account to send a new invitation."
+msgstr "Si vous n'avez pas encore choisi de mot de passe, demandez à la personne qui a créé votre compte de vous envoyer une nouvelle invitation."
+
+#: web/account/profile.py:55
+msgid "Account created, invitation sent"
+msgstr "Compte créé, invitation envoyée"
+
+#: web/account/profile.py:56
+msgid "Invitation sent again"
+msgstr "Invitation envoyée à nouveau"
+
+#: web/account/profile.py:57
+msgid "Invitation accepted, password chosen"
+msgstr "Invitation acceptée, mot de passe choisi"
+
+#: web/account/profile.py:62
+msgid "invitation not accepted yet"
+msgstr "invitation pas encore acceptée"
+
+#: web/account/profile.py:82
+msgid "by the accounts administrator"
+msgstr "par le super-admin"
+
+#: main.py:52
+msgid "Too many passwords are being checked at this moment. Try again in a few seconds."
+msgstr "Trop de mots de passe sont en cours de vérification. Réessayez dans quelques secondes."
+
+#: services/emails.py:104
+msgid "Your email address was entered for another AGaura account"
+msgstr "Votre adresse e-mail a été indiquée pour un autre compte AGaura"
+
+#: services/emails.py:108
+msgid "This address was entered as the new email address of another AGaura account. It cannot be used for it: it is already the address of your AGaura account, which stays as it is."
+msgstr "Cette adresse a été indiquée comme nouvelle adresse e-mail d'un autre compte AGaura. Elle ne peut pas lui servir : c'est déjà l'adresse de votre compte AGaura, qui reste inchangé."
+
+#: services/emails.py:113
+msgid "If you made this request, choose another address for the other account. If not, ignore this email: nothing will change."
+msgstr "Si vous êtes à l'origine de cette demande, choisissez une autre adresse pour l'autre compte. Sinon, ignorez cet e-mail : rien ne changera."
+
+#: templates/account/reset_requested.html:8
+msgid "If several emails arrived, only the link in the most recent one works."
+msgstr "Si plusieurs e-mails sont arrivés, seul le lien du plus récent fonctionne."
+
+#: web/messages.py:80
+msgid "After several failed logins with this address, an anti-robot check is needed. Wait until it is complete, then enter your password again."
+msgstr "Après plusieurs échecs de connexion avec cette adresse, une vérification anti-robot est nécessaire. Attendez qu'elle soit terminée, puis saisissez de nouveau votre mot de passe."
+
+#: services/emails.py:165
+msgid "Your AGaura account will be deleted"
+msgstr "Votre compte AGaura va être supprimé"
+
+#: services/emails.py:169
+msgid "Your AGaura account (%(email)s) has not been used for three years. AGaura keeps no account longer: it will be deleted with its sessions on %(date)s."
+msgstr "Votre compte AGaura (%(email)s) n'a pas servi depuis trois ans. AGaura ne garde pas un compte plus longtemps : il sera supprimé avec ses sessions le %(date)s."
+
+#: services/emails.py:173
+msgid "To keep it, log in before that date:"
+msgstr "Pour le garder, connectez-vous avant cette date :"
+
+#: services/emails.py:176
+msgid "If you no longer need it, there is nothing to do. To keep what your past sessions recorded, download their minutes and exports before that date."
+msgstr "Si vous n'en avez plus besoin, il n'y a rien à faire. Pour garder ce que vos sessions passées ont enregistré, téléchargez leurs procès-verbaux et leurs exports avant cette date."

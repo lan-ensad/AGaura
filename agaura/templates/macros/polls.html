@@ -1,0 +1,20 @@
+{#- A poll's tile in Polls (drafts, polls open now, finished polls): a details element folded by
+    default, whose summary holds the poll's title and state only, the pills of its life cycle;
+    everything else, actions included, shows once unfolded. Works without script; manage.js
+    unfolds the tile an address targets (#draft-<id>, #poll-<id>) and keeps the unfolded ones
+    open when a live part is redrawn. -#}
+{% from "macros/icons.html" import icon %}
+
+{% macro tile_head(poll, number=none, trial=false, closes_at=none, shown_to_voters=false, on_screen=false) -%}
+<summary class="poll-tile-head">
+  <span class="poll-tile-chevron">{{ icon("chevron-right", size="sm") }}</span>
+  <span class="poll-tile-title">{% if number %}<span class="muted">{{ _("No. %(number)s", number=number) }}</span> {% endif %}<strong>{{ poll.title }}</strong></span>
+  <span class="poll-tile-state">
+    {%- if trial %}<span class="badge neutral">{{ _("Trial") }}</span>{% endif %}
+    {%- if closes_at %}<span class="badge warning">{{ _("closes at %(time)s", time=closes_at | clock_time) }}</span>{% endif %}
+    <span class="badge {{ {'cancelled': 'danger', 'published': 'is-done', 'open': 'live is-live'}.get(poll.status.value, 'neutral') }}">{{ poll_status_label(poll.status) }}</span>
+    {%- if shown_to_voters %}<span class="badge success">{{ _("Shown to voters") }}</span>{% endif %}
+    {%- if on_screen %}<span class="badge success" data-on-screen>{{ icon("presentation") }}{{ _("On the screen") }}</span>{% endif %}
+  </span>
+</summary>
+{%- endmacro %}

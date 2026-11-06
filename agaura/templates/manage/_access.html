@@ -1,0 +1,47 @@
+{#- Access mode (FR-20, FR-23), in Access and attendance, the owner's only: the mode in words, the
+    session password to change (password mode), and the switch to the other mode, refused while
+    a poll is open (the button says so and is disabled then). Nothing changes once the session is
+    closed. Joining (_join.html), entries (_entries.html), the headcount with its attendance
+    record (_presence.html) and the codes (_codes.html) are cards of their own. -#}
+{% from "macros/forms.html" import csrf, field with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set codes = assembly.access_mode.value == "codes" %}
+{% set active = assembly.status.value != "closed" %}
+{% set poll_open = state.panel.open_polls | length > 0 %}
+<section class="card" id="access" aria-labelledby="access-title">
+  <h2 id="access-title">{{ icon("ticket" if codes else "rectangle-ellipsis") }} {{ _("Access mode") }}</h2>
+  {% if codes %}
+  <p><strong>{{ _("Individual codes") }}</strong> : {{ _("one vote per person, each with the card of their code.") }}</p>
+  {% else %}
+  <p><strong>{{ _("Session password") }}</strong> : {{ _("one vote per phone. The password is shown in the room.") }}</p>
+  {% endif %}
+
+  {% if active and not codes %}
+  <details>
+    <summary>{{ _("Change the password") }}</summary>
+    <form method="post" action="/manage/{{ assembly.public_id }}/password" class="stack">
+      {{ csrf() }}
+      {{ field("password", _("New password"), id="session-password", hint=_("8 characters minimum. Leave empty to generate 8 random digits."), attrs={"maxlength": "40", "autocomplete": "off"}) }}
+      <button type="submit" class="button small">{{ _("Change") }}</button>
+    </form>
+  </details>
+  {% endif %}
+
+  {% if active %}
+  <p class="hint">
+    {%- if codes %}{{ _("Back to the session password, one vote per phone: phones that joined with a code will lose access.") }}
+    {%- else %}{{ _("For a vote that requires one vote per person, switch to printed individual codes: phones that joined with the password will lose access.") }}{% endif %}
+    {%- if poll_open %} {{ _("Not possible while a poll is open.") }}{% endif -%}
+  </p>
+  <form method="post" action="/manage/{{ assembly.public_id }}/mode" class="row access-mode">
+    {{ csrf() }}
+    {% if not codes %}
+    <input type="hidden" name="mode" value="codes">
+    <button type="submit" class="button small" data-confirm="{{ _('Switch to individual codes? Phones that joined with the password will lose access.') }}"{{ ' disabled' if poll_open }}>{{ icon("ticket") }} {{ _("Switch to individual codes") }}</button>
+    {% else %}
+    <input type="hidden" name="mode" value="password">
+    <button type="submit" class="button small"{{ ' disabled' if poll_open }}>{{ icon("rectangle-ellipsis") }} {{ _("Switch to the session password") }}</button>
+    {% endif %}
+  </form>
+  {% endif %}
+</section>

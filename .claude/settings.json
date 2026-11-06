@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(uv sync)",
+      "Bash(uv run pytest *)",
+      "Bash(uv run ruff check *)",
+      "Bash(uv run ruff format *)",
+      "Bash(uv run uvicorn agaura.main:app *)",
+      "Bash(uv run python scripts/demo_session.py *)",
+      "Bash(uv run python scripts/i18n.py *)",
+      "Bash(uv run python scripts/dev_seed.py *)",
+      "Bash(uv run python scripts/recount.py *)",
+      "Bash(uv run agaura audit verify *)",
+      "Bash(uv run agaura stats *)",
+      "Bash(uv run alembic revision *)",
+      "Bash(uv run alembic check *)",
+      "Bash(uv run alembic current *)",
+      "Bash(uv run alembic heads *)",
+      "Bash(uv run alembic history *)",
+      "Bash(uv run alembic show *)",
+      "Bash(uv run alembic upgrade *)"
+    ],
+    "deny": [
+      "Read(./.env)"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf, field with context %}
+{% from "macros/demo.html" import offer with context %}
+{% block title %}{{ _("Log in") }} · AGaura{% endblock %}
+{% block head %}{% if pow_required %}<link rel="stylesheet" href="{{ static_url('css/account.css') }}">{% endif %}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Log in") }}</h1>
+  <form method="post" action="/login" class="stack">
+    {{ csrf() }}
+    <input type="hidden" name="next" value="{{ next }}">
+    {{ field("email", _("Email address"), type="email", value=email, required=true, autocomplete="email") }}
+    {{ field("password", _("Password"), type="password", required=true, autocomplete="current-password") }}
+    {% if pow_required %}{% include "account/pow_widget.html" %}{% endif %}
+    <button type="submit" class="button primary"{% if pow_required %} disabled{% endif %}>{{ _("Log in") }}</button>
+  </form>
+  <p class="muted form-links"><a href="/reset">{{ _("Forgot your password?") }}</a>
+    {%- if request.app.state.settings.signup_open %} · <a href="/signup">{{ _("Create an account") }}</a>{% endif %}</p>
+  {#- Signup closed: how to ask for an account, as on the home page and /signup. -#}
+  {% if not request.app.state.settings.signup_open %}
+  {% set contact = request.app.state.settings.contact_email %}
+  {% set contact_link %}<a href="mailto:{{ contact }}">{{ contact }}</a>{% endset %}
+  <p class="muted">{{ _("To get an account, write to %(email)s.", email=contact_link) }}</p>
+  {% endif %}
+  {{ offer(heading="h2") }}
+</section>
+{% endblock %}
+{% block scripts %}{% if pow_required %}<script src="{{ static_url('js/pow.js') }}" defer></script>{% endif %}{% endblock %}

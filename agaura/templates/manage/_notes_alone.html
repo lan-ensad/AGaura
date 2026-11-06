@@ -1,0 +1,7 @@
+{#- The session notes alone, for notes.js (GET and fetch POST of /manage/{id}/notes): the card of
+    the Session notes rubric and, during the session, the "Quick note" command of Steering, so one
+    answer refreshes both copies of the page. -#}
+{% include "manage/_notes.html" %}
+{% if assembly.status.value == "in_session" %}
+{% with compact = true %}{% include "manage/_notes.html" %}{% endwith %}
+{% endif %}

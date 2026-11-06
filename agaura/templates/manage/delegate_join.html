@@ -1,0 +1,23 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf with context %}
+{#- Page behind a delegate link (FR-92): /manage/{ID}/delegate#k={key}. delegate.js copies the key
+    of the fragment into the form, removes it from the address bar and sends the form; without
+    script, the key can be pasted. The fragment never reaches the server. -#}
+{% block title %}{{ _("Delegate access") }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow delegate-join">
+  <h1>{{ _("Delegate access") }}</h1>
+  <p>{{ _("This link opens part of the console of a session, without an account, on this device.") }}</p>
+  <p class="muted" data-delegate-joining hidden>{{ _("Opening the console…") }}</p>
+  <form method="post" action="/manage/{{ public_id }}/delegate" class="stack" data-delegate-join>
+    {{ csrf() }}
+    <div class="field">
+      <label for="delegate-key">{{ _("Key of the link") }}</label>
+      <p class="hint" id="delegate-key-hint">{{ _("Filled in by itself when the link is opened. Otherwise, paste the part of the link after “#k=”.") }}</p>
+      <input id="delegate-key" name="key" type="text" class="mono" required autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="delegate-key-hint">
+    </div>
+    <button type="submit" class="button primary">{{ _("Open the console") }}</button>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/delegate.js') }}" defer></script>{% endblock %}

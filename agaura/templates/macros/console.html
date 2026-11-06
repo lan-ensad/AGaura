@@ -1,0 +1,33 @@
+{#- Commands of Steering (D-A, "the cockpit commands, it does not store"): compact cards that act
+    at once during the session, each leading to its full card ("fiche"), which stays in its own
+    rubric in every state. Import with context:
+    {% from "macros/console.html" import command_head with context %}
+
+    command_head(icon_name, title, rubric, anchor, link, id, note=None, control="", link_part=None)
+        The head of a command: the icon and title (a heading of id ``id``), an optional muted
+        note after it ("invisible to voters"), the way to the card: the icon of its rubric,
+        ``link`` ("Dans Votes", "Réglages, dans Écran") and a chevron, a link to ``#anchor``;
+        then ``control``, the delegation of a right (``hand_over`` of macros/delegates.html:
+        the pill and "Confier"). ``rubric`` is the key of that rubric: polls, meeting, agenda,
+        notes, access, screen or documents (the icons of _nav.html). Every icon is decorative: the texts name
+        the command and the place it leads to. ``link_part`` makes the words of ``link`` a live
+        part of that name (manage.js), when they count what another console may change.
+
+    ready_link(drafts)
+        The words of the way from "Next poll" to the drafts: how many other drafts wait, else
+        "Drafts, in Polls"; in the head of #ready and in the live part "ready-link". -#}
+{% from "macros/icons.html" import icon with context %}
+
+{% macro command_head(icon_name, title, rubric, anchor, link, id, note=none, control="", link_part=none) -%}
+{% set rubric_icon = {"polls": "vote", "meeting": "calendar", "agenda": "list-ordered", "notes": "notebook-pen", "access": "door-open", "screen": "presentation", "documents": "scroll-text"}[rubric] %}
+<div class="cmd-head">
+  <h2 id="{{ id }}">{{ icon(icon_name) }}<span>{{ title }}{% if note %} <span class="muted small">{{ note }}</span>{% endif %}</span></h2>
+  <a class="to-home" href="#{{ anchor }}">{{ icon(rubric_icon, size="sm") }}<span{% if link_part %} data-live-part="{{ link_part }}"{% endif %}>{{ link }}</span>{{ icon("chevron-right", size="sm") }}</a>
+  {{ control }}
+</div>
+{%- endmacro %}
+
+{% macro ready_link(drafts) -%}
+{% set others = (drafts | length) - 1 %}
+{{- ngettext("%(num)s other draft, in Polls", "%(num)s other drafts, in Polls", others) if others > 0 else _("Drafts, in Polls") -}}
+{%- endmacro %}

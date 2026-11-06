@@ -1,0 +1,38 @@
+{#- Poll creation, "the method first" (FR-30, FR-31, D-C), and draft editing (FR-32): one page,
+    two steps rendered by the server (web/manage/editor.py). Step 1 (_editor_methods.html): the
+    voting modes as cards. Step 2 (_editor_form.html): the question and the settings of the
+    chosen mode only. Works without JavaScript; editor.js rewrites the rule sentence and adds
+    or removes option rows in place. -#}
+{% extends "layouts/admin.html" %}
+{% from "macros/icons.html" import icon with context %}
+{% set editing = poll is not none %}
+{% set console_url = "/manage/" ~ assembly.public_id %}
+{% set back_url = console_url ~ ("#drafts" if editing else "#tab-polls") %}
+{% set heading = _("Edit the draft") if editing else _("New poll") %}
+
+{% block title %}{{ heading }} · {{ assembly.title }} · AGaura{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ static_url('css/manage.css') }}">
+<link rel="stylesheet" href="{{ static_url('css/editor.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="editor-page">
+  <p class="editor-back"><a href="{{ back_url }}">{{ _("Back to Polls") }}</a></p>
+  <h1>{{ heading }}</h1>
+  <p class="muted">{{ assembly.title }} · {{ _("Drafts stay invisible to voters until they are pushed.") }}</p>
+  {#- Where the person stands; the step done is not a link: "Changer de mode" goes back to it
+      and keeps what was typed. -#}
+  <ol class="stepper" aria-label="{{ _('Steps of the poll') }}">
+    <li{% if step == 1 %} aria-current="step"{% else %} class="is-done"{% endif %}>{{ _("Voting method") }}</li>
+    <li{% if step == 2 %} aria-current="step"{% endif %}>{{ _("Question and settings") }}</li>
+  </ol>
+  {% if step == 1 %}
+  {% include "manage/_editor_methods.html" %}
+  {% else %}
+  {% include "manage/_editor_form.html" %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}{% if step == 2 %}<script src="{{ static_url('js/editor.js') }}" defer></script>{% endif %}{% endblock %}

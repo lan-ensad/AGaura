@@ -1,0 +1,22 @@
+{#- Body of the "Next poll" command of Steering (#ready in _cockpit.html, under its head), and the
+    live part "ready" of GET /manage/{id}/panel, answered during the session with the polls
+    right only: manage.js swaps it in when another console creates, edits, reorders, deletes,
+    duplicates, copies or pushes a draft. The first draft and "Push to voters", else "No draft";
+    then the way to a new poll. The count of the other drafts sits in the head, in the live
+    part "ready-link" (ready_link of macros/console.html). Needs assembly and drafts (in their
+    order: console_state().drafts, or console.drafts() for the panel). -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+{% if drafts %}
+{% set poll = drafts[0] %}
+<div class="ready-item">
+  <div class="ready-text"><strong>{{ poll.title }}</strong><span class="muted small">{{ poll_method_label(poll) }} · {{ ngettext("%(num)s option", "%(num)s options", poll.options | length) }}{% if poll.trial %} <span class="badge neutral">{{ _("Trial") }}</span>{% endif %}</span></div>
+  <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/open#tab-cockpit">
+    {{ csrf() }}
+    <button type="submit" class="button primary small">{{ _("Push to voters") }}</button>
+  </form>
+</div>
+{% else %}
+<p class="muted">{{ _("No draft.") }}</p>
+{% endif %}
+<p class="cmd-line"><a class="button small quiet" href="/manage/{{ assembly.public_id }}/polls/new">{{ icon("plus") }} {{ _("New poll") }}</a></p>

@@ -1,0 +1,21 @@
+{# Commitments of the service: home page and the information button of the voter pages.
+   Every sentence describes what the code does (docs/SPEC.md §9): change the code and the text
+   together. Import with context (the source link reads the settings). #}
+{% macro ethics() %}
+{% set source = request.app.state.settings.source_url %}
+<ul class="ethics">
+  <li><strong>{{ _("Secret ballot.") }}</strong>
+    {{ _("No ballot is linked to a person or to an access: no name, no time, and no trace of the order of arrival once the vote is closed. The service is designed so that neither the tribune nor the operator of the server can know who voted what.") }}</li>
+  <li><strong>{{ _("Voters without an account.") }}</strong>
+    {{ _("Voting needs no name, no email address and no app: the session password or an individual code drawn at random is enough. Only the accounts of the tribune have an email address.") }}</li>
+  <li><strong>{{ _("No tracking.") }}</strong>
+    {{ _("No advertising, no audience measurement, nothing loaded from another site. The only cookies keep the service working: login, form protection, access to the session. IP addresses serve security only: the security log keeps them 7 days at most, the other logs keep them truncated.") }}</li>
+  <li><strong>{{ _("Verifiable results.") }}</strong>
+    {{ _("Each result receives a fingerprint when it is closed, the log of the tribune's actions is chained so that a later change shows, and the export of the ballots allows an independent recount. Ties are reported, never broken by the software.") }}</li>
+  <li><strong>{{ _("Limits stated plainly.") }}</strong>
+    {{ _("With the session password, the service guarantees one vote per device, not per person: for a vote that requires one voice per person, the tribune uses individual codes. A vote with very few ballots can reveal individual choices. The projection screen shows a result only when the tribune chooses to, and the count of each option only from 10 ballots; the result published on the phones and the minutes always give the count.") }}</li>
+  <li><strong>{{ _("Open source.") }}</strong>
+    {{ _("The software is free (AGPL license): its code can be read, checked and reused.") }}
+    {% if source %}<a href="{{ source }}" rel="noopener">{{ _("Read the source code") }}</a>{% endif %}</li>
+</ul>
+{% endmacro %}

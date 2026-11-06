@@ -1,0 +1,293 @@
+{# Blocks of the projection screen. Inside each ``data-fit`` box, sizes are in ``em``: screen.js
+   picks the largest size at which the box's content fits (``data-fit-level``), from
+   ``data-fit-min`` (negative: larger than normal) up to the smallest size.
+   A result appears only through ``result_card`` and ``verdict_text``, for a closed poll the
+   tribune shows (``view.results``, FR-75); never for an open or cancelled poll (FR-72), and the
+   count of each option only from ``item.detail_min`` ballots. #}
+{% from "macros/icons.html" import icon with context %}
+{% from "macros/results.html" import single_choice_rule, approval_rule, condorcet_finding, names, merit_bar, grade_color, ranked %}
+
+{#- Digits in groups, easier to read from the back of the room: 4 by 4 (the 8 digits generated),
+    else 3 by 3 (the 6 digits of older sessions); any other password as typed. -#}
+{% macro password_text(password) -%}
+{% set size = 4 if password | length % 4 == 0 else (3 if password | length % 3 == 0 else 0) %}
+{% if password.isdigit() and size %}
+{% for start in range(0, password | length, size) %}<span>{{ password[start:start + size] }}</span>{% endfor %}
+{% else %}{{ password }}{% endif %}
+{%- endmacro %}
+
+{% macro password_size(password) -%}
+{% set length = password | length %}
+{{- "s" if length <= 8 else ("m" if length <= 14 else ("l" if length <= 24 else "xl")) -}}
+{%- endmacro %}
+
+{# Status of entries (FR-27), in the header: text, an icon and a colour that repeat it, never
+   colour alone (the door open, the lock, the calendar of the opening, the check of the end). #}
+{% macro entries_status(view) -%}
+{% set status = view.entries.value %}
+<p class="entries entries-{{ status }} has-icon" data-entries="{{ status }}">
+{{- icon({"open": "door-open", "locked": "lock", "soon": "calendar"}.get(status, "circle-check")) }}
+{%- if status == "open" %}{{ _("Entries open") }}
+{%- elif status == "locked" %}{{ _("Entries closed") }}
+{%- elif status == "soon" %}{{ _("Opening soon") }}
+{%- else %}{{ _("Session over") }}{% endif -%}
+</p>
+{%- endmacro %}
+
+{# How to join (FR-70): the QR code beside the address and the password (password mode), or
+   the address and the card instructions (codes mode). Shown only while entries are open
+   (FR-27). ``layout``: "stage" (the main place: QR code and text side by side, large),
+   "column" (alone in the side column: QR code above the text), "row" (beside other blocks of
+   the side column: the QR code at the left of the text, the box as tall as its content and
+   without the hint on the QR code, so the other blocks keep the rest of the column; fitted
+   first, ``data-fit-first``, for them to be fitted in the room it leaves). #}
+{% macro join_panel(view, address_base, public_id, join_qr, layout) -%}
+{% set large = layout == "stage" %}
+{% set row = layout == "row" %}
+<aside class="screen-join {{ 'is-large' if large else 'is-compact' }}{{ ' is-row' if row }}{{ ' codes' if view.codes_mode }}" aria-labelledby="screen-join-label" data-fit data-fit-min="{{ -3 if large else (0 if row else -2) }}"{{ ' data-fit-first' if row }}>
+  {% if join_qr %}<div class="join-qr" role="img" aria-label="{{ _('QR code to join the session') }}">{{ join_qr }}</div>{% endif %}
+  <div class="join-text">
+    {% if not view.in_session %}<p class="join-soon">{{ _("The session will start shortly.") }}</p>{% endif %}
+    <p class="join-label" id="screen-join-label">{{ icon("smartphone") }}{{ _("To vote") }}</p>
+    <p class="join-address{{ ' long' if (address_base | length) > 20 }}">{{ address_base }}<strong>{{ public_id }}</strong></p>
+    {% if view.password is not none %}
+    <p class="join-label">{{ _("Password") }}</p>
+    <p class="join-password size-{{ password_size(view.password) }}" data-password>{{ password_text(view.password) }}</p>
+    {% if not row %}<p class="join-hint">{{ _("Or scan the QR code: it joins directly.") }}</p>{% endif %}
+    {% else %}
+    <p class="join-hint">{{ _("Then enter the code printed on your card, or scan the QR code of your card.") }}</p>
+    {% endif %}
+    {% if not view.in_session %}<p class="join-hint">{{ _("You can already scan: your phone will join as soon as the session opens.") }}</p>{% endif %}
+  </div>
+</aside>
+{%- endmacro %}
+
+{# Chronometer or countdown (FR-74): the server's value; screen.js counts on from the data
+   attributes, on the server's clock. Without a label, the mode titles the box. Past zero a
+   countdown shows "+m:ss" and a text, not only a colour. #}
+{% macro timer_face(timer, large) -%}
+{% set phase = "running" if timer.running else ("paused" if timer.paused else "ready") %}
+<section class="screen-timer is-{{ phase }}{{ ' is-overtime' if timer.overtime }}{{ ' is-large' if large }}" aria-labelledby="screen-timer-label" data-fit data-fit-min="-6"
+  data-timer data-timer-duration="{{ timer.duration if timer.duration is not none else '' }}" data-timer-elapsed="{{ timer.base_elapsed }}" data-timer-started="{{ timer.started_ms if timer.started_ms is not none else '' }}">
+  <p class="timer-label" id="screen-timer-label">{{ icon("timer") }}{{ timer.label or (_("Chronometer") if timer.counting_up else _("Countdown")) }}</p>
+  <p class="timer-clock" data-timer-clock>{{ timer.display }}</p>
+  <p class="timer-note">
+    <span data-timer-over{{ ' hidden' if not timer.overtime }}>{{ _("Time is up") }}</span>
+    {% if timer.paused %}<span>{{ _("Paused") }}</span>{% endif %}
+  </p>
+</section>
+{%- endmacro %}
+
+{# Agenda: a window around the item under discussion, so a long agenda stays readable. #}
+{% macro agenda_block(view, size, large) -%}
+{% set window = view.agenda_window(size) %}
+<section class="screen-agenda{{ ' is-large' if large }}" aria-labelledby="screen-agenda-title" data-fit data-fit-min="{{ -3 if large else -2 }}">
+  <h2 class="eyebrow" id="screen-agenda-title">{{ icon("list-ordered") }}{{ _("Agenda") }}</h2>
+  {% if window.before %}<p class="more">{{ ngettext("%(num)s earlier item", "%(num)s earlier items", window.before) }}</p>{% endif %}
+  <ol class="agenda-list" start="{{ window.lines[0].position if window.lines else 1 }}">
+    {% for line in window.lines %}
+    <li class="{{ 'current' if line.current else ('past' if line.past else '') }}"{{ ' aria-current="step"' | safe if line.current }}>
+      <span class="agenda-number">{{ line.position }}</span>
+      <span class="agenda-title">{% if line.current %}<span class="agenda-now">{{ _("Now") }}</span> {% endif %}{{ line.title }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+  {% if window.after %}<p class="more">{{ ngettext("%(num)s more item", "%(num)s more items", window.after) }}</p>{% endif %}
+</section>
+{%- endmacro %}
+
+{% macro countdown(poll) -%}
+{# The closing time without script; screen.js turns it into a countdown on the server's clock. #}
+<p class="countdown" data-closes-at="{{ (poll.closes_at.timestamp() * 1000) | int }}">
+  <span data-countdown-fixed>{{ _("Closes at %(time)s", time=poll.closes_at | clock_time) }}</span>
+  <span data-countdown-live hidden>{{ _("Closes in") }} <strong data-countdown-value></strong></span>
+</p>
+{%- endmacro %}
+
+{# An open poll (FR-71): title, options, turnout so far, timer. Never a partial result (D4): the
+   bar at its foot is the turnout, ballots cast out of the attendees, in the plum of what runs
+   now (.screen-open), never a share of any option. #}
+{% macro poll_card(item, attendees) -%}
+{% set poll = item.poll %}
+{% set count = poll.options | length %}
+<section class="screen-card screen-poll screen-open" aria-labelledby="screen-poll-{{ poll.id }}" data-fit>
+  <div class="card-top">
+    <p class="eyebrow live">{{ _("Vote in progress") }}</p>
+    {% if poll.closes_at %}{{ countdown(poll) }}{% endif %}
+  </div>
+  <h2 id="screen-poll-{{ poll.id }}">{{ poll.title }}</h2>
+  {% if poll.description %}<p class="poll-description">{{ poll.description }}</p>{% endif %}
+  {% if poll.method == "approval" %}
+  {% set max = poll.params.get("max_choices") %}
+  <p class="poll-rule">{% if max %}{{ ngettext("Check up to %(num)s option.", "Check up to %(num)s options.", max) }}{% else %}{{ _("Check as many options as you wish.") }}{% endif %}</p>
+  {% elif poll.method == "majority_judgment" %}
+  <p class="poll-rule">{{ _("Grade each option.") }}</p>
+  {% elif poll.method == "condorcet" %}
+  <p class="poll-rule">{{ _("Rank the options in order of preference.") }}</p>
+  {% endif %}
+  <ul class="screen-options{{ ' lots' if count > 15 else (' many' if count > 6 else '') }}">
+    {% for option in poll.options %}<li>{{ option.label }}</li>
+    {% endfor %}
+    {% if poll.method == "single_choice" %}<li class="blank">{{ blank_label(poll) }}</li>{% endif %}
+  </ul>
+  <div class="turnout">
+    <progress class="bar" max="{{ [attendees, item.turnout, 1] | max }}" value="{{ item.turnout }}">{{ item.turnout }}</progress>
+    <p data-turnout>{{ ngettext("%(num)s ballot", "%(num)s ballots", item.turnout) }} / {{ ngettext("%(num)s attendee", "%(num)s attendees", attendees) }}</p>
+  </div>
+</section>
+{%- endmacro %}
+
+{# The verdict of a result shown, in words (FR-75): adopted or rejected, the option chosen, the
+   people elected, the Majority Judgment winner and its majority grade, the Condorcet winner
+   (or the winner of the Schulze method), no option over the
+   threshold, or a tie flagged to be settled under the bylaws, never broken (D6). ``short``: the
+   one-line form of the list (the winner without its grade). #}
+{% macro verdict_text(item, labels, short=false) -%}
+{% set poll = item.poll %}
+{% set outcome = item.data.outcome %}
+{% set kind = item.verdict.value %}
+{%- if kind == "adopted" %}{{ _("Adopted") }}
+{%- elif kind == "rejected" %}{{ _("Rejected") }}
+{%- elif kind == "tie" %}{{ _("Tie: to be settled under the bylaws") }}
+{%- elif kind == "decided" and poll.method == "approval" %}{{ _("Elected: %(names)s", names=names(outcome.elected, labels)) }}
+{%- elif kind == "decided" and poll.method == "majority_judgment" and not short %}
+{%- set row = outcome.options | selectattr("option", "equalto", outcome.winner) | first %}
+{{- _("%(option)s, majority grade “%(grade)s”", option=labels[outcome.winner], grade=grade_label(row.majority_grade, outcome.grade_count)) }}
+{%- elif kind == "decided" %}{{ labels[outcome.winner] }}
+{%- else %}{{ outcome_label(outcome.status) }}{% endif -%}
+{%- endmacro %}
+
+{% macro verdict_icon(kind) -%}
+{{ icon({"adopted": "circle-check", "decided": "circle-check", "rejected": "ban", "tie": "triangle-alert"}.get(kind, "info")) }}
+{%- endmacro %}
+
+{# Legend of the merit profiles on the night card: text, the colours only repeat it. #}
+{% macro night_legend(grade_count) -%}
+<p class="screen-legend" aria-hidden="true">
+{% for grade in range(grade_count) %}<span><svg class="legend-key" viewBox="0 0 1 1"><rect width="1" height="1" fill="{{ grade_color(grade, grade_count) }}" stroke="#fff" stroke-width="0.12"/></svg>{{ grade_label(grade, grade_count) }}</span>
+{% endfor %}<span><svg class="legend-half" viewBox="0 0 1 1" preserveAspectRatio="none"><rect width="1" height="1" fill="#fff"/></svg>{{ _("half of the votes") }}</span>
+</p>
+{%- endmacro %}
+
+{# A result the tribune shows (FR-75), on a night card apart from the light cards of the votes
+   in progress: the verdict first, in words on a light pill, then the rule. From
+   ``item.detail_min`` ballots, one row per option (votes, share, bar; merit profiles for
+   Majority Judgment; rank and duels won for Condorcet, after what the duels found) and the
+   counts (ballots cast, blank, valid votes); below, the verdict alone, and not even the number
+   of ballots. #}
+{% macro result_card(item) -%}
+{% set poll = item.poll %}
+{% set data = item.data %}
+{% set outcome = data.outcome %}
+{% set labels = option_labels(poll) %}
+{% set kind = item.verdict.value %}
+{% set rows = {} %}
+{% for row in outcome.options %}{% set unused = rows.update({row.option: row}) %}{% endfor %}
+<section class="screen-result" aria-labelledby="screen-result-{{ poll.id }}" data-fit data-fit-min="-3" data-result="{{ poll.id }}">
+  <div class="card-top">
+    <p class="eyebrow result">{{ icon("presentation") }}{{ _("Result") }}</p>
+    <p class="result-when">
+      {%- if item.detail %}{{ ngettext("closed at %(time)s · %(num)s ballot", "closed at %(time)s · %(num)s ballots", item.ballots, time=poll.closed_at | time_of_day) }}
+      {%- else %}{{ _("closed at %(time)s", time=poll.closed_at | time_of_day) }}{% endif -%}
+    </p>
+  </div>
+  <h2 id="screen-result-{{ poll.id }}">{{ poll.title }}</h2>
+  <p class="screen-verdict is-{{ kind }}" data-verdict="{{ kind }}">{{ verdict_icon(kind) }}{{ verdict_text(item, labels) }}</p>
+  {% if kind == "tie" and outcome.tied %}<p class="screen-rule">{{ _("Tied: %(names)s.", names=names(outcome.tied, labels)) }}</p>{% endif %}
+  {% if poll.method == "approval" and kind != "decided" and outcome.elected %}<p class="screen-rule">{{ _("Elected: %(names)s", names=names(outcome.elected, labels)) }}</p>{% endif %}
+  {% if kind == "tie" and outcome.seats_in_tie is defined and outcome.seats_in_tie %}<p class="screen-rule">{{ ngettext("%(num)s seat remains for the tied candidates.", "%(num)s seats remain for the tied candidates.", outcome.seats_in_tie) }}</p>{% endif %}
+  <p class="screen-rule">
+    {%- if poll.method == "single_choice" %}{{ single_choice_rule(poll, outcome) | trim }}
+    {%- elif poll.method == "approval" %}{{ approval_rule(poll, outcome) | trim }}
+    {%- elif poll.method == "condorcet" %}{{ _("Ranking by one-on-one duels (Condorcet, then Schulze); an option left unranked comes after the ranked ones.") }}
+    {%- else %}{{ _("Ranking by majority grade; an option left ungraded counts as “%(grade)s”.", grade=grade_label(outcome.grade_count - 1, outcome.grade_count)) }}{% endif -%}
+  </p>
+  {% if item.detail %}
+  {% if poll.method == "single_choice" %}
+  <ul class="screen-tally">
+    {% for row in outcome.options %}
+    <li{{ ' class="is-win"' | safe if row.option == outcome.winner }}>
+      <span class="tally-label">{{ labels[row.option] }}{% if row.option in outcome.tied %} <span class="tag-tie">{{ _("Tie") }}</span>{% endif %}</span>
+      <span class="tally-votes">{{ row.votes }}</span>
+      <span class="tally-share">{{ row.share | percent }}</span>
+      <progress class="bar" max="{{ [outcome.base_count, 1] | max }}" value="{{ row.votes }}">{{ row.votes }}</progress>
+    </li>
+    {% endfor %}
+  </ul>
+  {% elif poll.method == "approval" %}
+  <ul class="screen-tally">
+    {% call(id, rank, tied) ranked(outcome) %}
+    {% set row = rows[id] %}
+    <li{{ ' class="is-win"' | safe if id in outcome.elected }}>
+      <span class="tally-label">{{ labels[id] }}{% if id in outcome.elected %} <span class="tag-win">{{ _("Elected") }}</span>{% elif id in outcome.tied %} <span class="tag-tie">{{ _("Tie") }}</span>{% endif %}</span>
+      <span class="tally-votes">{{ row.approvals }}</span>
+      <span class="tally-share">{{ row.share | percent }}</span>
+      <progress class="bar" max="{{ [data.counts.valid, 1] | max }}" value="{{ row.approvals }}">{{ row.approvals }}</progress>
+    </li>
+    {% endcall %}
+  </ul>
+  {% elif poll.method == "condorcet" %}
+  {% if data.counts.valid > 0 %}<p class="screen-rule">{{ condorcet_finding(outcome, labels) | trim }}</p>{% endif %}
+  <ul class="screen-tally is-ranked">
+    {% call(id, rank, tied) ranked(outcome) %}
+    {% set row = rows[id] %}
+    <li{{ ' class="is-win"' | safe if id == outcome.winner }}>
+      <span class="tally-rank">{{ rank if rank is not none else "–" }}{% if tied %} ={% endif %}</span>
+      <span class="tally-label">{{ labels[id] }}{% if id in outcome.tied %} <span class="tag-tie">{{ _("Tie") }}</span>{% endif %}</span>
+      <span class="tally-share">{{ ngettext("%(num)s duel won", "%(num)s duels won", row.wins) }}</span>
+    </li>
+    {% endcall %}
+  </ul>
+  {% else %}
+  {% set valid = data.counts.valid %}
+  <ul class="screen-tally is-mj">
+    {% call(id, rank, tied) ranked(outcome) %}
+    {% set row = rows[id] %}
+    <li{{ ' class="is-win"' | safe if id == outcome.winner }}>
+      <span class="tally-rank">{{ rank if rank is not none else "–" }}{% if tied %} ={% endif %}</span>
+      <span class="tally-label">{{ labels[id] }}{% if id in outcome.tied %} <span class="tag-tie">{{ _("Tie") }}</span>{% endif %}</span>
+      {% if row.majority_grade is not none %}<span class="grade grade-{{ row.majority_grade if outcome.grade_count == 6 else 'x' }}">{{ grade_label(row.majority_grade, outcome.grade_count) }}</span>{% else %}<span>–</span>{% endif %}
+      {% if valid > 0 %}{{ merit_bar(row, outcome.grade_count, valid, night=true) }}{% endif %}
+    </li>
+    {% endcall %}
+  </ul>
+  {% if valid > 0 %}{{ night_legend(outcome.grade_count) }}{% endif %}
+  {% endif %}
+  <dl class="screen-counts">
+    <div><dt>{{ _("Ballots cast") }}</dt><dd>{{ data.counts.cast }}</dd></div>
+    <div><dt>{{ blank_count_label(poll) }}</dt><dd>{{ data.counts.blank }}</dd></div>
+    <div><dt>{{ _("Valid votes") }}</dt><dd>{{ data.counts.valid }}</dd></div>
+  </dl>
+  {% else %}
+  <p class="screen-detail-off">{{ icon("eye-off") }}{{ _("Count of votes not shown: fewer than %(num)s ballots", num=item.detail_min) }}</p>
+  {% endif %}
+</section>
+{%- endmacro %}
+
+{# Questions already put to the vote: title and state ("Vote clos", "Vote annulé"), or the
+   verdict of a result the tribune shows (FR-75), never another figure (FR-72). A cancelled
+   poll stays listed as cancelled: the room saw it put to the vote, and it must not vanish
+   silently; its reason goes to the minutes and the public results page, not here.
+   ``mode``: "large" (the stage), "strip" (below open polls or a result), "side" (side column);
+   ``waiting`` adds the waiting message above (in session, nothing open). #}
+{% macro past_list(view, polls, limit, mode, waiting=false) -%}
+<section class="screen-past is-{{ mode }}" aria-labelledby="screen-past-title" data-fit data-fit-min="{{ -3 if mode == 'large' else (-2 if mode == 'side' else -1) }}">
+  {% if waiting %}<p class="past-waiting">{{ _("Waiting for the next vote") }}</p>{% endif %}
+  <h2 class="eyebrow" id="screen-past-title">{{ _("Questions put to the vote") }}</h2>
+  <ul class="past-list">
+    {% for poll in polls[:limit] %}
+    {% set cancelled = poll.status.value == "cancelled" %}
+    {% set shown = view.result_of(poll) %}
+    <li class="{{ 'cancelled' if cancelled else 'closed' }}" data-past-poll="{{ poll.id }}">
+      <span class="past-title">{{ poll.title }}</span>
+      {% if shown %}
+      <span class="past-verdict is-{{ shown.verdict.value }}">{{ verdict_text(shown, option_labels(poll), short=true) }}</span>
+      {% else %}
+      <span class="past-state">{{ icon("ban" if cancelled else "lock") }}{{ _("Vote cancelled") if cancelled else _("Vote closed") }}</span>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% if polls | length > limit %}<p class="more">{{ ngettext("%(num)s earlier vote", "%(num)s earlier votes", (polls | length) - limit) }}</p>{% endif %}
+</section>
+{%- endmacro %}

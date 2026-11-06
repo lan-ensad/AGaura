@@ -1,0 +1,109 @@
+{#- Status bar of the console, on every rubric: state of the session, live figures, entries, the
+    running chronometer, the main action of the session, and the headcount warnings (FR-26,
+    FR-28). Rendered in console.html and again by GET /manage/{id}/panel, whose copy manage.js
+    swaps in after a console event when it changed; data-status lets it reload the page when
+    another console opens or closes the session. Needs panel, assembly, can and timer_state; join_alert and
+    join_lockdown (session.join_alert()) warn about refused passwords or codes, panel.access_cap
+    about the access cap reached in password mode (FR-27). A delegate
+    link (FR-92) sees the entries without their lock button, and no session action; data-access
+    reloads its page when the owner changes the rights of the link. With a single poll open,
+    the figure is the ballots cast in it ("Bulletins"); otherwise the count of polls open. On a
+    phone, "Close the session" leaves the bar for the foot of Steering (.session-end in
+    _cockpit.html, manage.css); the icons of the lock and the chronometer are decorative. The
+    lock button shows its verb alone, next to the state of the entries, and keeps the whole
+    action as its name ("Verrouiller les entrées", which starts with the visible label), so the
+    bar holds on one line at 1280 px. The running chronometer leads to its command during the
+    session (#cmd-timer, in Steering), to its card otherwise. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set assembly = panel.assembly %}
+{% set status = assembly.status.value %}
+{% set open_count = panel.open_polls | length %}
+<div class="status-row" data-status="{{ status }}" data-access="{{ can.key }}">
+  <span class="badge status-{{ status }}">{{ assembly_status_label(assembly.status) }}</span>
+
+  {% if status != "preparation" %}
+  <dl class="status-figures">
+    <div><dt>{{ _("Attendees") }}</dt><dd>{{ panel.attendees }}</dd></div>
+    {% if panel.quorum is not none %}
+    <div><dt>{{ _("Quorum") }}</dt><dd>{{ panel.quorum }} · {% if panel.attendees >= panel.quorum %}<span class="status-ok">{{ _("reached") }}</span>{% else %}<span class="status-warn">{{ _("not reached") }}</span>{% endif %}</dd></div>
+    {% endif %}
+    {% if assembly.headcount is not none %}
+    <div><dt>{{ _("Counted in the room") }}</dt><dd>{{ assembly.headcount }}</dd></div>
+    {% endif %}
+    {% if status == "in_session" and open_count == 1 %}
+    {% set ballots = panel.open_polls[0].turnout %}
+    <div class="status-ballots"><dt>{{ _("Ballots") }}</dt><dd>{% if can.polls %}<a href="#live">{{ ballots }}</a>{% else %}{{ ballots }}{% endif %}</dd></div>
+    {% elif status == "in_session" %}
+    <div><dt>{{ _("Polls open now") }}</dt><dd>{% if can.polls %}<a href="#live">{{ open_count }}</a>{% else %}{{ open_count }}{% endif %}</dd></div>
+    {% endif %}
+  </dl>
+  {% endif %}
+
+  {% if status == "in_session" and not can.owner %}
+  <div class="status-entries">
+    {% if assembly.entries_locked %}<span class="badge warning">{{ icon("lock") }}{{ _("Entries locked") }}</span>{% else %}<span class="status-label">{{ icon("lock-open") }} {{ _("Entries open") }}</span>{% endif %}
+  </div>
+  {% elif status == "in_session" %}
+  <form method="post" action="/manage/{{ assembly.public_id }}/entries" class="status-entries">
+    {{ csrf() }}
+    {% if assembly.entries_locked %}
+    <input type="hidden" name="locked" value="0">
+    <span class="badge warning">{{ icon("lock") }}{{ _("Entries locked") }}</span>
+    <button type="submit" class="button small" aria-label="{{ _('Unlock entries') }}">{{ icon("lock-open") }} {{ _("Unlock") }}</button>
+    {% else %}
+    <input type="hidden" name="locked" value="1">
+    <span class="status-label">{{ icon("lock-open") }} {{ _("Entries open") }}</span>
+    <button type="submit" class="button small" aria-label="{{ _('Lock entries') }}" title="{{ _('Once everyone has joined: nobody new can join, the others keep voting.') }}">{{ icon("lock") }} {{ _("Lock") }}</button>
+    {% endif %}
+  </form>
+  {% endif %}
+
+  {% if timer_state is defined and status != "closed" and not timer_state.ready %}
+  {% set t = timer_state %}
+  {% set tag = "a" if can.timer else "span" %}
+  <{{ tag }} class="status-timer{{ ' is-overtime' if t.overtime }}{{ ' is-paused' if not t.running }}"{% if can.timer %} href="{{ '#cmd-timer' if status == 'in_session' else '#timer' }}"{% endif %} data-timer data-timer-duration="{{ t.duration if t.duration is not none else '' }}" data-timer-elapsed="{{ t.base_elapsed }}" data-timer-started="{{ t.started_ms if t.started_ms is not none else '' }}">
+    {{ icon("timer") }}
+    <span class="status-label">{{ t.label or (_("Chronometer") if t.counting_up else _("Countdown")) }}</span>
+    <span class="status-clock" data-timer-clock>{{ t.display }}</span>
+  </{{ tag }}>
+  {% endif %}
+
+  <div class="status-action">
+    {% if not can.owner %}
+    {% elif status == "preparation" %}
+    <form method="post" action="/manage/{{ assembly.public_id }}/open#tab-cockpit" class="inline">
+      {{ csrf() }}
+      <button type="submit" class="button primary">{{ _("Open the session") }}</button>
+    </form>
+    {% elif status == "in_session" %}
+    <form method="post" action="/manage/{{ assembly.public_id }}/close#tab-cockpit" class="inline" data-confirm="{{ _('Close the session? Every voter access will end.') }}">
+      {{ csrf() }}
+      <button type="submit" class="button small">{{ _("Close the session") }}</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if status == "in_session" and join_alert %}
+<div class="alert alert-warning status-alert" role="alert" id="join-alert">
+  {{ ngettext("%(num)s password or code refused in the last 10 minutes.", "%(num)s passwords or codes refused in the last 10 minutes.", join_alert) }}
+  {% if assembly.access_mode.value == "password" %}{{ _("If this is not people mistyping in the room, change the password, or lock the entries once everyone has joined.") }}{% else %}{{ _("If this is not people mistyping in the room, lock the entries once everyone has joined.") }}{% endif %}
+  {% if join_lockdown %}{{ _("The addresses that keep failing are now refused; voters with the right password or code still get in.") }}{% endif %}
+</div>
+{% endif %}
+{% if status == "in_session" and panel.access_cap %}
+<div class="alert alert-warning status-alert" role="alert" id="access-cap">
+  {% if assembly.is_demo %}{{ _("Demonstration: the 5 voters a demonstration session takes have joined. No new device can join; a real assembly needs an account.") }}
+  {%- else %}{{ _("Maximum of %(cap)s accesses reached: no new device can join with the password. If people in the room are refused, save the headcount: the maximum becomes the people counted plus a margin.", cap=panel.access_cap) }}{% endif %}
+</div>
+{% endif %}
+{% for warning in panel.warnings %}
+<div class="alert alert-warning status-alert" role="alert">
+  {% if warning.kind == "attendees" %}
+  {{ _("%(count)s accesses in use for %(headcount)s people counted: someone may have joined twice. Lock entries, or rerun binding votes with individual codes.", count=warning.count, headcount=warning.headcount) }}
+  {% else %}
+  {{ _("A poll has %(count)s ballots for %(headcount)s people counted.", count=warning.count, headcount=warning.headcount) }}
+  {% endif %}
+</div>
+{% endfor %}

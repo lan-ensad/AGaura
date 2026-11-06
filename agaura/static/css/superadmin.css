@@ -1,0 +1,12 @@
+/* Super-admin area: list of accounts, phone first. */
+
+.sa-accounts { list-style: none; margin: 0; padding: 0; }
+.sa-account { padding: 0.9rem 0; border-top: 1px solid var(--border); }
+.sa-account:first-child { border-top: 0; padding-top: 0; }
+.sa-account p { margin: 0.25rem 0 0; }
+.sa-account-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; }
+.sa-email { overflow-wrap: anywhere; }
+.sa-actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.6rem 1rem; margin-top: 0.6rem; }
+.sa-delete { flex: 1 1 16rem; }
+.sa-delete > summary { cursor: pointer; min-height: 2.25rem; display: flex; align-items: center; color: var(--danger); }
+.sa-delete[open] { border: 1px solid #f0c2bf; border-radius: var(--radius); padding: 0 0.8rem 0.8rem; }

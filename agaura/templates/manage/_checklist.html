@@ -1,0 +1,92 @@
+{#- Recap before the opening, at the head of Meeting (the rubric the console lands on in
+    preparation; Steering only exists once the session is open), the owner's only: one short
+    line per step, what it still lacks ("Date manquante", in amber, session.checklist()
+    missing) or what it holds, and a link to its card. The steps whose card sits in another
+    rubric end with that rubric's icon and short name, the same as in the tabs; the details and
+    the tribune follow in this rubric. Steps come from session.checklist(); an
+    optional step (the projection screen, the trial vote) never counts in the steps ready. The
+    mark of each line is drawn (manage.css), its state said in words for screen readers, and
+    an optional step says so in its note. The trial vote (D-I) is a form while there is none:
+    its button, "Créer" (named in full for screen readers, a name that starts with the visible
+    word), creates the draft "Tout le monde est-il connecté ?" (POST …/polls/trial, back to
+    #checklist); then the line leads to that draft. Nothing blocks the opening, which sits in
+    the status bar. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set done_count = checklist | rejectattr("optional") | selectattr("done") | list | length %}
+{% set total = checklist | rejectattr("optional") | list | length %}
+{% set codes_mode = assembly.access_mode.value == "codes" %}
+{% set drafts_count = state.drafts | rejectattr("trial") | list | length %}
+{% set agenda_count = (assembly.agenda or []) | length %}
+{% set tribune_count = (assembly.tribune or []) | length %}
+{% set homes = {
+  "polls": ("vote", _("Polls")),
+  "agenda": ("list-ordered", _("Agenda")),
+  "access": ("door-open", _("Access")),
+  "screen": ("presentation", _("Screen")),
+} %}
+{% macro home(rubric) -%}
+{% if rubric in homes %}<span class="check-home">{{ icon(homes[rubric][0], size="sm") }}<span>{{ homes[rubric][1] }}</span></span>{% endif %}
+{%- endmacro %}
+{% macro missing(name) -%}
+<span class="check-missing">{{ _("Date missing") if name == "date" else _("Place missing") }}</span>
+{%- endmacro %}
+{% macro state_of(step) -%}
+{% if step.done %} <span class="visually-hidden">({{ _("Ready") }})</span>{% elif not step.optional %} <span class="visually-hidden">({{ _("To do") }})</span>{% endif %}
+{%- endmacro %}
+<section class="card checklist-card" id="checklist" aria-labelledby="checklist-title">
+  <div class="card-head">
+    <h2 id="checklist-title">{{ icon("list-checks") }} {{ _("Before opening the session") }}</h2>
+    <span class="badge{{ ' success' if done_count == total }}">{{ _("%(done)s of %(total)s steps ready", done=done_count, total=total) }}</span>
+  </div>
+  <ol class="checklist">
+    {% for step in checklist %}
+    {% set rubric = "meeting" %}
+    {% if step.key == "details" %}
+      {% set href, label = "#details", _("Details") %}
+      {% set parts = [] %}
+      {% for name in step.missing %}{% set unused = parts.append(missing(name)) %}{% endfor %}
+      {% if assembly.date %}{% set unused = parts.append(assembly.date | long_date) %}{% endif %}
+      {% if assembly.place %}{% set unused = parts.append(assembly.place) %}{% endif %}
+      {% set note = parts | join(" · ") %}
+    {% elif step.key == "tribune" %}
+      {% set href, label = "#tribune", _("Tribune") %}
+      {% set note %}{% if tribune_count %}{{ ngettext("%(num)s person", "%(num)s people", tribune_count) }}{% else %}{{ _("Nobody at the tribune yet.") }}{% endif %}{% endset %}
+    {% elif step.key == "agenda" %}
+      {% set href, label, rubric = "#agenda", _("Agenda"), "agenda" %}
+      {% set note %}{% if agenda_count %}{{ ngettext("%(num)s item", "%(num)s items", agenda_count) }}{% else %}{{ _("No agenda yet.") }}{% endif %}{% endset %}
+    {% elif step.key == "polls" %}
+      {% set href, label, rubric = "#drafts", _("Prepared polls"), "polls" %}
+      {% set note %}{% if drafts_count %}{{ ngettext("%(num)s draft", "%(num)s drafts", drafts_count) }}{% else %}{{ _("No draft.") }}{% endif %}{% endset %}
+    {% elif step.key == "access" %}
+      {% set href, label, rubric = ("#codes" if codes_mode else "#join"), _("Access mode"), "access" %}
+      {% set note %}{% if codes_mode %}{% if step.done %}{{ _("Individual codes, printed on cards") }}{% else %}{{ _("Individual codes: generate them") }}{% endif %}{% else %}{{ _("Session password and QR code") }}{% endif %}{% endset %}
+    {% elif step.key == "screen" %}
+      {% set href, label, rubric = "#links", _("Projection screen"), "screen" %}
+      {% set note %}{{ _("Optional: check the display") }}{% endset %}
+    {% else %}
+      {% set href, label, rubric = ("#draft-" ~ step.poll if step.done else none), _("Trial vote"), "polls" %}
+      {% set note %}{% if step.done %}{{ _("Draft ready, to push first") }}{% else %}{{ _("Optional: to test the network") }}{% endif %}{% endset %}
+    {% endif %}
+    <li class="check-step {{ ('is-done' if step.done else 'is-optional') if step.optional else ('is-done' if step.done else 'is-todo') }}">
+      {% if href %}
+      <a href="{{ href }}">
+        <span class="check-mark" aria-hidden="true"></span>
+        <strong class="check-label">{{ label }}</strong>{{ state_of(step) }}
+        <span class="check-note">{{ note }}</span>
+        {{ home(rubric) }}
+      </a>
+      {% else %}
+      <form method="post" action="/manage/{{ assembly.public_id }}/polls/trial#checklist" class="check-form">
+        {{ csrf() }}
+        <span class="check-mark" aria-hidden="true"></span>
+        <strong class="check-label">{{ label }}</strong>{{ state_of(step) }}
+        <span class="check-note">{{ note }}</span>
+        <button type="submit" class="button small" aria-label="{{ _('Create the trial vote') }}">{{ icon("plus") }} {{ _("Create") }}</button>
+      </form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="hint">{{ _("Nothing here is required.") }} {{ _("Voters can join only once the session is open.") }}</p>
+</section>

@@ -1,0 +1,1374 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-11-02 22:50+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: templates/manage/_panel.html:5 templates/manage/dashboard.html:28
+msgid "Attendees"
+msgstr "Présents"
+
+#: templates/manage/_panel.html:7 templates/manage/console.html:299 templates/manage/dashboard.html:60
+msgid "Quorum"
+msgstr "Quorum"
+
+#: templates/manage/_panel.html:7
+msgid "reached"
+msgstr "atteint"
+
+#: templates/manage/_panel.html:7
+msgid "not reached"
+msgstr "non atteint"
+
+#: templates/manage/_panel.html:10
+msgid "Counted in the room"
+msgstr "Comptés dans la salle"
+
+#: templates/manage/_panel.html:17
+#, python-format
+msgid ""
+"%(count)s accesses in use for %(headcount)s people counted: someone may have joined twice. Lock "
+"entries, or rerun binding votes with individual codes."
+msgstr ""
+"%(count)s accès en cours pour %(headcount)s personnes comptées : quelqu'un a peut-être rejoint "
+"deux fois. Verrouillez les entrées, ou refaites les votes importants avec les codes individuels."
+
+#: templates/manage/_panel.html:19
+#, python-format
+msgid "A poll has %(count)s ballots for %(headcount)s people counted."
+msgstr "Un vote compte %(count)s bulletins pour %(headcount)s personnes comptées."
+
+#: templates/manage/_panel.html:24
+msgid "Polls open now"
+msgstr "Votes en cours"
+
+#: templates/manage/_panel.html:31
+#, python-format
+msgid "closes at %(time)s"
+msgstr "clôture à %(time)s"
+
+#: templates/manage/_panel.html:34
+#, python-format
+msgid "%(num)s ballot"
+msgid_plural "%(num)s ballots"
+msgstr[0] "%(num)s bulletin"
+msgstr[1] "%(num)s bulletins"
+
+#: templates/manage/_panel.html:34
+#, python-format
+msgid "%(num)s attendee"
+msgid_plural "%(num)s attendees"
+msgstr[0] "%(num)s présent"
+msgstr[1] "%(num)s présents"
+
+#: templates/manage/_panel.html:37
+msgid "Close the vote"
+msgstr "Clore le vote"
+
+#: templates/manage/_panel.html:43
+msgid "No poll is open."
+msgstr "Aucun vote en cours."
+
+#: templates/manage/codes.html:2 templates/manage/console.html:258
+msgid "Individual codes"
+msgstr "Codes individuels"
+
+#: templates/manage/codes.html:8
+#, python-format
+msgid "%(num)s code generated. Print this page now: the codes cannot be shown again."
+msgid_plural "%(num)s codes generated. Print this page now: the codes cannot be shown again."
+msgstr[0] "%(num)s code généré. Imprimez cette page maintenant : les codes ne pourront plus être affichés."
+msgstr[1] "%(num)s codes générés. Imprimez cette page maintenant : les codes ne pourront plus être affichés."
+
+#: templates/manage/codes.html:11
+msgid "Print"
+msgstr "Imprimer"
+
+#: templates/manage/codes.html:12
+msgid "Back to the console"
+msgstr "Retour à la console"
+
+#: templates/manage/codes.html:22
+#, python-format
+msgid "Scan the QR code, or open %(url)s and type this code."
+msgstr "Scannez le QR code, ou ouvrez %(url)s et saisissez ce code."
+
+#: templates/manage/codes.html:23
+msgid "Personal and secret: one vote per poll."
+msgstr "Personnel et secret : un vote par scrutin."
+
+#: templates/manage/console.html:11 templates/manage/console.html:183
+msgid "Timer (minutes)"
+msgstr "Minuterie (minutes)"
+
+#: templates/manage/console.html:33
+msgid "Open the session"
+msgstr "Ouvrir la session"
+
+#: templates/manage/console.html:35
+msgid "Voters can join only once the session is open."
+msgstr "Les votants ne peuvent rejoindre qu'une fois la session ouverte."
+
+#: templates/manage/console.html:37
+msgid "Close the session? Every voter access will end."
+msgstr "Terminer la session ? Tous les accès des votants prendront fin."
+
+#: templates/manage/console.html:39
+msgid "Close the session"
+msgstr "Terminer la session"
+
+#: templates/manage/console.html:48
+msgid "A poll has closed."
+msgstr "Un vote vient d'être clos."
+
+#: templates/manage/console.html:48
+msgid "Refresh the page"
+msgstr "Actualiser la page"
+
+#: templates/manage/console.html:57
+msgid "Address"
+msgstr "Adresse"
+
+#: templates/manage/console.html:60
+msgid "QR code to join the session"
+msgstr "QR code pour rejoindre la session"
+
+#: templates/manage/console.html:62
+msgid "Session password"
+msgstr "Mot de passe de la session"
+
+#: templates/manage/console.html:64
+msgid "The QR code contains the password: scanning it joins directly."
+msgstr "Le QR code contient le mot de passe : le scanner suffit pour rejoindre."
+
+#: templates/manage/console.html:68
+msgid "Change the password"
+msgstr "Changer le mot de passe"
+
+#: templates/manage/console.html:71
+msgid "New password"
+msgstr "Nouveau mot de passe"
+
+#: templates/manage/console.html:72
+msgid "Change"
+msgstr "Changer"
+
+#: templates/manage/console.html:76
+msgid "Each person joins with the individual code printed on their card."
+msgstr "Chaque personne rejoint avec le code individuel imprimé sur sa carte."
+
+#: templates/manage/console.html:76
+msgid "Manage the codes"
+msgstr "Gérer les codes"
+
+#: templates/manage/console.html:84 web/manage/__init__.py:84
+msgid "Entries locked"
+msgstr "Entrées verrouillées"
+
+#: templates/manage/console.html:85
+msgid "Unlock entries"
+msgstr "Déverrouiller les entrées"
+
+#: templates/manage/console.html:88
+msgid "Lock entries"
+msgstr "Verrouiller les entrées"
+
+#: templates/manage/console.html:89
+msgid "Once everyone has joined: nobody new can join, the others keep voting."
+msgstr "Une fois tout le monde entré : plus personne ne peut rejoindre, les autres continuent de voter."
+
+#: templates/manage/console.html:95
+msgid "People counted in the room"
+msgstr "Personnes comptées dans la salle"
+
+#: templates/manage/console.html:97 templates/manage/console.html:301
+msgid "Save"
+msgstr "Enregistrer"
+
+#: templates/manage/console.html:104
+msgid "Switch to individual codes? Phones that joined with the password will lose access."
+msgstr "Passer aux codes individuels ? Les téléphones entrés avec le mot de passe perdront l'accès."
+
+#: templates/manage/console.html:104
+msgid "Switch to individual codes"
+msgstr "Passer aux codes individuels"
+
+#: templates/manage/console.html:107
+msgid "Switch to the session password"
+msgstr "Revenir au mot de passe de session"
+
+#: templates/manage/console.html:116
+msgid "New poll"
+msgstr "Nouveau vote"
+
+#: templates/manage/console.html:119 templates/manage/console.html:123
+msgid "Resolution"
+msgstr "Résolution"
+
+#: templates/manage/console.html:133 templates/manage/console.html:157
+msgid "Question"
+msgstr "Question"
+
+#: templates/manage/console.html:145
+msgid "Election"
+msgstr "Élection"
+
+#: templates/manage/console.html:146
+msgid "Seats to fill"
+msgstr "Sièges à pourvoir"
+
+#: templates/manage/console.html:168
+msgid "Drafts"
+msgstr "Brouillons"
+
+#: templates/manage/console.html:168
+msgid "invisible to voters"
+msgstr "invisibles pour les votants"
+
+#: templates/manage/console.html:184
+msgid "Push to voters"
+msgstr "Lancer le vote"
+
+#: templates/manage/console.html:188
+msgid "Duplicate"
+msgstr "Dupliquer"
+
+#: templates/manage/console.html:190
+msgid "Delete this draft?"
+msgstr "Supprimer ce brouillon ?"
+
+#: templates/manage/console.html:191
+msgid "Delete"
+msgstr "Supprimer"
+
+#: templates/manage/console.html:198
+msgid "No draft."
+msgstr "Aucun brouillon."
+
+#: templates/manage/console.html:198
+msgid "Prepare polls in advance, or create them during the session."
+msgstr "Préparez les votes à l'avance, ou créez-les pendant la session."
+
+#: templates/manage/console.html:203
+msgid "Finished polls"
+msgstr "Votes terminés"
+
+#: templates/manage/console.html:212
+msgid "Shown to voters"
+msgstr "Visible par les votants"
+
+#: templates/manage/console.html:216
+#, python-format
+msgid "closed at %(time)s"
+msgstr "clos à %(time)s"
+
+#: templates/manage/console.html:218
+#, python-format
+msgid "Cancelled: %(reason)s"
+msgstr "Annulé : %(reason)s"
+
+#: templates/manage/console.html:233
+msgid "Hide the result"
+msgstr "Masquer le résultat"
+
+#: templates/manage/console.html:238
+msgid "Cancel this poll"
+msgstr "Annuler ce vote"
+
+#: templates/manage/console.html:241
+msgid "Reason (appears in the minutes)"
+msgstr "Motif (figurera au procès-verbal)"
+
+#: templates/manage/console.html:242
+msgid "Cancel the poll"
+msgstr "Annuler le vote"
+
+#: templates/manage/console.html:247
+msgid "Copy as a new draft (to vote again)"
+msgstr "Copier en nouveau brouillon (pour revoter)"
+
+#: templates/manage/console.html:252
+msgid "Results appear here once a poll is closed."
+msgstr "Les résultats apparaissent ici une fois un vote clos."
+
+#: templates/manage/console.html:259
+msgid ""
+"Codes are shown only once, on the printable page: print it right away. A lost page is handled by "
+"revoking its codes."
+msgstr ""
+"Les codes ne s'affichent qu'une fois, sur la page à imprimer : imprimez-la aussitôt. En cas de "
+"perte, révoquez les codes concernés."
+
+#: templates/manage/console.html:263
+msgid "Number of codes"
+msgstr "Nombre de codes"
+
+#: templates/manage/console.html:264
+msgid "Generate and print"
+msgstr "Générer et imprimer"
+
+#: templates/manage/console.html:269
+msgid "Batch"
+msgstr "Lot"
+
+#: templates/manage/console.html:269
+msgid "Codes"
+msgstr "Codes"
+
+#: templates/manage/console.html:269
+msgid "Created"
+msgstr "Créé"
+
+#: templates/manage/console.html:269 templates/manage/dashboard.html:27
+msgid "Status"
+msgstr "État"
+
+#: templates/manage/console.html:274
+msgid "Active"
+msgstr "Actif"
+
+#: templates/manage/console.html:274
+msgid "Revoked"
+msgstr "Révoqué"
+
+#: templates/manage/console.html:276
+msgid "Revoke these codes? People using them lose access."
+msgstr "Révoquer ces codes ? Les personnes qui les utilisent perdront l'accès."
+
+#: templates/manage/console.html:277
+msgid "Revoke"
+msgstr "Révoquer"
+
+#: templates/manage/console.html:289
+msgid "Edit the details"
+msgstr "Modifier les informations"
+
+#: templates/manage/console.html:292 templates/manage/dashboard.html:53
+msgid "Title"
+msgstr "Titre"
+
+#: templates/manage/console.html:294 templates/manage/dashboard.html:27
+#: templates/manage/dashboard.html:55
+msgid "Date"
+msgstr "Date"
+
+#: templates/manage/console.html:295 templates/manage/dashboard.html:56
+msgid "Place"
+msgstr "Lieu"
+
+#: templates/manage/console.html:298 templates/manage/dashboard.html:59
+msgid "Registered members"
+msgstr "Membres inscrits"
+
+#: templates/manage/console.html:299 templates/manage/dashboard.html:60
+msgid "Optional: a number (50) or a share of members (1/4)."
+msgstr "Facultatif : un nombre (50) ou une proportion des membres (1/4)."
+
+#: templates/manage/console.html:307
+msgid "Session log"
+msgstr "Journal de la session"
+
+#: templates/manage/console.html:319 templates/manage/console.html:323
+msgid "Delete the session"
+msgstr "Supprimer la session"
+
+#: templates/manage/console.html:322
+msgid "I understand that the session, its polls, ballots and results will be deleted for good."
+msgstr "Je comprends que la session, ses votes, bulletins et résultats seront supprimés définitivement."
+
+#: templates/manage/dashboard.html:7
+msgid "My sessions"
+msgstr "Mes sessions"
+
+#: templates/manage/dashboard.html:12
+#, python-format
+msgid "Confirm your email address to create sessions: open the link we sent to %(email)s."
+msgstr "Confirmez votre adresse e-mail pour créer des sessions : ouvrez le lien envoyé à %(email)s."
+
+#: templates/manage/dashboard.html:15
+msgid "Send the link again"
+msgstr "Renvoyer le lien"
+
+#: templates/manage/dashboard.html:22
+msgid "Sessions"
+msgstr "Sessions"
+
+#: templates/manage/dashboard.html:27
+msgid "Session"
+msgstr "Session"
+
+#: templates/manage/dashboard.html:28
+msgid "Polls"
+msgstr "Votes"
+
+#: templates/manage/dashboard.html:45
+msgid "No session yet. Create your first one."
+msgstr "Aucune session pour l'instant. Créez la première."
+
+#: templates/manage/dashboard.html:50
+msgid "New session"
+msgstr "Nouvelle session"
+
+#: templates/manage/dashboard.html:63
+msgid "How voters join"
+msgstr "Accès des votants"
+
+#: templates/manage/dashboard.html:67
+msgid "Create the session"
+msgstr "Créer la session"
+
+#: web/manage/__init__.py:44
+msgid "Confirm your email address before creating a session."
+msgstr "Confirmez votre adresse e-mail avant de créer une session."
+
+#: web/manage/__init__.py:45
+msgid "Enter a whole number."
+msgstr "Saisissez un nombre entier."
+
+#: web/manage/__init__.py:46
+msgid "Enter a valid date."
+msgstr "Saisissez une date valide."
+
+#: web/manage/__init__.py:47
+msgid "The number of seats must be between 1 and the number of candidates."
+msgstr "Le nombre de sièges doit être compris entre 1 et le nombre de candidat·es."
+
+#: web/manage/__init__.py:53
+msgid "Session created. Prepare the polls, then open the session."
+msgstr "Session créée. Préparez les votes, puis ouvrez la session."
+
+#: web/manage/__init__.py:54
+msgid "The session is open: voters can join."
+msgstr "La session est ouverte : les votants peuvent rejoindre."
+
+#: web/manage/__init__.py:55
+msgid "The session is closed. Every voter access has ended."
+msgstr "La session est terminée. Tous les accès des votants ont pris fin."
+
+#: web/manage/__init__.py:56
+msgid "Session deleted."
+msgstr "Session supprimée."
+
+#: web/manage/__init__.py:57
+msgid "Details saved."
+msgstr "Informations enregistrées."
+
+#: web/manage/__init__.py:58
+msgid "Session password changed."
+msgstr "Mot de passe de session modifié."
+
+#: web/manage/__init__.py:59
+msgid "Access mode changed."
+msgstr "Mode d'accès modifié."
+
+#: web/manage/__init__.py:60
+msgid "Entries locked: nobody new can join."
+msgstr "Entrées verrouillées : plus personne ne peut rejoindre."
+
+#: web/manage/__init__.py:61
+msgid "Entries unlocked."
+msgstr "Entrées déverrouillées."
+
+#: web/manage/__init__.py:62
+msgid ""
+"Headcount saved and added to the attendance record; the console warns when "
+"accesses or ballots exceed it."
+msgstr ""
+"Effectif enregistré et ajouté au suivi des présences ; la console signale les connexions ou "
+"les bulletins qui le dépassent."
+
+#: web/manage/__init__.py:63
+msgid "Codes revoked: they no longer work."
+msgstr "Codes révoqués : ils ne fonctionnent plus."
+
+#: web/manage/__init__.py:64
+msgid "Poll created as a draft."
+msgstr "Vote créé en brouillon."
+
+#: web/manage/__init__.py:65
+msgid "Poll pushed to voters."
+msgstr "Vote lancé."
+
+#: web/manage/__init__.py:66
+msgid "Poll closed; result computed."
+msgstr "Vote clos ; résultat calculé."
+
+#: web/manage/__init__.py:67
+msgid "Poll cancelled."
+msgstr "Vote annulé."
+
+#: web/manage/__init__.py:68
+msgid "Result published."
+msgstr "Résultat publié."
+
+#: web/manage/__init__.py:69
+msgid "Result hidden."
+msgstr "Résultat masqué."
+
+#: web/manage/__init__.py:70
+msgid "Draft deleted."
+msgstr "Brouillon supprimé."
+
+#: web/manage/__init__.py:71
+msgid "Copy created as a draft."
+msgstr "Copie créée en brouillon."
+
+#: web/manage/__init__.py:77
+msgid "Session created"
+msgstr "Session créée"
+
+#: web/manage/__init__.py:78
+msgid "Details edited"
+msgstr "Informations modifiées"
+
+#: web/manage/__init__.py:79
+msgid "Session opened"
+msgstr "Session ouverte"
+
+#: web/manage/__init__.py:80
+msgid "Session closed"
+msgstr "Session terminée"
+
+#: web/manage/__init__.py:81
+msgid "New session password generated"
+msgstr "Nouveau mot de passe de session généré"
+
+#: web/manage/__init__.py:82
+msgid "Session password replaced"
+msgstr "Mot de passe de session remplacé"
+
+#: web/manage/__init__.py:83
+msgid "Access mode changed"
+msgstr "Mode d'accès modifié"
+
+#: web/manage/__init__.py:85
+msgid "Entries unlocked"
+msgstr "Entrées déverrouillées"
+
+#: web/manage/__init__.py:86
+msgid "Headcount entered"
+msgstr "Effectif saisi"
+
+#: web/manage/__init__.py:87
+msgid "Screen link regenerated"
+msgstr "Lien de l'écran régénéré"
+
+#: web/manage/__init__.py:88
+msgid "Public results link enabled"
+msgstr "Lien public des résultats activé"
+
+#: web/manage/__init__.py:89
+msgid "Public results link disabled"
+msgstr "Lien public des résultats désactivé"
+
+#: web/manage/__init__.py:90
+msgid "Individual codes generated"
+msgstr "Codes individuels générés"
+
+#: web/manage/__init__.py:91
+msgid "Individual codes revoked"
+msgstr "Codes individuels révoqués"
+
+#: web/manage/__init__.py:92
+msgid "Poll created"
+msgstr "Vote créé"
+
+#: web/manage/__init__.py:93
+msgid "Poll edited"
+msgstr "Vote modifié"
+
+#: web/manage/__init__.py:94
+msgid "Draft deleted"
+msgstr "Brouillon supprimé"
+
+#: web/manage/__init__.py:95
+msgid "Poll duplicated"
+msgstr "Vote dupliqué"
+
+#: web/manage/__init__.py:96
+msgid "Polls copied from another session"
+msgstr "Votes copiés depuis une autre session"
+
+#: web/manage/__init__.py:97
+msgid "Drafts reordered"
+msgstr "Brouillons réordonnés"
+
+#: web/manage/__init__.py:98
+msgid "Poll pushed"
+msgstr "Vote lancé"
+
+#: web/manage/__init__.py:99
+msgid "Poll closed"
+msgstr "Vote clos"
+
+#: web/manage/__init__.py:100
+msgid "Poll cancelled"
+msgstr "Vote annulé"
+
+#: web/manage/__init__.py:101
+msgid "Result published"
+msgstr "Résultat publié"
+
+#: web/manage/__init__.py:102
+msgid "Result hidden"
+msgstr "Résultat masqué"
+
+#: web/manage/__init__.py:504
+msgid "For"
+msgstr "Pour"
+
+#: web/manage/__init__.py:504
+msgid "Against"
+msgstr "Contre"
+
+#: web/manage/__init__.py:507
+msgid "Abstention"
+msgstr "Abstention"
+
+#: templates/manage/_checklist.html:11
+msgid "Before opening the session"
+msgstr "Avant d'ouvrir la session"
+
+#: templates/manage/_checklist.html:12 templates/manage/_nav.html:13
+msgid "%(done)s of %(total)s steps ready"
+msgstr "Étapes prêtes : %(done)s sur %(total)s"
+
+#: templates/manage/_checklist.html:17
+msgid "Details"
+msgstr "Informations"
+
+#: templates/manage/_checklist.html:24 templates/manage/_nav.html:21
+msgid "%(num)s item"
+msgid_plural "%(num)s items"
+msgstr[0] "%(num)s point"
+msgstr[1] "%(num)s points"
+
+#: templates/manage/_checklist.html:24 templates/manage/_cockpit.html:30
+msgid "No agenda yet."
+msgstr "Pas encore d'ordre du jour."
+
+#: templates/manage/_checklist.html:26
+msgid "Prepared polls"
+msgstr "Votes préparés"
+
+#: templates/manage/_checklist.html:27 templates/manage/_nav.html:17
+msgid "%(num)s draft"
+msgid_plural "%(num)s drafts"
+msgstr[0] "%(num)s brouillon"
+msgstr[1] "%(num)s brouillons"
+
+#: templates/manage/_checklist.html:30
+msgid "Individual codes, printed on cards"
+msgstr "Codes individuels, imprimés sur des cartes"
+
+#: templates/manage/_checklist.html:30
+msgid "Individual codes: generate them"
+msgstr "Codes individuels : à générer"
+
+#: templates/manage/_checklist.html:30
+msgid "Session password and QR code"
+msgstr "Mot de passe de la session et QR code"
+
+#: templates/manage/_checklist.html:39
+msgid "Ready"
+msgstr "Prêt"
+
+#: templates/manage/_checklist.html:39
+msgid "To do"
+msgstr "À faire"
+
+#: templates/manage/_checklist.html:44
+msgid "Nothing here is required."
+msgstr "Rien n'est obligatoire."
+
+#: templates/manage/_cockpit.html:18
+msgid "Next: %(title)s"
+msgstr "À venir : %(title)s"
+
+#: templates/manage/_join.html:4
+msgid "Joining the session"
+msgstr "Rejoindre la session"
+
+#: templates/manage/_links.html:4
+msgid "Screen link"
+msgstr "Lien de l'écran"
+
+#: templates/manage/_nav.html:14
+msgid "live"
+msgstr "en direct"
+
+#: templates/manage/_nav.html:20
+msgid "%(number)s/%(count)s"
+msgstr "%(number)s/%(count)s"
+
+#: templates/manage/_nav.html:32 templates/manage/_nav.html:45
+msgid "Session console"
+msgstr "Console de la session"
+
+#: templates/manage/_nav.html:34 templates/manage/_nav.html:46 templates/manage/console.html:30
+msgid "Steering"
+msgstr "Conduite"
+
+#: templates/manage/_nav.html:37 templates/manage/console.html:63
+msgid "Access and attendance"
+msgstr "Accès et présences"
+
+#: templates/manage/_nav.html:39 templates/manage/_nav.html:54 templates/manage/console.html:85
+msgid "Documents"
+msgstr "Documents"
+
+#: templates/manage/_nav.html:49
+msgid "Access"
+msgstr "Accès"
+
+#: templates/manage/_nav.html:51
+msgid "More"
+msgstr "Plus"
+
+#: templates/manage/_presence.html:13
+msgid "Compared with the accesses in use: a warning shows when they, or the ballots of a poll, exceed it. Nothing is blocked. Leave empty to remove it."
+msgstr "Comparé aux connexions (Présents) : une alerte s'affiche si elles, ou les bulletins d'un vote, le dépassent. Rien n'est bloqué. Laissez vide pour le retirer."
+
+#: templates/manage/_summary.html:5
+msgid "The session is over"
+msgstr "La session est terminée"
+
+#: templates/manage/_summary.html:7
+msgid "Opened"
+msgstr "Ouverte"
+
+#: templates/manage/_summary.html:9
+msgid "Polls held"
+msgstr "Votes tenus"
+
+#: templates/manage/_summary.html:10
+msgid "Polls cancelled"
+msgstr "Votes annulés"
+
+#: templates/manage/_summary.html:12
+msgid "Download the minutes and the complete data, and keep them: they are the record of the votes."
+msgstr "Téléchargez le procès-verbal et les données complètes, et conservez-les : ils gardent la trace des votes."
+
+#: templates/manage/console.html:65
+msgid "Go to Steering"
+msgstr "Aller dans Conduite"
+
+#: templates/manage/_codes.html:5
+msgid "Codes are shown only once, when they are generated."
+msgstr "Les codes ne s'affichent qu'une fois, à leur génération."
+
+#: templates/manage/_codes.html:5
+msgid "Download the card PDF (10 cards per A4 page, with cut marks) and keep it safe, or print the page right away. A lost PDF or page is handled by revoking its codes and generating new ones."
+msgstr "Téléchargez le PDF des cartes (10 cartes par page A4, avec traits de coupe) et conservez-le, ou imprimez la page tout de suite. Un PDF ou une page perdus se règlent en révoquant leurs codes et en en générant de nouveaux."
+
+#: templates/manage/_drafts.html:44
+msgid "More actions: %(title)s"
+msgstr "Autres actions : %(title)s"
+
+#: templates/manage/_drafts.html:44
+msgid "More actions"
+msgstr "Autres actions"
+
+#: templates/manage/_drafts.html:50
+msgid "Push with this timer"
+msgstr "Lancer avec cette minuterie"
+
+#: templates/manage/_notes.html:68
+msgid "Notes appear in the minutes, except internal ones."
+msgstr "Les notes figurent au procès-verbal, sauf les notes internes."
+
+#: templates/manage/_notes.html:68
+msgid "Each note keeps its time and its agenda item. Voters never see the notes, nor does the projection screen or the public results page."
+msgstr "Chaque note garde son heure et son point de l'ordre du jour. Ni les votants, ni l'écran de projection, ni la page publique des résultats ne les voient."
+
+#: templates/manage/_timer.html:41
+msgid "Change the settings"
+msgstr "Modifier les réglages"
+
+#: templates/manage/_access.html:12
+msgid "8 characters minimum. Leave empty to generate 8 random digits."
+msgstr "8 caractères minimum. Laissez vide pour générer 8 chiffres au hasard."
+
+#: templates/manage/_status.html:69
+msgid "%(num)s password or code refused in the last 10 minutes."
+msgid_plural "%(num)s passwords or codes refused in the last 10 minutes."
+msgstr[0] "%(num)s mot de passe ou code refusé ces 10 dernières minutes."
+msgstr[1] "%(num)s mots de passe ou codes refusés ces 10 dernières minutes."
+
+#: templates/manage/_status.html:70
+msgid "If this is not people mistyping in the room, change the password, or lock the entries once everyone has joined."
+msgstr "S'il ne s'agit pas d'erreurs de saisie dans la salle, changez le mot de passe, ou verrouillez les entrées une fois tout le monde arrivé."
+
+#: templates/manage/_status.html:70
+msgid "If this is not people mistyping in the room, lock the entries once everyone has joined."
+msgstr "S'il ne s'agit pas d'erreurs de saisie dans la salle, verrouillez les entrées une fois tout le monde arrivé."
+
+#: templates/manage/_status.html:71
+msgid "The addresses that keep failing are now refused; voters with the right password or code still get in."
+msgstr "Les adresses qui échouent à répétition sont désormais refusées ; les votants qui ont le bon mot de passe ou le bon code entrent toujours."
+
+#: templates/manage/_status.html:85
+#, python-format
+msgid "Maximum of %(cap)s accesses reached: no new device can join with the password. If people in the room are refused, save the headcount: the maximum becomes the people counted plus a margin."
+msgstr "Maximum de %(cap)s accès atteint : aucun nouvel appareil ne peut entrer avec le mot de passe. Si des personnes présentes dans la salle sont refusées, enregistrez l'effectif compté : le maximum devient le nombre de personnes comptées plus une marge."
+
+#: templates/manage/_cockpit.html:106
+msgid "All polls closed? The session can end: every voter access will end."
+msgstr "Tous les votes sont clos ? La session peut se terminer : les accès des votants prendront fin."
+
+#: templates/manage/_status.html:32
+msgid "Ballots"
+msgstr "Bulletins"
+
+#: templates/manage/_status.html:52
+msgid "Unlock"
+msgstr "Déverrouiller"
+
+#: templates/manage/_status.html:56
+msgid "Lock"
+msgstr "Verrouiller"
+
+#: templates/manage/_checklist.html:16 templates/manage/_nav.html:40 templates/manage/_nav.html:54
+msgid "Meeting"
+msgstr "Séance"
+
+#: templates/manage/_nav.html
+msgid "Notes"
+msgstr "Notes"
+
+#: templates/manage/_checklist.html:25 templates/manage/_details.html:16
+msgid "Date missing"
+msgstr "Date manquante"
+
+#: templates/manage/_checklist.html:25 templates/manage/_details.html:17
+msgid "Place missing"
+msgstr "Lieu manquant"
+
+#: templates/manage/_checklist.html:62
+msgid "Trial vote"
+msgstr "Vote d'essai"
+
+#: templates/manage/_checklist.html:79
+msgid "Create the trial vote"
+msgstr "Créer le vote d'essai"
+
+#: templates/manage/_cockpit.html:35
+msgid "Details, in Polls"
+msgstr "Détail, dans Votes"
+
+#: templates/manage/_cockpit.html:36 templates/manage/_cockpit.html:105 templates/manage/_drafts.html:33
+msgid "Trial"
+msgstr "Essai"
+
+#: templates/manage/_cockpit.html:48
+msgid "Two separate actions. On the screen: the verdict and, from %(num)s ballots, the count of each option."
+msgstr "Deux gestes indépendants. À l'écran : le verdict et, à partir de %(num)s bulletins, le détail des voix."
+
+#: templates/manage/_cockpit.html:54
+msgid "In Polls"
+msgstr "Dans Votes"
+
+#: templates/manage/_cockpit.html:65 templates/manage/_cockpit.html:67
+msgid "Item under discussion"
+msgstr "Point en cours"
+
+#: templates/manage/_cockpit.html:65
+msgid "The whole agenda"
+msgstr "Tout l'ordre du jour"
+
+#: templates/manage/_cockpit.html:101
+msgid "Next poll"
+msgstr "Prochain vote"
+
+#: templates/manage/_cockpit.html:101
+msgid "%(num)s other draft, in Polls"
+msgid_plural "%(num)s other drafts, in Polls"
+msgstr[0] "%(num)s autre brouillon, dans Votes"
+msgstr[1] "%(num)s autres brouillons, dans Votes"
+
+#: templates/manage/_cockpit.html:101
+msgid "Drafts, in Polls"
+msgstr "Brouillons, dans Votes"
+
+#: templates/manage/_cockpit.html:105
+msgid "%(num)s option"
+msgid_plural "%(num)s options"
+msgstr[0] "%(num)s option"
+msgstr[1] "%(num)s options"
+
+#: templates/manage/_details.html:12
+msgid "at the head of the minutes"
+msgstr "en tête du procès-verbal"
+
+#: templates/manage/_details.html:19
+msgid "%(rule)s, that is %(num)s"
+msgstr "%(rule)s, soit %(num)s"
+
+#: templates/manage/_details.html:39
+msgid "Editable before the opening only: the number of members sets the access cap."
+msgstr "Modifiables avant l'ouverture seulement : le nombre de membres fixe le plafond d'accès."
+
+#: templates/manage/_finished.html:44
+msgid "Trial vote: left out of the minutes and the exports."
+msgstr "Vote d'essai : absent du procès-verbal et des exports."
+
+#: templates/manage/_join.html:15 templates/manage/_presence.html:18
+msgid "In Access"
+msgstr "Dans Accès"
+
+#: templates/manage/_nav.html:56
+msgid "Screen"
+msgstr "Écran"
+
+#: templates/manage/_presence.html:21
+msgid "People counted"
+msgstr "Personnes comptées"
+
+#: templates/manage/_presence.html:25
+msgid "No headcount entered yet."
+msgstr "Aucun effectif saisi pour l'instant."
+
+#: templates/manage/_presence.html:25
+msgid "%(accesses)s accesses in use for %(num)s person counted."
+msgid_plural "%(accesses)s accesses in use for %(num)s people counted."
+msgstr[0] "%(accesses)s accès en cours pour %(num)s personne comptée."
+msgstr[1] "%(accesses)s accès en cours pour %(num)s personnes comptées."
+
+#: web/manage/exports.py:46
+msgid "A trial vote only tests the room's network: no export carries it, nor the minutes."
+msgstr "Un vote d'essai teste seulement le réseau de la salle : aucun export ne le contient, ni le procès-verbal."
+
+#: web/manage/polls.py:42
+msgid "A trial vote is already waiting in the drafts: push it once the session is open."
+msgstr "Un vote d'essai attend déjà dans les brouillons : le lancer une fois la session ouverte."
+
+#: web/manage/polls.py:51
+msgid "Trial vote created in the drafts: push it first, once the session is open, to check that every phone receives it. The minutes and the exports leave it out."
+msgstr "Vote d'essai créé dans les brouillons : le lancer en premier, une fois la session ouverte, pour vérifier que chaque téléphone le reçoit. Le procès-verbal et les exports l'ignorent."
+
+#: web/manage/polls.py:144
+msgid "Is everyone connected?"
+msgstr "Tout le monde est-il connecté ?"
+
+#: web/manage/polls.py:146
+msgid "Yes"
+msgstr "Oui"
+
+#: web/manage/polls.py:146
+msgid "No"
+msgstr "Non"
+
+#: templates/manage/_exports.html
+msgid "Minutes and data of the session"
+msgstr "Procès-verbal et données de la session"
+
+#: templates/manage/_exports.html
+msgid "Details, tribune, attendance, agenda, the course of the session with its notes, each poll with its result and its digest, the anchor of the session log."
+msgstr "Informations, tribune, présences, ordre du jour, déroulé avec les notes, chaque vote avec son résultat et son empreinte, ancre du journal."
+
+#: templates/manage/_exports.html
+msgid "Download"
+msgstr "Télécharger"
+
+#: templates/manage/_exports.html
+msgid "Definitions, anonymous ballots and results: enough to recount every poll independently."
+msgstr "Définitions, bulletins anonymes et résultats : de quoi recompter chaque vote de façon indépendante."
+
+#: templates/manage/_exports.html
+msgid "Code cards (PDF)"
+msgstr "Cartes de codes (PDF)"
+
+#: templates/manage/_exports.html
+msgid "Downloaded once, when they are generated, in Access and attendance: AGaura keeps no copy of the codes."
+msgstr "Téléchargées une seule fois, à leur création, dans Accès et présences : AGaura ne garde aucune copie des codes."
+
+#: templates/manage/_exports.html
+msgid "Per poll"
+msgstr "Par vote"
+
+#: templates/manage/_exports.html
+msgid "Available once a poll is closed; never while it is open."
+msgstr "Disponibles dès qu'un vote est clos ; jamais pendant qu'il est ouvert."
+
+#: templates/manage/_exports.html
+msgid "No."
+msgstr "N°"
+
+#: templates/manage/_exports.html
+msgid "Poll"
+msgstr "Vote"
+
+#: templates/manage/_exports.html
+msgid "Files"
+msgstr "Fichiers"
+
+#: templates/manage/_exports.html
+msgid "Ballots (CSV)"
+msgstr "Bulletins (CSV)"
+
+#: templates/manage/_exports.html
+msgid "Data (JSON)"
+msgstr "Données (JSON)"
+
+#: templates/manage/_exports.html
+msgid "Vote in progress: files at closing"
+msgstr "Vote en cours : fichiers à la clôture"
+
+#: templates/manage/_exports.html
+msgid "No poll put to the vote yet."
+msgstr "Aucun vote mis aux voix pour l'instant."
+
+#: templates/manage/_finished.html
+msgid "Exports of this poll, in Documents"
+msgstr "Exports de ce vote, dans Documents"
+
+#: templates/manage/_access.html
+msgid "one vote per person, each with the card of their code."
+msgstr "un vote par personne, chacune avec la carte de son code."
+
+#: templates/manage/_access.html
+msgid "one vote per phone. The password is shown in the room."
+msgstr "un vote par téléphone. Le mot de passe s'affiche dans la salle."
+
+#: templates/manage/_access.html
+msgid "Back to the session password, one vote per phone: phones that joined with a code will lose access."
+msgstr "Revenir au mot de passe de la session, un vote par téléphone : les téléphones entrés avec un code perdront l'accès."
+
+#: templates/manage/_access.html
+msgid "For a vote that requires one vote per person, switch to printed individual codes: phones that joined with the password will lose access."
+msgstr "Pour un vote qui exige une voix par personne, passer aux codes individuels imprimés : les téléphones entrés avec le mot de passe perdront l'accès."
+
+#: templates/manage/_access.html
+msgid "Not possible while a poll is open."
+msgstr "Impossible pendant un vote en cours."
+
+#: templates/manage/_entries.html
+msgid "Entries"
+msgstr "Entrées"
+
+#: templates/manage/_entries.html
+msgid "Open with the session"
+msgstr "Ouvertes avec la session"
+
+#: templates/manage/_entries.html
+msgid "The session is over: every voter access has ended."
+msgstr "La session est terminée : tous les accès des votants ont pris fin."
+
+#: templates/manage/_entries.html
+msgid "Nobody new can join; the voters already in keep voting. Unlock to let a latecomer in, then lock again."
+msgstr "Plus personne ne peut rejoindre ; les votants déjà entrés continuent de voter. Déverrouiller pour laisser entrer un retardataire, puis verrouiller de nouveau."
+
+#: templates/manage/_entries.html
+msgid "Once everyone has joined, lock: nobody new can join, the others keep voting. The QR code and the password leave the screen."
+msgstr "Une fois tout le monde entré, verrouiller : plus personne ne peut rejoindre, les autres continuent de voter. Le QR code et le mot de passe disparaissent de l'écran."
+
+#: templates/manage/_entries.html
+msgid "Voters can join once the session is open. Once everyone has joined, lock the entries here or from the status bar: nobody new can join, the others keep voting."
+msgstr "Les votants peuvent rejoindre dès l'ouverture de la session. Une fois tout le monde entré, verrouiller les entrées ici ou depuis la barre d'état : plus personne ne peut rejoindre, les autres continuent de voter."
+
+#: templates/manage/_entries.html
+msgid "Individual codes: no maximum, each code opens one access only."
+msgstr "Codes individuels : pas de plafond, chaque code n'ouvre qu'un accès."
+
+#: templates/manage/_entries.html
+msgid "Maximum: %(cap)s accesses (%(members)s registered members and a margin of 10 %% for those who change device, at least 10)."
+msgstr "Plafond : %(cap)s accès (%(members)s membres inscrits et une marge de 10 %% pour qui change d'appareil, au moins 10)."
+
+#: templates/manage/_entries.html
+msgid "Maximum: %(cap)s accesses (%(num)s person counted and a margin of 10 %%, at least 10): the headcount raised it."
+msgid_plural "Maximum: %(cap)s accesses (%(num)s people counted and a margin of 10 %%, at least 10): the headcount raised it."
+msgstr[0] "Plafond : %(cap)s accès (%(num)s personne comptée et une marge de 10 %%, au moins 10) : l'effectif compté l'a relevé."
+msgstr[1] "Plafond : %(cap)s accès (%(num)s personnes comptées et une marge de 10 %%, au moins 10) : l'effectif compté l'a relevé."
+
+#: templates/manage/_entries.html
+msgid "Maximum: %(cap)s accesses, the codes quota of the account, as the number of registered members is not filled in."
+msgstr "Plafond : %(cap)s accès, le quota de codes du compte, faute de nombre de membres inscrits."
+
+#: templates/manage/_entries.html
+msgid "Beyond it, a new device is refused and sent to the tribune; saving the headcount raises the maximum, never lowers it."
+msgstr "Au-delà, un nouvel appareil est refusé et renvoyé vers la tribune ; saisir l'effectif compté relève le plafond, sans jamais l'abaisser."
+
+#: templates/manage/_entries.html
+msgid "The same lock is in the status bar."
+msgstr "Le même verrou figure dans la barre d'état."
+
+#: templates/manage/_screen_recap.html
+msgid "What the room sees"
+msgstr "Ce que la salle voit"
+
+#: templates/manage/_screen_recap.html
+msgid "Result shown"
+msgstr "Résultat affiché"
+
+#: templates/manage/_screen_recap.html
+msgid "Result on one line"
+msgstr "Résultat sur une ligne"
+
+#: templates/manage/_screen_recap.html
+msgid "with the count of votes (%(num)s ballot)"
+msgid_plural "with the count of votes (%(num)s ballots)"
+msgstr[0] "avec le détail des voix (%(num)s bulletin)"
+msgstr[1] "avec le détail des voix (%(num)s bulletins)"
+
+#: templates/manage/_screen_recap.html
+msgid "the verdict alone: fewer than %(num)s ballots"
+msgstr "le verdict seul : moins de %(num)s bulletins"
+
+#: templates/manage/_screen_recap.html
+msgid "Header"
+msgstr "En-tête"
+
+#: templates/manage/_screen_recap.html
+msgid "title, attendees and quorum"
+msgstr "titre, présents et quorum"
+
+#: templates/manage/_screen_recap.html
+msgid "title and attendees"
+msgstr "titre et présents"
+
+#: templates/manage/_screen_recap.html
+msgid "title"
+msgstr "titre"
+
+#: templates/manage/_screen_recap.html
+msgid "%(num)s poll in progress"
+msgid_plural "%(num)s polls in progress"
+msgstr[0] "%(num)s vote en cours"
+msgstr[1] "%(num)s votes en cours"
+
+#: templates/manage/_screen_recap.html
+msgid "title, options and turnout"
+msgstr "titre, options et participation"
+
+#: templates/manage/_screen_recap.html
+msgid "%(num)s, with its state (“Vote clos”, “Vote annulé”) or the verdict of a result shown"
+msgid_plural "%(num)s, each with its state (“Vote clos”, “Vote annulé”) or the verdict of a result shown"
+msgstr[0] "%(num)s, avec son état (« Vote clos », « Vote annulé ») ou le verdict d'un résultat affiché"
+msgstr[1] "%(num)s, chacune avec son état (« Vote clos », « Vote annulé ») ou le verdict d'un résultat affiché"
+
+#: templates/manage/_screen_recap.html
+msgid "To join"
+msgstr "Pour rejoindre"
+
+#: templates/manage/_screen_recap.html
+msgid "the address and how to use the code cards"
+msgstr "l'adresse et la consigne des cartes de codes"
+
+#: templates/manage/_screen_recap.html
+msgid "the address, the QR code and the session password"
+msgstr "l'adresse, le QR code et le mot de passe de la session"
+
+#: templates/manage/_screen_recap.html
+msgid "while entries are open"
+msgstr "tant que les entrées sont ouvertes"
+
+#: templates/manage/_screen_recap.html
+msgid "running"
+msgstr "en marche"
+
+#: templates/manage/_screen_recap.html
+msgid "paused"
+msgstr "en pause"
+
+#: templates/manage/_screen_recap.html
+msgid "ready to start"
+msgstr "prêt à démarrer"
+
+#: templates/manage/_screen_recap.html
+msgid "item %(number)s: %(title)s"
+msgstr "point %(number)s : %(title)s"
+
+#: templates/manage/_screen_recap.html
+msgid "no item under discussion"
+msgstr "sans point en cours"
+
+#: templates/manage/_screen_recap.html
+msgid "Message"
+msgstr "Message"
+
+#: templates/manage/_screen_recap.html
+msgid "Chronometer: not shown"
+msgstr "Chronomètre : non affiché"
+
+#: templates/manage/_screen_recap.html
+msgid "To join: hidden, the session is over"
+msgstr "Pour rejoindre : masqué, la session est terminée"
+
+#: templates/manage/_screen_recap.html
+msgid "To join: hidden while entries are locked; the address stays at the foot of the screen"
+msgstr "Pour rejoindre : masqué tant que les entrées sont verrouillées ; l'adresse reste en bas de l'écran"
+
+#: templates/manage/_screen_recap.html
+msgid "Never the result of an open or cancelled poll; the count of votes only from %(num)s ballots"
+msgstr "Jamais de résultat d'un vote ouvert ou annulé ; détail des voix seulement à partir de %(num)s bulletins"
+
+#: templates/manage/_screen_recap.html
+msgid "As of when this page was loaded; the screen updates by itself."
+msgstr "État au chargement de cette page ; l'écran, lui, se met à jour seul."
+
+#: templates/manage/_summary.html
+msgid "No poll held."
+msgstr "Aucun vote tenu."
+
+#: templates/manage/_summary.html
+msgid "Every result was published to voters."
+msgstr "Tous les résultats ont été publiés aux votants."
+
+#: templates/manage/_summary.html
+msgid "No result was published to voters."
+msgstr "Aucun résultat n'a été publié aux votants."
+
+#: templates/manage/_summary.html
+msgid "%(num)s result published to voters."
+msgid_plural "%(num)s results published to voters."
+msgstr[0] "%(num)s résultat publié aux votants."
+msgstr[1] "%(num)s résultats publiés aux votants."
+
+#: templates/manage/_summary.html
+msgid "Not published: %(titles)s."
+msgid_plural "Not published: %(titles)s."
+msgstr[0] "Non publié : %(titles)s."
+msgstr[1] "Non publiés : %(titles)s."
+
+#: templates/manage/_summary.html
+msgid "%(num)s result not published."
+msgid_plural "%(num)s results not published."
+msgstr[0] "%(num)s résultat non publié."
+msgstr[1] "%(num)s résultats non publiés."
+
+#: templates/manage/_summary.html
+msgid "In Documents"
+msgstr "Dans Documents"
+
+#: templates/manage/_summary.html
+msgid "Enabled: members who could not attend see the published results."
+msgstr "Activé : les membres absents voient les résultats publiés."
+
+#: templates/manage/_summary.html
+msgid "Disabled. Once enabled, it shows the results to the members who could not attend."
+msgstr "Désactivé. Une fois activé, il montre les résultats aux membres absents."
+
+#: templates/manage/_summary.html
+msgid "Correct before archiving"
+msgstr "Corriger avant d'archiver"
+
+#: templates/manage/_summary.html
+msgid "In Meeting"
+msgstr "Dans Séance"
+
+#: templates/manage/_summary.html
+msgid "The tribune and the notes can still be changed after closing, and the minutes follow. The session log records each correction."
+msgstr "La tribune et les notes restent modifiables après la clôture : le procès-verbal suit. Chaque correction entre au journal."
+
+#: templates/manage/dashboard.html
+msgid "Sessions in progress"
+msgstr "En cours"
+
+#: templates/manage/dashboard.html
+msgid "Sessions in preparation"
+msgstr "En préparation"
+
+#: templates/manage/dashboard.html
+msgid "Sessions over"
+msgstr "Terminées"
+
+#: templates/manage/dashboard.html
+msgid "%(num)s poll"
+msgid_plural "%(num)s polls"
+msgstr[0] "%(num)s vote"
+msgstr[1] "%(num)s votes"
+
+#: templates/manage/dashboard.html
+msgid "Shown in the room, with a QR code. One vote per phone."
+msgstr "Affiché dans la salle, avec un QR code. Un vote par téléphone."
+
+#: templates/manage/dashboard.html
+msgid "Printed individual codes"
+msgstr "Codes individuels imprimés"
+
+#: templates/manage/dashboard.html
+msgid "One card per person, handed out at the entrance. One vote per person."
+msgstr "Une carte par personne, remise à l'entrée. Un vote par personne."
+
+msgid "Hide: %(name)s"
+msgstr "Masquer : %(name)s"
+
+msgid "Show: %(name)s"
+msgstr "Afficher : %(name)s"
+
+msgid "Hide"
+msgstr "Masquer"
+
+msgid "Show"
+msgstr "Afficher"
+
+msgid "result of %(title)s"
+msgstr "résultat de « %(title)s »"
+
+msgid "how to join"
+msgstr "comment rejoindre"
+
+msgid "chronometer"
+msgstr "chronomètre"
+
+msgid "agenda"
+msgstr "ordre du jour"
+
+msgid "To join: hidden by the tribune; the address stays at the foot of the screen"
+msgstr "Pour rejoindre : masqué par la tribune ; l'adresse reste en bas de l'écran"
+
+msgid "Agenda: hidden"
+msgstr "Ordre du jour : masqué"
+
+msgid "No result shown"
+msgstr "Aucun résultat affiché"
+
+msgid "Result not shown: %(title)s"
+msgstr "Résultat non affiché : %(title)s"
+
+msgid "This part of the screen cannot be shown or hidden."
+msgstr "Cette partie de l'écran ne peut être ni affichée ni masquée."
+
+msgid "Agenda shown on the screen"
+msgstr "Ordre du jour affiché à l'écran"
+
+msgid "Agenda hidden from the screen"
+msgstr "Ordre du jour masqué à l'écran"
+
+msgid "How to join shown on the screen"
+msgstr "Accès affiché à l'écran"
+
+msgid "How to join hidden from the screen"
+msgstr "Accès masqué à l'écran"
+
+#: templates/manage/_checklist.html:51
+msgid "%(num)s person"
+msgid_plural "%(num)s people"
+msgstr[0] "%(num)s personne"
+msgstr[1] "%(num)s personnes"
+
+#: templates/manage/_checklist.html:65
+msgid "Optional: check the display"
+msgstr "Facultatif : vérifier l'affichage"
+
+#: templates/manage/_checklist.html:66
+msgid "Draft ready, to push first"
+msgstr "Brouillon prêt, à lancer en premier"
+
+#: templates/manage/_checklist.html:66
+msgid "Optional: to test the network"
+msgstr "Facultatif : tester le réseau"
+
+#: templates/manage/_checklist.html:84
+msgid "Create"
+msgstr "Créer"

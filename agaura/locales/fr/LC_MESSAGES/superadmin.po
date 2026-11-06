@@ -1,0 +1,127 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: templates/superadmin/accounts.html:7
+msgid "Create accounts by invitation and delete them. This super-admin account has no access to sessions or their content."
+msgstr "Créez des comptes sur invitation et supprimez-les. Ce compte super-admin n'a accès ni aux sessions ni à leur contenu."
+
+#: templates/superadmin/accounts.html:10
+msgid "Invite a person"
+msgstr "Inviter une personne"
+
+#: templates/superadmin/accounts.html:19
+msgid "The person receives an email with a link, valid for 7 days, to choose a password. The link also confirms the address."
+msgstr "La personne reçoit un e-mail avec un lien, valable 7 jours, pour choisir son mot de passe. Le lien confirme aussi son adresse."
+
+#: templates/superadmin/accounts.html:20
+msgid "Create the account and send the invitation"
+msgstr "Créer le compte et envoyer l'invitation"
+
+#: templates/superadmin/accounts.html:25
+msgid "All accounts"
+msgstr "Tous les comptes"
+
+#: templates/superadmin/accounts.html:32
+msgid "Super-admin"
+msgstr "Super-admin"
+
+#: templates/superadmin/accounts.html:34
+msgid "Invitation pending"
+msgstr "Invitation en attente"
+
+#: templates/superadmin/accounts.html:36
+msgid "Disabled"
+msgstr "Désactivé"
+
+#: templates/superadmin/accounts.html:40
+msgid "(this account)"
+msgstr "(ce compte)"
+
+#: templates/superadmin/accounts.html:44
+msgid "Created on %(date)s"
+msgstr "Créé le %(date)s"
+
+#: templates/superadmin/accounts.html:45
+msgid "last seen on %(date)s"
+msgstr "dernière visite le %(date)s"
+
+#: templates/superadmin/accounts.html:45
+msgid "never logged in"
+msgstr "aucune connexion"
+
+#: templates/superadmin/accounts.html:48
+msgid "The invitation link is still valid."
+msgstr "Le lien d'invitation est encore valable."
+
+#: templates/superadmin/accounts.html:48
+msgid "The invitation link has expired."
+msgstr "Le lien d'invitation a expiré."
+
+#: templates/superadmin/accounts.html:55
+msgid "Send a new invitation"
+msgstr "Renvoyer une invitation"
+
+#: templates/superadmin/accounts.html:59
+msgid "Delete this account"
+msgstr "Supprimer ce compte"
+
+#: templates/superadmin/accounts.html:62
+msgid "The account is deleted with all its sessions, their polls, results and exports. This cannot be undone. Type the address of the account and your own password to confirm."
+msgstr "Le compte est supprimé avec toutes ses sessions, leurs votes, résultats et exports. C'est irréversible. Saisissez l'adresse du compte et votre propre mot de passe pour confirmer."
+
+#: templates/superadmin/accounts.html:63
+msgid "Address of the account"
+msgstr "Adresse du compte"
+
+#: templates/superadmin/accounts.html:65
+msgid "Your password"
+msgstr "Votre mot de passe"
+
+#: templates/superadmin/refused.html:2 templates/superadmin/refused.html:5
+msgid "Not available to the super-admin"
+msgstr "Non disponible pour le super-admin"
+
+#: templates/superadmin/refused.html:6
+msgid "The super-admin account manages accounts only: it has no access to sessions, their polls, results, minutes or exports."
+msgstr "Le compte super-admin gère uniquement les comptes : il n'a accès ni aux sessions, ni à leurs votes, résultats, procès-verbaux ou exports."
+
+#: templates/superadmin/refused.html:7
+msgid "Go to the accounts"
+msgstr "Aller aux comptes"
+
+#: web/superadmin/__init__.py:32
+msgid "A super-admin account cannot be deleted here: the platform operator manages it on the server."
+msgstr "Un compte super-admin ne peut pas être supprimé ici : l'exploitant de la plateforme le gère sur le serveur."
+
+#: web/superadmin/__init__.py:36
+msgid "This account is not waiting for an invitation: its password is already chosen, or it is disabled."
+msgstr "Ce compte n'attend pas d'invitation : son mot de passe est déjà choisi, ou il est désactivé."
+
+#: web/superadmin/__init__.py:40
+msgid "The address typed does not match the account. Nothing was deleted."
+msgstr "L'adresse saisie ne correspond pas au compte. Rien n'a été supprimé."
+
+#: web/superadmin/__init__.py:43
+msgid "A session of this account is in progress. The account can be deleted once that session is closed."
+msgstr "Une session de ce compte est en cours. Le compte pourra être supprimé une fois cette session terminée."
+
+#: web/superadmin/__init__.py:46
+msgid "The super-admin account cannot create sessions."
+msgstr "Le compte super-admin ne peut pas créer de sessions."
+
+#: web/superadmin/__init__.py:52
+msgid "Account created. The invitation has been sent; its link is valid for 7 days."
+msgstr "Compte créé. L'invitation est envoyée ; son lien est valable 7 jours."
+
+#: web/superadmin/__init__.py:55
+msgid "A new invitation has been sent. The previous link no longer works."
+msgstr "Une nouvelle invitation est envoyée. Le lien précédent ne fonctionne plus."
+
+#: web/superadmin/__init__.py:57
+msgid "Account deleted, with all its sessions."
+msgstr "Compte supprimé, avec toutes ses sessions."

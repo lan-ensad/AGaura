@@ -1,0 +1,68 @@
+{#- Tribune: the people running the session, each with a function typed freely, in the Meeting
+    rubric (D-B), the owner's only. Editable in every state (the names go into the minutes). One
+    row per person, one empty row when nobody is there yet; the "+" button adds a row: in place
+    with meeting.js, else by sending the form back with one more row, nothing saved
+    (agaura/web/manage/meeting.py). Empty rows are ignored. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set form = meeting_tribune %}
+
+{% macro row(number, name="", role="", name_error=none, role_error=none) -%}
+<fieldset class="tribune-row{% if name_error or role_error %} has-error{% endif %}">
+  <legend class="visually-hidden">{{ _("Person %(number)s", number=number) }}</legend>
+  <div class="tribune-fields">
+    <div class="field">
+      <label for="tribune-name-{{ number }}">{{ _("Name") }}</label>
+      <input id="tribune-name-{{ number }}" name="name" value="{{ name }}" maxlength="100" autocomplete="off" autocapitalize="words"
+        {%- if name_error %} aria-invalid="true" aria-describedby="tribune-error-{{ number }}-name"{% endif %}>
+    </div>
+    <div class="field">
+      <label for="tribune-role-{{ number }}">{{ _("Function") }}</label>
+      <input id="tribune-role-{{ number }}" name="role" value="{{ role }}" maxlength="100" autocomplete="off"
+        {%- if role_error %} aria-invalid="true" aria-describedby="tribune-error-{{ number }}-role"{% endif %}>
+    </div>
+  </div>
+  {% if name_error %}<p class="meeting-error" id="tribune-error-{{ number }}-name">{{ name_error }}</p>{% endif %}
+  {% if role_error %}<p class="meeting-error" id="tribune-error-{{ number }}-role">{{ role_error }}</p>{% endif %}
+</fieldset>
+{%- endmacro %}
+
+<section class="card meeting" id="tribune" aria-labelledby="tribune-title">
+  <h2 id="tribune-title">{{ icon("users-round") }} {{ _("Tribune") }}</h2>
+  {% if assembly.tribune %}
+  <ul class="tribune-list">
+    {% for member in assembly.tribune %}
+    <li><strong>{{ member.name }}</strong>{% if member.role %} <span class="tribune-role">&mdash; {{ member.role }}</span>{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">{{ _("Nobody at the tribune yet.") }}</p>
+  {% endif %}
+  <p class="hint">{{ _("The people running the session, with their function. Their names appear in the minutes.") }}</p>
+
+  <details class="meeting-edit" id="tribune-edit"{% if form.open or not assembly.tribune %} open{% endif %}>
+    <summary>{{ _("Edit the tribune") if assembly.tribune else _("Fill in the tribune") }}</summary>
+    <form method="post" action="/manage/{{ assembly.public_id }}/tribune#tribune" class="stack">
+      {{ csrf() }}
+      {% if form.errors or form.summary %}
+      <div class="alert alert-error" role="alert">
+        <p>{{ _("The tribune was not saved: correct the rows marked below.") }}</p>
+        {% if form.summary %}<ul>{% for message in form.summary %}<li>{{ message }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      {% endif %}
+      <p class="hint" id="tribune-hint">{{ _("One row per person, in the order of the minutes; the function is optional. Empty a row to remove that person.") }}</p>
+      <div class="tribune-rows" data-tribune-rows data-max="{{ form.max_rows }}">
+        {% for name, role in form.rows %}
+        {{ row(loop.index, name, role, form.errors.get(loop.index ~ ":name"), form.errors.get(loop.index ~ ":role")) }}
+        {% endfor %}
+      </div>
+      <template id="tribune-row-template">{{ row("__N__") }}</template>
+      {#- "Save" comes first: pressing Enter in a field saves, it never adds a row. -#}
+      <div class="actions">
+        <button type="submit" class="button primary">{{ _("Save the tribune") }}</button>
+        {% if form.can_add %}<button type="submit" name="more" value="1" class="button tribune-add" aria-label="{{ _('Add a person') }}" title="{{ _('Add a person') }}" data-add-row><span aria-hidden="true">+</span></button>{% endif %}
+      </div>
+    </form>
+  </details>
+</section>
+<script src="{{ static_url('js/meeting.js') }}" defer></script>

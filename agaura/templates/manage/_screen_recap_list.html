@@ -1,0 +1,101 @@
+{#- The list of "Ce que la salle voit" (_screen_recap.html), a live part of the console: the card
+    renders it with the page, and GET /manage/{ID}/panel again on every console event
+    (_panel.html), so it follows what other consoles, the chronometer card, a delegate or a
+    poll's timer change (manage.js swaps it, keeping the focus on the button pressed, by its id).
+    Its buttons are live forms: manage.js sends them with fetch (204), then fetches the live
+    parts; without script they post and the page comes back to #screen-now. Needs
+    links_screen_view, polls_screen_detail_min, assembly and csrf_token. -#}
+{% from "screen/macros.html" import verdict_text %}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set view = links_screen_view %}
+{% set hero = view.hero.value %}
+{% set shown = [hero] + (view.side | map(attribute="value") | list) %}
+{% set open_count = view.open_polls | length %}
+{% set stage = view.stage_result %}
+{% set entries = view.entries.value %}
+{% set live = not view.closed %}
+
+{#- The button of one block: "Masquer" when the screen shows it, else "Afficher"; its name says
+    which block, so that every button of the card reads apart. -#}
+{% macro toggle(part, visible, name, poll=none) -%}
+<form method="post" action="/manage/{{ assembly.public_id }}/screen/show#screen-now" class="inline recap-toggle" data-live-form>
+  {{ csrf() }}
+  <input type="hidden" name="part" value="{{ part }}">
+  {% if poll is not none %}<input type="hidden" name="poll" value="{{ poll }}">{% endif %}
+  <input type="hidden" name="shown" value="{{ '0' if visible else '1' }}">
+  <button type="submit" class="button small" id="screen-toggle-{{ part }}{{ '-' ~ poll if poll is not none }}" aria-label="{{ _('Hide: %(name)s', name=name) if visible else _('Show: %(name)s', name=name) }}">{{ icon("eye-off" if visible else "eye") }}<span>{{ _("Hide") if visible else _("Show") }}</span></button>
+</form>
+{%- endmacro %}
+
+{% macro result_line(item, main) -%}
+<li>{{ icon("presentation") }}<span><strong>{{ _("Result shown") if main else _("Result on one line") }}</strong> : {{ item.poll.title }}, {{ verdict_text(item, option_labels(item.poll), short=not main) }}
+  {%- if main %}, {% if item.detail %}{{ ngettext("with the count of votes (%(num)s ballot)", "with the count of votes (%(num)s ballots)", item.ballots) }}{% else %}{{ _("the verdict alone: fewer than %(num)s ballots", num=item.detail_min) }}{% endif %}{% endif %}</span>
+  {{ toggle("result", true, _("result of %(title)s", title=item.poll.title), item.poll.id) }}</li>
+{%- endmacro %}
+
+{#- The questions put to the vote, then each earlier result still shown on its line there. -#}
+{% macro past_lines() -%}
+{% if view.past_listed %}
+<li>{{ icon("list-checks") }}<span><strong>{{ _("Questions put to the vote") }}</strong> : {{ ngettext("%(num)s, with its state (“Vote clos”, “Vote annulé”) or the verdict of a result shown", "%(num)s, each with its state (“Vote clos”, “Vote annulé”) or the verdict of a result shown", view.past_listed | length) }}</span></li>
+{% for item in view.results if not stage or item.poll.id != stage.poll.id %}{{ result_line(item, false) }}
+{% endfor %}
+{% endif %}
+{%- endmacro %}
+
+<ul class="screen-recap">
+  <li>{{ icon({"open": "door-open", "locked": "lock", "soon": "calendar"}.get(entries, "circle-check")) }}<span><strong>{{ _("Header") }}</strong> :
+    {% if view.in_session and view.quorum is not none %}{{ _("title, attendees and quorum") }}{% elif view.in_session %}{{ _("title and attendees") }}{% else %}{{ _("title") }}{% endif %},
+    « {% if entries == "open" %}{{ _("Entries open") }}{% elif entries == "locked" %}{{ _("Entries closed") }}{% elif entries == "soon" %}{{ _("Opening soon") }}{% else %}{{ _("Session over") }}{% endif %} »</span></li>
+  {% for part in shown %}
+  {% if part == "questions" %}
+  {% if open_count %}
+  <li>{{ icon("vote") }}<span><strong>{{ ngettext("%(num)s poll in progress", "%(num)s polls in progress", open_count) }}</strong> : {{ _("title, options and turnout") }}{% if open_count == 1 %} ({{ ngettext("%(num)s ballot", "%(num)s ballots", view.open_polls[0].turnout) }} / {{ ngettext("%(num)s attendee", "%(num)s attendees", view.attendees) }}){% endif %}</span></li>
+  {% endif %}
+  {% if stage and hero == "questions" %}{{ result_line(stage, true) }}{% endif %}
+  {{ past_lines() }}
+  {% elif part == "result" %}
+  {{ result_line(stage, true) }}
+  {{ past_lines() }}
+  {% elif part == "join" %}
+  <li>{{ icon("qr-code") }}<span><strong>{{ _("To join") }}</strong> : {% if view.codes_mode %}{{ _("the address and how to use the code cards") }}{% else %}{{ _("the address, the QR code and the session password") }}{% endif %}, {{ _("while entries are open") }}</span>
+    {{ toggle("join", true, _("how to join")) }}</li>
+  {% elif part == "timer" %}
+  {% set t = view.timer %}
+  <li>{{ icon("timer") }}<span><strong>{{ _("Chronometer") }}</strong> : {{ t.label or (_("Chronometer") if t.counting_up else _("Countdown")) }}, {% if t.running %}{{ _("running") }}{% elif t.paused %}{{ _("paused") }}{% else %}{{ _("ready to start") }}{% endif %}</span>
+    {{ toggle("timer", true, _("chronometer")) }}</li>
+  {% elif part == "agenda" %}
+  {% set current = view.agenda_current %}
+  <li>{{ icon("list-ordered") }}<span>{{ _("Agenda") }}, {% if current and current <= view.agenda | length %}<strong>{{ _("item %(number)s: %(title)s", number=current, title=view.agenda[current - 1]) }}</strong>{% else %}{{ _("no item under discussion") }}{% endif %}</span>
+    {{ toggle("agenda", true, _("agenda")) }}</li>
+  {% elif part == "message" %}
+  <li>{{ icon("info") }}<span><strong>{{ _("Message") }}</strong> : « {% if view.closed %}{{ _("The session is closed.") }} {{ _("Thank you for taking part.") }}{% elif view.in_session %}{{ _("Waiting for the next vote") }}{% else %}{{ _("The session will start shortly.") }}{% endif %} »</span></li>
+  {% endif %}
+  {% endfor %}
+  {% if "timer" not in shown and live %}
+  <li class="is-off">{{ icon("timer") }}<span>{{ _("Chronometer: not shown") }}</span>
+    {{ toggle("timer", false, _("chronometer")) }}</li>
+  {% endif %}
+  {% if "join" not in shown %}
+  {% if view.closed %}
+  <li class="is-off">{{ icon("qr-code") }}<span>{{ _("To join: hidden, the session is over") }}</span></li>
+  {% elif view.entries_open %}
+  <li class="is-off">{{ icon("qr-code") }}<span>{{ _("To join: hidden by the tribune; the address stays at the foot of the screen") }}</span>
+    {{ toggle("join", false, _("how to join")) }}</li>
+  {% else %}
+  <li class="is-off">{{ icon("qr-code") }}<span>{{ _("To join: hidden while entries are locked; the address stays at the foot of the screen") }}</span></li>
+  {% endif %}
+  {% endif %}
+  {% if view.agenda and view.agenda_hidden and live %}
+  <li class="is-off">{{ icon("list-ordered") }}<span>{{ _("Agenda: hidden") }}</span>
+    {{ toggle("agenda", false, _("agenda")) }}</li>
+  {% endif %}
+  {% if not view.results %}
+  <li class="is-off">{{ icon("presentation") }}<span>{{ _("No result shown") }}</span></li>
+  {% endif %}
+  {% for poll in view.results_off %}
+  <li class="is-off">{{ icon("presentation") }}<span>{{ _("Result not shown: %(title)s", title=poll.title) }}</span>
+    {{ toggle("result", false, _("result of %(title)s", title=poll.title), poll.id) }}</li>
+  {% endfor %}
+  <li class="is-off">{{ icon("eye-off") }}<span>{{ _("Never the result of an open or cancelled poll; the count of votes only from %(num)s ballots", num=polls_screen_detail_min) }}</span></li>
+</ul>

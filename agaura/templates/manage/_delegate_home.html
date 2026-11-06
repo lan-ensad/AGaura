@@ -1,0 +1,13 @@
+{#- Whose delegate link (FR-92) it is and what it opens, each right a link to its card in its
+    rubric (D-A): at the head of Steering during the session, the commands of its rights
+    following (console.html); in preparation, when Steering does not exist yet, at the head of
+    the rubric the console lands on (the first rubric of its rights). -#}
+{% from "macros/icons.html" import icon with context %}
+{% set delegate = console_access.delegate %}
+{% set cards = {"agenda": "#agenda", "notes": "#notes", "polls": "#drafts", "timer": "#timer", "screen": "#screen-now", "headcount": "#presence"} %}
+<section class="card delegate-home" id="delegate-home" aria-labelledby="delegate-home-title">
+  <h2 id="delegate-home-title">{{ icon("user-round-key") }} {{ _("Delegate access") }}</h2>
+  <p>{{ _("Link of %(name)s, for this session only.", name=delegate.name) }}</p>
+  <p class="row delegate-badges">{% for right in delegate.rights %}<a class="badge neutral" href="{{ cards[right] }}">{{ right_label(right) }}</a>{% endfor %}</p>
+  <p class="hint">{% if assembly.status.value == "preparation" %}{{ _("The session is not open yet: the tribune opens it.") }} {% endif %}{{ _("The tribune may change what this link opens or revoke it at any time; it ends when the session is closed.") }}</p>
+</section>

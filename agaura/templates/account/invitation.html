@@ -1,0 +1,20 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf, field with context %}
+{% block title %}{{ _("Choose your password") }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Welcome to AGaura") }}</h1>
+  <p>{{ _("An account has been created for you. Choose its password to start using it.") }}</p>
+  <form method="post" action="/invite/{{ token }}" class="stack">
+    {{ csrf() }}
+    {{ field("email", _("Email address"), type="email", value=email, autocomplete="username",
+             attrs={"readonly": "readonly"}) }}
+    {{ field("password", _("Password"), type="password", required=true, autocomplete="new-password",
+             hint=_("At least %(count)s characters.", count=min_password_length),
+             attrs={"minlength": min_password_length, "maxlength": "256"}) }}
+    {{ field("password_confirm", _("Confirm the password"), type="password", required=true,
+             autocomplete="new-password", attrs={"minlength": min_password_length, "maxlength": "256"}) }}
+    <button type="submit" class="button primary">{{ _("Save the password and log in") }}</button>
+  </form>
+</section>
+{% endblock %}

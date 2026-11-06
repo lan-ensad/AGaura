@@ -1,0 +1,22 @@
+{#- Attendance record (FR-28), at the foot of the headcount card (_presence.html, the owner's
+    only): one reading per headcount saved, poll pushed or closed, session opened or closed;
+    most recent first. Data: meeting_attendance (agaura/web/manage/meeting.py). Aggregated
+    counts only: never a join or a ballot. -#}
+<details class="attendance" id="attendance">
+  <summary>{{ _("Attendance record") }}{% if meeting_attendance %} <span class="muted small">({{ ngettext("%(num)s reading", "%(num)s readings", meeting_attendance | length) }})</span>{% endif %}</summary>
+  {% if meeting_attendance %}
+  <div class="table-wrap">
+    <table class="data attendance-table">
+      <thead><tr><th scope="col">{{ _("Time") }}</th><th scope="col">{{ _("Event") }}</th><th scope="col" class="num">{{ _("Headcount") }}</th><th scope="col" class="num">{{ _("Connections") }}</th></tr></thead>
+      <tbody>
+      {% for row in meeting_attendance %}
+      <tr><td class="nowrap">{{ row.when }}</td><td>{{ row.label }}</td><td class="num">{{ row.headcount if row.headcount is not none else "–" }}</td><td class="num">{{ row.attendees if row.attendees is not none else "–" }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="muted small">{{ _("No reading yet.") }}</p>
+  {% endif %}
+  <p class="hint">{{ _("A reading is taken when the session opens and closes, each time the headcount is saved and when a poll is pushed or closed; never when someone joins or votes. Connections: accesses in use at that moment, as Attendees.") }}</p>
+</details>

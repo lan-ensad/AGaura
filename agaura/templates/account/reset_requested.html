@@ -1,0 +1,11 @@
+{% extends "layouts/admin.html" %}
+{% block title %}{{ _("Forgotten password") }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Check your inbox") }}</h1>
+  <p>{{ _("If an account uses this address, an email with a link to choose a new password has just been sent to it. The link is valid for one hour.") }}</p>
+  <p class="muted">{{ _("Nothing received after a few minutes? Check your spam folder, or try again.") }}
+    {{ _("If several emails arrived, only the link in the most recent one works.") }}</p>
+  <p class="actions"><a class="button" href="/login">{{ _("Back to the login page") }}</a></p>
+</section>
+{% endblock %}

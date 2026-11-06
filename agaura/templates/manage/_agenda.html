@@ -1,0 +1,67 @@
+{#- Agenda (FR-19), in its own rubric, Agenda, in every state: one text area, one item per line, edited
+    in place and saved with one button (agaura/web/manage/meeting.py); then, once there are items,
+    the choice of the item under discussion: none or any item ("Previous" and "Next" sit in
+    Steering during the session). Without script both forms post and the page comes back to the
+    card; a refused agenda brings the console page back with the text as typed and the messages
+    on the field. agenda.js sends the text with fetch, marks and keeps unsaved changes on the
+    device, and follows the other consoles without touching a text being edited; the choice of
+    the item is a live form (data-live-form, sent by manage.js). The head says who holds the
+    agenda and offers to hand it over in place (R13, D-G). One primary button at most (R12):
+    "Save the agenda" while the agenda is empty. Rendered alone (agenda_alone) by
+    GET /manage/{id}/agenda and as the answer to agenda.js; read only once the session is
+    closed. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/delegates.html" import hand_over with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set form = meeting_agenda %}
+{% set items = assembly.agenda or [] %}
+{% set current = assembly.agenda_current %}
+{% set editable = assembly.status.value != "closed" %}
+{% set base = "/manage/" ~ assembly.public_id ~ "/agenda" %}
+{% if items or editable %}
+<section class="card meeting" id="agenda" aria-labelledby="agenda-title"{% if editable %} data-agenda-url="{{ base }}" data-agenda-draft="agaura-agenda-draft:{{ assembly.public_id }}"{% endif %}>
+  <div class="card-head">
+    <h2 id="agenda-title">{{ icon("list-ordered") }} {{ _("Agenda") }}</h2>
+    {{ hand_over("agenda", "agenda") }}
+  </div>
+  {% if editable %}
+  {% set lines = form.text.splitlines() | length %}
+  <form method="post" action="{{ base }}#agenda" class="agenda-form" data-agenda-form>
+    {{ csrf() }}
+    <label for="agenda-items" class="visually-hidden">{{ _("Agenda items") }}</label>
+    <p class="hint" id="agenda-hint">{{ _("One item per line, numbered automatically.") }}</p>
+    <textarea id="agenda-items" name="items" rows="{{ [[lines, 3] | max, 12] | min }}" data-saved="{{ items | map(attribute='title') | join('\n') }}" aria-describedby="agenda-hint{% if form.errors %} agenda-errors{% endif %}"{% if form.errors %} aria-invalid="true" autofocus{% endif %}>{{ form.text }}</textarea>
+    <div data-agenda-errors>{% if form.errors %}<div class="agenda-errors" id="agenda-errors" role="alert">{% for message in form.errors %}<p class="meeting-error">{{ message }}</p>{% endfor %}</div>{% endif %}</div>
+    <p class="hint agenda-elsewhere" role="status" data-agenda-elsewhere data-message="{{ _('The agenda has just been changed from another console: saving this text replaces that version.') }}"></p>
+    <div class="agenda-actions">
+      <button type="submit" class="button{{ ' primary' if not items }}">{{ _("Save the agenda") }}</button>
+      <span class="agenda-unsaved" data-agenda-unsaved hidden>{{ _("Unsaved changes") }}</span>
+      <button type="button" class="button quiet" data-agenda-discard hidden>{{ _("Discard the changes") }}</button>
+      <span class="agenda-saved" role="status" data-agenda-saved>{% if form.saved %}{{ _("Agenda saved.") }}{% endif %}</span>
+    </div>
+  </form>
+  <div data-agenda-current>
+    {% if items %}
+    <form method="post" action="{{ base }}/current#agenda" class="agenda-current" data-live-form>
+      {{ csrf() }}
+      <label for="agenda-current-item">{{ _("Item under discussion") }}</label>
+      <select id="agenda-current-item" name="item">
+        <option value="none"{% if not current %} selected{% endif %}>{{ _("No item under discussion") }}</option>
+        {% for item in items %}<option value="{{ loop.index }}"{% if loop.index == current %} selected{% endif %}>{{ loop.index }}. {{ item.title }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="button">{{ _("Change item") }}</button>
+    </form>
+    {% endif %}
+  </div>
+  {% else %}
+  {% if form.errors %}
+  <div class="alert alert-error" role="alert">{% for message in form.errors %}<p>{{ message }}</p>{% endfor %}</div>
+  {% endif %}
+  <ol class="agenda-read">
+    {% for item in items %}<li>{{ item.title }}</li>{% endfor %}
+  </ol>
+  <p class="hint">{{ _("The session is closed: the agenda can no longer change.") }}</p>
+  {% endif %}
+</section>
+{% if editable and not (agenda_alone is defined and agenda_alone) %}<script src="{{ static_url('js/agenda.js') }}" defer></script>{% endif %}
+{% endif %}

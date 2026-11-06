@@ -1,0 +1,18 @@
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf, field with context %}
+{% block title %}{{ _("New password") }} · AGaura{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("New password") }}</h1>
+  <form method="post" action="/reset/{{ token }}" class="stack">
+    {{ csrf() }}
+    {{ field("password", _("New password"), type="password", required=true, autocomplete="new-password",
+             hint=_("At least %(count)s characters.", count=min_password_length),
+             attrs={"minlength": min_password_length, "maxlength": "256"}) }}
+    {{ field("password_confirm", _("Confirm the password"), type="password", required=true,
+             autocomplete="new-password", attrs={"minlength": min_password_length, "maxlength": "256"}) }}
+    <p class="hint">{{ _("Every device logged in to your account will be logged out.") }}</p>
+    <button type="submit" class="button primary">{{ _("Save the new password") }}</button>
+  </form>
+</section>
+{% endblock %}

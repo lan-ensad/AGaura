@@ -1,0 +1,10 @@
+{#- Answer to a link created from the "Confier" of a card, for manage.js (create_link with
+    X-Requested-With: fetch): the delegation slot of every card and command that hands a right
+    over (delegates_cards), the one of delegates_open showing the new link, then the Settings
+    card. manage.js swaps each [data-hand-over] slot of the page and #delegates by their
+    counterpart here. -#}
+{% from "macros/delegates.html" import hand_over with context %}
+{% for card, right in delegates_cards.items() %}
+{{ hand_over(right, card) }}
+{% endfor %}
+{% include "manage/_delegates.html" %}

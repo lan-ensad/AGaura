@@ -1,0 +1,16 @@
+{#- "Ce que la salle voit", next to the screen link: what the projection screen shows now, in
+    words, for a tribune that cannot see it from its seat, with a small button on each block to
+    hide or show it there (POST /manage/{ID}/screen/show, links.show_on_screen). The owner's,
+    and a delegate link's holding the right "screen" (FR-92), who gets this card alone, without
+    the screen link. Its list (_screen_recap_list.html) is a live part: it follows the screen
+    while the page is open; without script, a hint says it is as of the page's loading. The
+    head holds "Confier", outside the live part (the panel has no delegation context). -#}
+{% from "macros/delegates.html" import hand_over with context %}
+<section class="card" id="screen-now" aria-labelledby="screen-now-title">
+  <div class="card-head">
+    <h2 id="screen-now-title">{{ _("What the room sees") }}</h2>
+    {{ hand_over("screen", "screen-now") }}
+  </div>
+  <div data-live-part="screen-now">{% include "manage/_screen_recap_list.html" %}</div>
+  <noscript><p class="hint">{{ _("As of when this page was loaded; the screen updates by itself.") }} <a class="action-link" href="/manage/{{ assembly.public_id }}#screen-now">{{ _("Refresh") }}</a></p></noscript>
+</section>

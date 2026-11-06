@@ -1,0 +1,304 @@
+{#- Step 2 of the poll editor: the question and the settings of one voting method (kind), never
+    the others (FR-30). The method (its card) is recalled at the top with "Changer de mode" (a
+    submit: step 1 again, every value carried), then the forms of the card if it has several
+    ("Résolution" or "Options libres" for "Choix unique"). The rule of the result is one
+    sentence, rendered here and rewritten by editor.js from data-rule-texts (no text in the
+    script); its settings fold under "Modifier la règle", open when one of them is at fault.
+    Enter saves a draft (the first submit button), never launches. The blank vote has no field:
+    "Abstention" for a resolution, "Vote blanc" otherwise. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon, icon_button with context %}
+{% set action = "/manage/" ~ assembly.public_id ~ ("/polls/" ~ poll.id ~ "/edit" if editing else "/polls/new") %}
+{% set candidates = kind.name == "approval" %}
+
+{% macro error_id(key) %}error-{{ key | replace(":", "-") }}{% endmacro %}
+
+{% macro problem(key) -%}
+{% if errors.get(key) %}<p class="field-error" id="{{ error_id(key) }}">{{ errors[key] }}</p>{% endif %}
+{%- endmacro %}
+
+{#- aria attributes of an input: its hint, its error if any. -#}
+{% macro described(key, hint=none) -%}
+{% set error = error_id(key) if errors.get(key) else none %}
+{% if error %} aria-invalid="true"{% endif %}
+{% if hint or error %} aria-describedby="{{ [hint, error] | select | join(' ') }}"{% endif %}
+{%- endmacro %}
+
+{% macro choice(name, value, label, hint=none, current="") -%}
+<label class="choice" for="{{ name }}-{{ value }}">
+  <input type="radio" name="{{ name }}" value="{{ value }}" id="{{ name }}-{{ value }}"{% if current == value %} checked{% endif %}>
+  <span><span class="choice-label">{{ label }}</span>{% if hint %}<span class="choice-hint">{{ hint }}</span>{% endif %}</span>
+</label>
+{%- endmacro %}
+
+{% macro comparison(name, current, target) -%}
+<select id="{{ name }}" name="{{ name }}" class="comparison" aria-label="{{ _('Comparison') }}"{% if target %} data-selects="{{ target }}"{% endif %}>
+  <option value="">{{ _("at least") }}</option>
+  <option value="1"{% if current == "1" %} selected{% endif %}>{{ _("more than") }}</option>
+</select>
+{%- endmacro %}
+
+{% macro row_label(number) %}{% if candidates %}{{ _("Candidate %(number)s", number=number) }}{% else %}{{ _("Option %(number)s", number=number) }}{% endif %}{% endmacro %}
+
+{% macro option_row(number, label, text) -%}
+{% set key = "option:" ~ number %}
+{% set description_key = "option_description:" ~ number %}
+<li class="option-row{% if errors.get(key) or errors.get(description_key) %} has-error{% endif %}" data-option-row>
+  <div class="option-fields">
+    <label class="visually-hidden" for="option-label-{{ number }}" data-row-label>{{ row_label(number) }}</label>
+    <input id="option-label-{{ number }}" name="option_label" value="{{ label }}" maxlength="200" autocomplete="off" enterkeyhint="next" placeholder="{{ row_label(number) }}"{{ described(key) }}>
+    <label class="visually-hidden" for="option-description-{{ number }}" data-row-description>{{ _("Description of option %(number)s", number=number) }}</label>
+    <input id="option-description-{{ number }}" name="option_description" value="{{ text }}" maxlength="1000" autocomplete="off" enterkeyhint="next" class="option-description" placeholder="{{ _('Description (optional)') }}"{{ described(description_key) }}>
+  </div>
+  {{ icon_button("x", _("Remove option %(number)s", number=number), tip=_("Remove"), type="button", classes="option-remove", attrs={"data-remove-option": "", "hidden": ""}) }}
+  {{ problem(key) }}{{ problem(description_key) }}
+</li>
+{%- endmacro %}
+
+{#- The option rows, and the button that brings more (a submit without JavaScript). -#}
+{% macro option_rows(addable=true) -%}
+{{ problem("options") }}
+<ol class="option-rows" data-option-rows data-max="{{ max_options }}"
+    data-label="{{ row_label('{n}') }}"
+    data-description-label="{{ _('Description of option %(number)s', number='{n}') }}"
+    data-remove-label="{{ _('Remove option %(number)s', number='{n}') }}">
+  {% for label, text in rows %}
+  {{ option_row(loop.index, label, text) }}
+  {% endfor %}
+</ol>
+{% if addable %}
+<template id="option-row-template">{{ option_row("{n}", "", "") }}</template>
+<p><button type="submit" name="more" value="1" class="button small" data-add-option>{{ icon("plus") }} {{ _("Add options") }}</button></p>
+{% endif %}
+{%- endmacro %}
+
+{% macro percent_input(name, id, value, error_key, label=none, hint=none, selects=none) -%}
+<input id="{{ id }}" name="{{ name }}" value="{{ value }}" inputmode="decimal" maxlength="7" class="percent"{% if label %} aria-label="{{ label }}"{% endif %}{% if selects %} data-selects="{{ selects }}"{% endif %}{{ described(error_key, hint) }}>
+<span aria-hidden="true">%</span>
+{%- endmacro %}
+
+<form method="post" action="{{ action }}" class="editor" id="poll-editor" novalidate data-kind="{{ kind.name }}">
+  {{ csrf() }}
+  {#- First submit button: the one Enter triggers, so Enter saves a draft rather than adding
+      rows, changing the method or launching. -#}
+  <button type="submit" name="action" value="draft" class="visually-hidden" tabindex="-1" aria-hidden="true">{{ _("Save the draft") }}</button>
+  <input type="hidden" name="kind" value="{{ kind.name }}">
+
+  {% if errors %}
+  <div class="alert alert-error" role="alert" id="editor-errors">
+    <p>{{ _("The poll was not saved: correct the fields marked below.") }}</p>
+    {% if summary %}<ul>{% for message in summary %}<li>{{ message }}</li>{% endfor %}</ul>{% endif %}
+  </div>
+  {% endif %}
+
+  <div class="editor-method">
+    <span class="method-icon">{{ icon(card.icon) }}</span>
+    <p class="method-name"><span class="visually-hidden">{{ _("Voting method:") }} </span>{{ _(card.label) }}</p>
+    <p class="muted small">{{ _(card.summary) }}</p>
+    <button type="submit" name="change" value="1" class="button small quiet">{{ _("Change the method") }}</button>
+  </div>
+
+  {% if forms %}
+  {#- The forms of the card: each a submit of step 2 in that form (switch, what fits kept),
+      sent in place by editor.js; the current one is pressed. -#}
+  <fieldset class="plain editor-forms">
+    <legend>{{ _("Form of the poll") }}</legend>
+    <div class="form-choices">
+      {% for form_kind, label, text in forms %}
+      <button type="submit" name="switch" value="{{ form_kind.name }}" class="form-choice" id="form-{{ form_kind.name }}" aria-pressed="{{ 'true' if form_kind.name == kind.name else 'false' }}" aria-labelledby="form-{{ form_kind.name }}-name" aria-describedby="form-{{ form_kind.name }}-text" data-switch-form>
+        <span class="form-choice-icon">{{ icon(form_kind.icon) }}</span>
+        <span class="choice-label" id="form-{{ form_kind.name }}-name">{{ _(label) }}</span>
+        <span class="choice-hint" id="form-{{ form_kind.name }}-text">{{ _(text) }}</span>
+      </button>
+      {% endfor %}
+    </div>
+  </fieldset>
+  {% endif %}
+
+  <section class="card" aria-labelledby="question-title">
+    <h2 id="question-title">{{ _("Question") }}</h2>
+    <div class="field">
+      <label for="editor-title">{% if kind.name == "resolution" %}{{ _("Title of the resolution") }}{% elif candidates %}{{ _("Title of the election") }}{% else %}{{ _("Question") }}{% endif %}</label>
+      <input id="editor-title" name="title" value="{{ form.title }}" maxlength="200" required{{ described("title") }}>
+      {{ problem("title") }}
+    </div>
+    <div class="field">
+      <label for="editor-description">{% if kind.name == "resolution" %}{{ _("Text of the resolution") }}{% else %}{{ _("Explanatory text") }}{% endif %} <span class="muted">{{ _("(optional)") }}</span></label>
+      <p class="hint" id="editor-description-hint">
+        {%- if kind.name == "resolution" %}{{ _("Shown to voters under the title.") }}
+        {%- elif candidates %}{{ _("Shown to voters under the title: offices, length of the term…") }}
+        {%- elif kind.name in ("majority_judgment", "condorcet") %}{{ _("Shown to voters under the question: budget, criteria…") }}
+        {%- else %}{{ _("Shown to voters under the question: context, conditions…") }}{% endif -%}
+      </p>
+      <textarea id="editor-description" name="description" rows="3" maxlength="5000"{{ described("description", "editor-description-hint") }}>{{ form.description }}</textarea>
+      {{ problem("description") }}
+    </div>
+  </section>
+
+  <section class="card" id="options" aria-labelledby="options-title">
+    {% if kind.name == "resolution" %}
+    <h2 id="options-title">{{ _("Options") }}</h2>
+    <p class="hint" id="preview-hint">{{ _("Voters will see:") }}</p>
+    <ul class="option-preview" aria-labelledby="preview-hint">
+      {% for label, text in rows %}<li data-preview-option="{{ loop.index }}">{{ label or "…" }}</li>{% endfor %}
+      <li class="is-blank">{{ _("Abstention") }} <span class="muted small">{{ _("(blank vote)") }}</span></li>
+    </ul>
+    {#- An error on a label opens the fold (labels_open). -#}
+    <details class="rule-edit" id="labels-edit"{% if labels_open %} open{% endif %}>
+      <summary>{{ icon("chevron-right") }} {{ _("Edit the labels") }}</summary>
+      <div class="rule-edit-body">
+        {{ option_rows(addable=false) }}
+      </div>
+    </details>
+    <input type="hidden" name="adopt_option" value="{{ form.adopt_option or '1' }}" data-adopt-option>
+    {#- Free options typed before the resolution, given back with "Options libres". -#}
+    {% for label, text in form.kept() %}<input type="hidden" name="kept_label" value="{{ label }}"><input type="hidden" name="kept_description" value="{{ text }}">
+    {% endfor %}
+    {% else %}
+    <h2 id="options-title">{% if candidates %}{{ _("Seats and candidates") }}{% elif kind.name == "majority_judgment" %}{{ _("Options to grade") }}{% elif kind.name == "condorcet" %}{{ _("Options to rank") }}{% else %}{{ _("Options") }}{% endif %}</h2>
+    {% if candidates %}
+    <div class="field">
+      <label for="editor-seats">{{ _("Seats to fill") }}</label>
+      <p class="hint" id="editor-seats-hint">{{ _("The names ticked by the most voters are elected, up to this number.") }}</p>
+      <input id="editor-seats" name="seats" type="number" min="1" max="30" inputmode="numeric" class="short" value="{{ form.seats }}"{{ described("seats", "editor-seats-hint") }}>
+      {{ problem("seats") }}
+    </div>
+    {% endif %}
+    {{ option_rows() }}
+    {% if kind.name == "single_choice" %}
+    <div class="alert alert-info has-icon">
+      {{ icon("info") }}
+      <div>
+        <p>{{ _("From 3 options, majority judgment avoids splitting the votes.") }}</p>
+        <p class="row"><button type="submit" name="switch" value="majority_judgment" class="button small">{{ icon("chart-bar-stacked") }} {{ _("Switch to majority judgment") }}</button> <span class="muted small">{{ _("the options are kept") }}</span></p>
+      </div>
+    </div>
+    {% elif kind.name == "majority_judgment" %}
+    <p>{{ _("Each voter gives every option one of these grades:") }}</p>
+    <p class="grade-scale">{% for grade in range(6) %}<span class="grade grade-{{ grade }}">{{ grade_label(grade) }}</span> {% endfor %}</p>
+    {% if form.grade_count %}<input type="hidden" name="grade_count" value="{{ form.grade_count }}">{% endif %}
+    {% elif kind.name == "condorcet" %}
+    <p>{{ _("Each voter gives every option a rank, from “%(first)s” to the last; options may share a rank.", first=rank_label(1)) }}</p>
+    {% endif %}
+    {% endif %}
+  </section>
+
+  <section class="card" id="rule" aria-labelledby="rule-title">
+    <h2 id="rule-title">{{ _("Rule of the result") }}</h2>
+    <div class="rule-summary">
+      <p class="label">{{ _("Rule chosen") }}</p>
+      <p class="rule-sentence" aria-live="polite" data-rule-sentence data-rule-texts='{{ rule_texts | tojson }}'>{{ rule }}</p>
+      {#- A resolution says what its base counts: the hint of the base chosen, which editor.js
+          keeps in step with the radio buttons. -#}
+      {% if kind.name == "resolution" %}
+      {% set bases = {
+        "valid": _("Valid votes: the ballots without the blank votes. A tie is reported, never broken."),
+        "cast": _("Ballots cast: every ballot, blank votes included. A tie is reported, never broken."),
+        "attendees": _("Attendees: everyone who joined the session, whether they vote or not. A tie is reported, never broken."),
+      } %}
+      {% for base, text in bases.items() %}<p class="hint" data-base-hint="{{ base }}"{% if (form.base or "valid") != base %} hidden{% endif %}>{{ text }}</p>
+      {% endfor %}
+      {% else %}
+      <p class="hint">
+        {%- if kind.name == "single_choice" %}{{ _("Below the threshold, the result reads \"No option reaches the required threshold\". A tie is reported, never broken.") }}
+        {%- elif candidates %}{{ _("A tie for the last seat is reported, never broken: the tribune applies the bylaws.") }}
+        {%- elif kind.name == "condorcet" %}{{ _("An option left unranked comes after the ranked ones. A tie is reported, never broken. Nothing to set.") }}
+        {%- else %}{{ _("An option left without a grade counts as “Reject”. A tie is reported, never broken. Nothing to set.") }}{% endif -%}
+      </p>
+      {% endif %}
+    </div>
+
+    {% if kind.method == "single_choice" %}
+    <details class="rule-edit" id="rule-edit"{% if rule_open %} open{% endif %}>
+      <summary>{{ icon("chevron-right") }} {{ _("Edit the rule") }}</summary>
+      <div class="rule-edit-body">
+        <fieldset class="plain">
+          <legend>{% if kind.name == "resolution" %}{{ _("Threshold of adoption") }}{% else %}{{ _("Who wins") }}{% endif %}</legend>
+          <div class="choices compact">
+            {% for value in thresholds %}
+            {% if value == "auto" %}{{ choice("threshold", value, _("Depends on the number of options"), _("With 2 options, more than half of the votes; with more, the option with the most votes."), form.threshold) }}
+            {% elif value == "plurality" %}{{ choice("threshold", value, _("The most votes (relative majority)"), _("The option with the most votes wins, whatever its share."), form.threshold) }}
+            {% elif value == "majority" %}{{ choice("threshold", value, _("More than half (absolute majority)"), _("The usual rule of a resolution.") if kind.name == "resolution" else none, form.threshold) }}
+            {% elif value == "two_thirds" %}{{ choice("threshold", value, _("At least two thirds"), none, form.threshold) }}
+            {% elif value == "three_quarters" %}{{ choice("threshold", value, _("At least three quarters"), none, form.threshold) }}
+            {% elif value == "custom" %}
+            <div class="choice-with-input">
+              {{ choice("threshold", "custom", _("Another threshold"), _("In percent, e.g. 60."), form.threshold) }}
+              <div class="percent-row">
+                {{ comparison("threshold_strict", form.threshold_strict, "threshold-custom") }}
+                {{ percent_input("threshold_percent", "threshold-percent", form.threshold_percent, "threshold", label=_("Threshold in percent"), selects="threshold-custom") }}
+              </div>
+            </div>
+            {% else %}{{ choice("threshold", value, value, none, form.threshold) }}
+            {% endif %}
+            {% endfor %}
+          </div>
+          {{ problem("threshold") }}
+          {{ problem("adopt_option") }}
+        </fieldset>
+
+        <fieldset class="plain">
+          <legend>{{ _("Shares are computed on") }}</legend>
+          <div class="choices compact">
+            {{ choice("base", "valid", _("Valid votes"), _("Blank votes are left out: the usual rule."), form.base) }}
+            {{ choice("base", "cast", _("Ballots cast"), _("Blank votes count, and weigh like votes against."), form.base) }}
+            {{ choice("base", "attendees", _("Attendees"), _("Everyone who joined counts: not voting weighs like a vote against."), form.base) }}
+          </div>
+          {{ problem("base") }}
+        </fieldset>
+      </div>
+    </details>
+    {% elif candidates %}
+    <details class="rule-edit" id="rule-edit"{% if rule_open %} open{% endif %}>
+      <summary>{{ icon("chevron-right") }} {{ _("Edit the rule") }}</summary>
+      <div class="rule-edit-body">
+        <fieldset class="plain">
+          <legend>{{ _("Boxes each voter may tick") }}</legend>
+          <div class="choices compact">
+            {{ choice("max_choices", "seats", _("As many as seats to fill"), _("The usual rule for an election."), form.max_choices) }}
+            {{ choice("max_choices", "none", _("No limit"), _("Voters tick every option they accept."), form.max_choices) }}
+            <div class="choice-with-input">
+              {{ choice("max_choices", "number", _("At most"), none, form.max_choices) }}
+              <div class="percent-row">
+                <input id="max-choices-number" name="max_choices_number" type="number" min="1" max="30" inputmode="numeric" class="short" value="{{ form.max_choices_number }}" aria-label="{{ _('Maximum number of boxes') }}" data-selects="max_choices-number"{{ described("max_choices") }}>
+              </div>
+            </div>
+          </div>
+          {{ problem("max_choices") }}
+        </fieldset>
+        <div class="field">
+          <label for="min-share-percent">{{ _("Minimum score to be elected") }} <span class="muted">{{ _("(optional)") }}</span></label>
+          <p class="hint" id="min-share-hint">{{ _("Share of valid votes an option needs to win a seat. Leave empty for no minimum.") }}</p>
+          <div class="percent-row">
+            {{ comparison("min_share_strict", form.min_share_strict, none) }}
+            {{ percent_input("min_share_percent", "min-share-percent", form.min_share_percent, "min_share", hint="min-share-hint") }}
+          </div>
+          {{ problem("min_share") }}
+        </div>
+      </div>
+    </details>
+    {% endif %}
+  </section>
+
+  {% if can_launch %}
+  <section class="card" aria-labelledby="launch-title">
+    <h2 id="launch-title">{{ _("Push") }}</h2>
+    <div class="field">
+      <label for="editor-minutes">{{ _("Automatic closing") }} <span class="muted">{{ _("(optional)") }}</span></label>
+      <p class="hint" id="editor-minutes-hint">{{ _("In minutes, for “Push to voters”. Without a duration, the poll is closed from the console.") }}</p>
+      <input id="editor-minutes" name="minutes" type="number" min="1" max="1440" inputmode="numeric" class="short" value="{{ form.minutes }}"{{ described("minutes", "editor-minutes-hint") }}>
+      {{ problem("minutes") }}
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="editor-actions">
+    {% if can_launch %}
+    <button type="submit" name="action" value="launch" class="button primary">{{ _("Push to voters") }}</button>
+    <button type="submit" name="action" value="draft" class="button">{{ _("Save the draft") }}</button>
+    {% else %}
+    <button type="submit" name="action" value="draft" class="button primary">{{ _("Save the draft") }}</button>
+    {% endif %}
+    <a class="button quiet" href="{{ back_url }}">{{ _("Cancel") }}</a>
+  </div>
+</form>

@@ -1,0 +1,50 @@
+{#- Entries (FR-27), in Access and attendance, the owner's only: their state, what locking does,
+    and the access cap explained (access_entries of web/manage/access.py; password mode only,
+    codes mode has none). The lock is the same form as the status bar's (POST …/entries, which
+    redirects without an anchor), posting to #entries to come back here; offered during the
+    session, like the bar's, and before it only to unlock entries locked already. The state is
+    a pill with its word, the colour and the icon only repeat it. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set status = assembly.status.value %}
+{% set locked = assembly.entries_locked %}
+{% set cap = access_entries %}
+<section class="card entries-card" id="entries" aria-labelledby="entries-title">
+  <h2 id="entries-title">{{ icon("door-open") }} {{ _("Entries") }}</h2>
+  <p>
+    {%- if status == "closed" %}<span class="badge neutral">{{ _("Session over") }}</span>
+    {%- elif locked %}<span class="badge warning">{{ icon("lock") }}{{ _("Entries locked") }}</span>
+    {%- elif status == "in_session" %}<span class="badge success">{{ icon("lock-open") }}{{ _("Entries open") }}</span>
+    {%- else %}<span class="badge neutral">{{ _("Open with the session") }}</span>{% endif -%}
+  </p>
+  <p>
+    {%- if status == "closed" %}{{ _("The session is over: every voter access has ended.") }}
+    {%- elif locked %}{{ _("Nobody new can join; the voters already in keep voting. Unlock to let a latecomer in, then lock again.") }}
+    {%- elif status == "in_session" %}{{ _("Once everyone has joined, lock: nobody new can join, the others keep voting. The QR code and the password leave the screen.") }}
+    {%- else %}{{ _("Voters can join once the session is open. Once everyone has joined, lock the entries here or from the status bar: nobody new can join, the others keep voting.") }}{% endif -%}
+  </p>
+  {% if status != "closed" and (status == "in_session" or locked) %}
+  <form method="post" action="/manage/{{ assembly.public_id }}/entries#entries" class="actions">
+    {{ csrf() }}
+    <input type="hidden" name="locked" value="{{ '0' if locked else '1' }}">
+    {% if locked %}
+    <button type="submit" class="button">{{ icon("lock-open") }} {{ _("Unlock entries") }}</button>
+    {% else %}
+    <button type="submit" class="button">{{ icon("lock") }} {{ _("Lock entries") }}</button>
+    {% endif %}
+  </form>
+  {% endif %}
+  {% if status != "closed" %}
+  <p class="hint">
+    {%- if cap is none %}{{ _("Individual codes: no maximum, each code opens one access only.") }}
+    {%- elif cap.basis == "demo" %}{{ _("Maximum: 5 voters, the limit of a demonstration session, whatever the registered members or the headcount. Past it, a new device is refused with a message saying so. A real assembly needs an account.") }}
+    {%- else %}
+    {%- if cap.basis == "members" %}{{ _("Maximum: %(cap)s accesses (%(members)s registered members and a margin of 10 %% for those who change device, at least 10).", cap=cap.cap, members=cap.members) }}
+    {%- elif cap.basis == "headcount" %}{{ ngettext("Maximum: %(cap)s accesses (%(num)s person counted and a margin of 10 %%, at least 10): the headcount raised it.", "Maximum: %(cap)s accesses (%(num)s people counted and a margin of 10 %%, at least 10): the headcount raised it.", cap.headcount, cap=cap.cap) }}
+    {%- else %}{{ _("Maximum: %(cap)s accesses, the codes quota of the account, as the number of registered members is not filled in.", cap=cap.cap) }}{% endif %}
+    {{ _("Beyond it, a new device is refused and sent to the tribune; saving the headcount raises the maximum, never lowers it.") }}
+    {%- endif %}
+    {%- if status == "in_session" %} {{ _("The same lock is in the status bar.") }}{% endif -%}
+  </p>
+  {% endif %}
+</section>

@@ -1,0 +1,132 @@
+# AGaura reverse proxy.
+# AGAURA_DOMAIN=localhost locally (Caddy's internal CA), agaura.org in production
+# (automatic Let's Encrypt certificate).
+# HSTS and the other security headers are added by the application (phase P3),
+# so that local development never pins HSTS on localhost.
+
+# Secrets travel in some paths: projection screen and public results links, invitations, email
+# verification, password reset and email change tokens; the Referer header can carry them too,
+# and so can the Location header of a redirect (a screen or results link typed with a session
+# ID in lower case is sent to its canonical address, token included). Every log line
+# that describes a request has them redacted: the access log (snippet below) and the default
+# logger, which records failed proxy requests (global options come first, hence the repetition).
+# Those two outputs, kept by Docker, also truncate client addresses (/24 in IPv4, /48 in IPv6):
+# only the fail2ban file (below), which rolls after 7 days, keeps them whole.
+# No output records the size of a request or an answer (size, bytes_read, Content-Length): the
+# size of a ballot step sent by a browser without JavaScript tells a blank vote, or how many
+# options were approved or graded (SPEC §9.2).
+{
+	# Slow clients (Slowloris) cannot hold connections open while sending headers or bodies.
+	# No write timeout: Server-Sent Events stay open for the whole session.
+	servers {
+		timeouts {
+			read_header 10s
+			read_body 30s
+			idle 2m
+		}
+	}
+
+	log default {
+		output stderr
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp "^/([^/?]+)/(screen|results)/[^/?]+" "/${1}/${2}/[redacted]"
+				request>uri regexp "^/(verify|reset|invite|account/email)/[^/?]+" "/${1}/[redacted]"
+				request>headers>Referer delete
+				resp_headers>Location delete
+				request>headers>Content-Length delete
+				request>remote_ip ip_mask {
+					ipv4 24
+					ipv6 48
+				}
+				request>client_ip ip_mask {
+					ipv4 24
+					ipv6 48
+				}
+				resp_headers>Content-Length delete
+				size delete
+				bytes_read delete
+			}
+		}
+	}
+}
+
+(redacted_requests) {
+	format filter {
+		wrap json
+		fields {
+			request>uri regexp "^/([^/?]+)/(screen|results)/[^/?]+" "/${1}/${2}/[redacted]"
+			request>uri regexp "^/(verify|reset|invite|account/email)/[^/?]+" "/${1}/[redacted]"
+			request>headers>Referer delete
+			resp_headers>Location delete
+			request>headers>Content-Length delete
+			request>remote_ip ip_mask {
+				ipv4 24
+				ipv6 48
+			}
+			request>client_ip ip_mask {
+				ipv4 24
+				ipv6 48
+			}
+			resp_headers>Content-Length delete
+			size delete
+			bytes_read delete
+		}
+	}
+}
+
+{$AGAURA_DOMAIN:localhost} {
+	# Ballot steps (/{ID}/polls/…) are padded to one size per poll whatever the choice; a
+	# compressed answer would shrink by an amount that depends on the choice (SPEC §9.2).
+	@compressible not path_regexp ^/[^/]+/polls/
+	encode @compressible zstd gzip
+
+	# Forms are small (the largest is the poll editor): anything bigger is refused here.
+	request_body {
+		max_size 1MB
+	}
+
+	reverse_proxy app:8000 {
+		# Server-Sent Events must reach clients immediately, without buffering.
+		flush_interval -1
+	}
+
+	header -Server
+
+	log {
+		output stdout
+		import redacted_requests
+	}
+
+	# Same lines in a file for fail2ban on the server (deploy/fail2ban/), ISO 8601 times so it
+	# finds them, kept 7 days: client addresses are personal data. The file rolls every day, not
+	# only at 20 MiB: on a quiet server, the current file would otherwise keep them for months.
+	log fail2ban {
+		output file /var/log/caddy/access.log {
+			roll_interval 24h
+			roll_size 20MiB
+			roll_keep 10
+			roll_keep_for 168h
+		}
+		format filter {
+			wrap json {
+				time_format iso8601
+			}
+			fields {
+				request>uri regexp "^/([^/?]+)/(screen|results)/[^/?]+" "/${1}/${2}/[redacted]"
+				request>uri regexp "^/(verify|reset|invite|account/email)/[^/?]+" "/${1}/[redacted]"
+				request>headers>Referer delete
+				resp_headers>Location delete
+				request>headers>Content-Length delete
+				resp_headers>Content-Length delete
+				size delete
+				bytes_read delete
+			}
+		}
+	}
+}
+
+www.{$AGAURA_DOMAIN:localhost} {
+	redir https://{$AGAURA_DOMAIN:localhost}{uri} permanent
+}

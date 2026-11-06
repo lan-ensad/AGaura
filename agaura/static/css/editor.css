@@ -1,0 +1,193 @@
+/* Poll editor (manage/editor.html), "the method first" (D-C): step 1, the voting methods as
+   cards; step 2, the settings of one method, the rule in one sentence, then "Lancer le vote" or
+   "Enregistrer le brouillon". Mobile first; loaded by the editor page only. */
+
+/* `hidden` must win over the display of buttons and grids set elsewhere. */
+.editor [hidden] { display: none !important; }
+
+.editor-page { max-width: 760px; margin: 0 auto; }
+.editor-back { margin-bottom: 0.5rem; }
+/* The way back to the console: a 24 px box at least (WCAG 2.5.8; inline, the link is 19 px tall). */
+.editor-back a { display: inline-block; min-height: 24px; padding-block: 0.125rem; }
+.editor-back a::before { content: "\2190\00a0"; content: "\2190\00a0" / ""; }
+.editor-page h1 { margin-bottom: 0.25rem; }
+.editor-page > .muted { margin-top: 0; }
+.editor-step > h2 { margin: 0 0 0.4rem; }
+.editor-step > .hint { margin-bottom: 0.75rem; }
+
+/* --- Step 1: the voting methods ------------------------------------------------------------
+
+   Icon, name, the ballot in a few words, one line in plain words, an example, when to use it.
+   The whole card is the target: the title's link stretched over it, or, after "Changer de
+   mode", the label of a radio button kept focusable (opacity 0), framed and ticked once
+   chosen. The focus ring goes round the card. */
+.method-cards { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 720px) { .method-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.method-card {
+  position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.15rem 0.9rem; align-content: start;
+  height: 100%; padding: 1rem 1.1rem; border: 1px solid var(--border-strong); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+}
+.method-card:hover, .method-card:focus-within { border-color: var(--accent); background: var(--accent-soft); }
+.method-card:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.method-card .method-icon {
+  grid-row: 1 / span 5; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: var(--radius-sm);
+  background: var(--accent-soft); color: var(--accent-strong);
+}
+.method-card:hover .method-icon, .method-card:focus-within .method-icon { background: var(--surface); }
+.method-card .method-icon svg.icon { width: 1.6rem; height: 1.6rem; }
+.method-card h3, .method-card .method-name { display: block; margin: 0; font-size: var(--fs-lg); font-weight: 700; line-height: 1.3; }
+.method-card h3 a { color: inherit; text-decoration: none; }
+.method-card h3 a::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius); }
+.method-card h3 a:focus-visible { outline: none; }
+.method-card > :not(.method-icon):not(input) { grid-column: 2; min-width: 0; }
+.method-kind { display: block; margin: 0; color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
+.method-line { display: block; margin: 0.2rem 0 0; }
+.method-example { display: block; margin: 0.35rem 0 0; font-size: var(--fs-sm); color: var(--muted); }
+.method-example q { color: var(--text); font-weight: 600; quotes: "« " " »"; }
+.method-when { display: block; margin: 0.1rem 0 0; font-size: var(--fs-sm); color: var(--muted); }
+/* Radio variant, after "Changer de mode". */
+.method-card input[type="radio"] { position: absolute; top: 0; left: 0; opacity: 0; width: 1px; height: 1px; margin: 0; }
+label.method-card { cursor: pointer; }
+.method-card:has(input:checked) { border: 2px solid var(--accent); background: var(--accent-soft); padding: calc(1rem - 1px) calc(1.1rem - 1px); }
+.method-card:has(input:checked) .method-name::after { content: "\00a0\2713"; content: "\00a0\2713" / ""; color: var(--accent-strong); }
+.editor fieldset.plain > .method-cards:last-child { margin-bottom: 0; }
+
+/* "Reprendre les votes d'une session passée": a fold under the cards, the owner's only. */
+.copy-past > summary { min-height: var(--tap); padding-block: 0.7rem; font-weight: 700; cursor: pointer; }
+.copy-past > summary svg.icon { color: var(--accent-strong); }
+.copy-past[open] > summary { margin-bottom: 0.75rem; }
+
+/* --- Step 2: one method's settings ---------------------------------------------------------- */
+
+.editor .card { display: grid; gap: 1rem; }
+.editor .card > h2 { margin: 0; }
+.editor fieldset.plain { border: 0; padding: 0; margin: 0; min-width: 0; }
+.editor fieldset.plain > legend { padding: 0; margin-bottom: 0.5rem; font-weight: 700; }
+.editor h3 { margin: 0; font-size: 1.05rem; }
+
+/* The method chosen, at the top of step 2, with the way back to step 1. */
+.editor-method {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.1rem 0.85rem; align-items: center;
+  margin-bottom: 1rem; padding: 0.75rem 1rem; border: 1px solid var(--accent-line); border-radius: var(--radius); background: var(--accent-soft);
+}
+.editor-method .method-icon { grid-row: 1 / span 2; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: var(--radius-sm); background: var(--surface); color: var(--accent-strong); }
+.editor-method .method-icon svg.icon { width: 1.4rem; height: 1.4rem; }
+.editor-method p { margin: 0; min-width: 0; }
+.editor-method .method-name { font-weight: 800; font-size: var(--fs-lg); }
+.editor-method .button { grid-row: 1 / span 2; grid-column: 3; }
+/* On a phone: the way back under the method's name, not beside it. */
+@media (max-width: 479px) {
+  .editor-method { grid-template-columns: auto minmax(0, 1fr); }
+  .editor-method .method-icon { grid-row: 1 / span 3; }
+  .editor-method > :not(.method-icon) { grid-column: 2; }
+  .editor-method .button { grid-row: auto; justify-self: start; margin-top: 0.25rem; padding-inline: 0; }
+}
+
+/* The forms of a card ("Résolution", "Options libres"), under the method: two buttons side by
+   side (stacked on a narrow phone), the current one framed and ticked like a chosen card. */
+.editor fieldset.editor-forms { margin-bottom: 1rem; }
+.form-choices { display: grid; gap: 0.5rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 379px) { .form-choices { grid-template-columns: minmax(0, 1fr); } }
+.form-choice {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.1rem 0.6rem; align-content: start;
+  min-height: var(--tap); padding: 0.65rem 0.8rem; border: 1px solid var(--border-strong); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer;
+}
+.form-choice:hover { border-color: var(--accent); background: var(--accent-soft); }
+.form-choice[aria-pressed="true"] { border: 2px solid var(--accent); background: var(--accent-soft); padding: calc(0.65rem - 1px) calc(0.8rem - 1px); cursor: default; }
+.form-choice[aria-pressed="true"] .choice-label::after { content: "\00a0\2713"; content: "\00a0\2713" / ""; color: var(--accent-strong); }
+.form-choice-icon { grid-row: 1 / span 2; color: var(--accent-strong); padding-top: 0.1rem; }
+.form-choice-icon svg.icon { width: 1.25rem; height: 1.25rem; }
+.form-choice .choice-label, .form-choice .choice-hint { grid-column: 2; min-width: 0; }
+.editor[aria-busy="true"] .form-choice { cursor: progress; }
+
+/* Field errors: text next to the field, red border on the field. */
+.field-error { color: var(--danger); font-weight: 600; font-size: 0.9rem; margin: 0.2rem 0 0; }
+.field-error::before { content: "\26a0\00a0"; content: "\26a0\00a0" / ""; }
+.editor [aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); }
+#editor-errors ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+#editor-errors p { margin: 0; }
+
+/* Radio and checkbox choices: the whole row is the tap target. */
+.choices { display: grid; gap: 0.5rem; }
+.choice {
+  display: flex; gap: 0.75rem; align-items: flex-start; min-height: var(--tap);
+  padding: 0.65rem 0.8rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  cursor: pointer;
+}
+.choice:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.choice input { width: 1.25rem; height: 1.25rem; margin: 0.15rem 0 0; flex: none; accent-color: var(--accent); }
+.choice-label { display: block; font-weight: 600; }
+.choice-hint { display: block; color: var(--muted); font-size: 0.875rem; }
+.choices.compact .choice { padding: 0.5rem 0.75rem; }
+.choice-with-input { display: grid; gap: 0.4rem; }
+.choice-with-input .percent-row { padding-left: 2.8rem; }
+
+.percent-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.percent-row select.comparison { width: auto; }
+.editor input.percent { width: 6.5rem; }
+.editor input.short { width: 7rem; }
+
+/* Option rows: number, label and optional description, remove button. */
+.option-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; counter-reset: option; }
+.option-row {
+  counter-increment: option;
+  display: grid; grid-template-columns: 1.6rem minmax(0, 1fr) auto; gap: 0.25rem 0.5rem; align-items: start;
+}
+.option-row::before {
+  content: counter(option) "."; font-weight: 700; color: var(--muted);
+  grid-column: 1; grid-row: 1; padding-top: 0.7rem; text-align: right;
+}
+.option-fields { grid-column: 2; display: grid; gap: 0.3rem; min-width: 0; }
+.option-fields input.option-description { min-height: 40px; font-size: 0.9rem; padding: 0.4rem 0.65rem; }
+.option-remove {
+  grid-column: 3; grid-row: 1; display: inline-grid; place-items: center; width: 40px; height: 48px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--muted); cursor: pointer;
+}
+.option-remove svg.icon { width: 1.25rem; height: 1.25rem; }
+.option-remove:hover:not([disabled]) { border-color: var(--danger); color: var(--danger); }
+.option-remove[disabled] { opacity: 0.4; cursor: not-allowed; }
+.option-row .field-error { grid-column: 2 / 4; }
+.option-row.has-error input[name="option_label"] { border-color: var(--danger); }
+.option-rows + p, .option-rows + template + p { margin: 0; }
+
+.grade-scale { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; }
+.editor .alert.has-icon { margin: 0; }
+.editor .alert.has-icon p { margin: 0 0 0.5rem; }
+
+/* Fixed options of a resolution: shown as voters will see them, editable behind a fold. */
+.option-preview { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.option-preview li { padding: 0.35rem 0.85rem; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); font-weight: 600; overflow-wrap: anywhere; }
+.option-preview li.is-blank { border-style: dashed; background: var(--bg); }
+
+/* The rule in one sentence; its settings folded under "Modifier la règle" (open on an error). */
+.rule-summary {
+  display: grid; gap: 0.25rem; padding: 0.85rem 1rem; border-radius: var(--radius-sm);
+  background: var(--bg); border-left: 4px solid var(--accent);
+}
+.rule-summary .label { margin: 0; color: var(--muted); font-size: var(--fs-xs); letter-spacing: 0.05em; text-transform: uppercase; }
+.rule-sentence { margin: 0; font-size: 1.1rem; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.rule-summary .hint { margin: 0; }
+.rule-edit { border-top: 1px solid var(--border); padding-top: 0.25rem; }
+.rule-edit > summary { display: inline-flex; align-items: center; gap: 0.4rem; min-height: var(--tap); color: var(--accent); font-weight: 600; list-style: none; cursor: pointer; }
+.rule-edit > summary::-webkit-details-marker { display: none; }
+.rule-edit > summary svg.icon { transition: transform 0.15s; }
+.rule-edit[open] > summary svg.icon { transform: rotate(90deg); }
+.rule-edit[open] > summary { margin-bottom: 0.5rem; }
+.rule-edit-body { display: grid; gap: 1rem; }
+
+/* Launch or save, always within reach on a phone: the next step of the session primary. */
+.editor-actions {
+  position: sticky; bottom: 0; z-index: 2; display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;
+  padding: 0.75rem 0; margin-top: 0.5rem; background: var(--bg); border-top: 1px solid var(--border);
+}
+.editor-actions .button.primary { flex: 1 1 12rem; }
+.editor-actions .button:not(.primary):not(.quiet) { flex: 0 1 auto; }
+/* The sticky bar never hides the field that has the focus (WCAG 2.4.11). */
+:root:has(.editor-actions) { scroll-padding-bottom: 6rem; }
+
+@media (min-width: 760px) {
+  .option-fields { grid-template-columns: 2fr 3fr; }
+  .option-fields input.option-description { min-height: var(--tap); }
+}

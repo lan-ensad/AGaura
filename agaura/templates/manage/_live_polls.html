@@ -1,0 +1,28 @@
+{#- Polls open now, in the cockpit (#live-panel), at the top of Polls (_polls_open.html) and in
+    the live panel answer: turnout against the attendees, closing time, "Close the vote". No id:
+    it shows twice on the page. "Close the vote" is the primary button when one poll is open,
+    the next step of the session; with several open, none of them is, and each stays secondary
+    (R12). The pill says the state of the poll in the words of its life cycle; a trial vote
+    (D-I) says so too. Needs panel. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% set assembly = panel.assembly %}
+{% if panel.open_polls %}
+<ul class="open-polls">
+  {% for view in panel.open_polls %}
+  <li class="open-poll">
+    <div class="spread">
+      <strong>{{ view.poll.title }}</strong>
+      <span class="row">{% if view.poll.trial %}<span class="badge neutral">{{ _("Trial") }}</span>{% endif %}{% if view.poll.closes_at %}<span class="badge warning">{{ _("closes at %(time)s", time=view.poll.closes_at | clock_time) }}</span>{% endif %}<span class="badge live is-live">{{ poll_status_label(view.poll.status) }}</span></span>
+    </div>
+    <progress class="bar" max="{{ [panel.attendees, view.turnout, 1] | max }}" value="{{ view.turnout }}">{{ view.turnout }}</progress>
+    <p class="muted small">{{ ngettext("%(num)s ballot", "%(num)s ballots", view.turnout) }} / {{ ngettext("%(num)s attendee", "%(num)s attendees", panel.attendees) }}</p>
+    <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ view.poll.id }}/close" class="inline">
+      {{ csrf() }}
+      <button type="submit" class="button{{ ' primary' if panel.open_polls | length == 1 }} small">{{ _("Close the vote") }}</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="muted">{{ _("No poll is open.") }}</p>
+{% endif %}

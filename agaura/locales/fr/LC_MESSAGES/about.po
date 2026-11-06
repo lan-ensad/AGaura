@@ -1,0 +1,72 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+
+#: templates/layouts/admin.html:45
+msgid "Source code"
+msgstr "Code source"
+
+#: templates/layouts/voter.html:12 templates/layouts/voter.html:18
+msgid "About the service"
+msgstr "À propos du service"
+
+#: templates/layouts/voter.html:21 templates/public/home.html:45
+msgid "Service ethics"
+msgstr "Déontologie du service"
+
+#: templates/macros/ethics.html:7
+msgid "Secret ballot."
+msgstr "Secret du vote."
+
+#: templates/macros/ethics.html:8
+msgid "No ballot is linked to a person or to an access: no name, no time, and no trace of the order of arrival once the vote is closed. The service is designed so that neither the tribune nor the operator of the server can know who voted what."
+msgstr "Aucun bulletin n'est relié à une personne ni à un accès : ni nom, ni heure, ni trace de l'ordre d'arrivée une fois le vote clos. Le service est conçu pour que ni la tribune ni l'exploitant du serveur ne puissent savoir qui a voté quoi."
+
+#: templates/macros/ethics.html:9
+msgid "Voters without an account."
+msgstr "Votants sans compte."
+
+#: templates/macros/ethics.html:10
+msgid "Voting needs no name, no email address and no app: the session password or an individual code drawn at random is enough. Only the accounts of the tribune have an email address."
+msgstr "Voter ne demande ni nom, ni adresse e-mail, ni application : le mot de passe de la session ou un code personnel tiré au hasard suffit. Seuls les comptes de la tribune ont une adresse e-mail."
+
+#: templates/macros/ethics.html:11
+msgid "No tracking."
+msgstr "Aucun pistage."
+
+#: templates/macros/ethics.html:12
+msgid "No advertising, no audience measurement, nothing loaded from another site. The only cookies keep the service working: login, form protection, access to the session. IP addresses serve security only: the security log keeps them 7 days at most, the other logs keep them truncated."
+msgstr "Ni publicité, ni mesure d'audience, ni contenu chargé depuis un autre site. Les seuls cookies servent au fonctionnement : connexion, protection des formulaires, accès à la session. Les adresses IP ne servent qu'à la sécurité : le journal de sécurité les garde 7 jours au plus, les autres journaux ne les gardent que tronquées."
+
+#: templates/macros/ethics.html:13
+msgid "Verifiable results."
+msgstr "Résultats vérifiables."
+
+#: templates/macros/ethics.html:14
+msgid "Each result receives a fingerprint when it is closed, the log of the tribune's actions is chained so that a later change shows, and the export of the ballots allows an independent recount. Ties are reported, never broken by the software."
+msgstr "Chaque résultat reçoit une empreinte à sa clôture, le journal des actions de la tribune est chaîné pour qu'une modification après coup se voie, et l'export des bulletins permet un recomptage indépendant. Les égalités sont signalées, jamais tranchées par le logiciel."
+
+#: templates/macros/ethics.html:15
+msgid "Limits stated plainly."
+msgstr "Limites annoncées."
+
+#: templates/macros/ethics.html:16
+msgid "With the session password, the service guarantees one vote per device, not per person: for a vote that requires one voice per person, the tribune uses individual codes. A vote with very few ballots can reveal individual choices. The projection screen shows a result only when the tribune chooses to, and the count of each option only from 10 ballots; the result published on the phones and the minutes always give the count."
+msgstr "Avec le mot de passe de la session, le service garantit un vote par appareil, pas par personne : pour un vote qui exige une voix par personne, la tribune utilise des codes individuels. Un vote qui ne compte que très peu de bulletins peut révéler des choix individuels. L'écran de projection n'affiche un résultat que si la tribune le choisit, et le détail des voix qu'à partir de 10 bulletins ; le résultat publié sur les téléphones et le procès-verbal en donnent toujours le détail."
+
+#: templates/macros/ethics.html:17
+msgid "Open source."
+msgstr "Code source ouvert."
+
+#: templates/macros/ethics.html:18
+msgid "The software is free (AGPL license): its code can be read, checked and reused."
+msgstr "Le logiciel est libre (licence AGPL) : son code peut être lu, vérifié et réutilisé."
+
+#: templates/macros/ethics.html:19
+msgid "Read the source code"
+msgstr "Lire le code source"

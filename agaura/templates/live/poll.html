@@ -1,0 +1,11 @@
+{# Ballot steps without JavaScript: one poll's section on its own page; ``section`` is rendered
+   and padded by ``agaura.web.live.padding``. #}
+{% extends "layouts/voter.html" %}
+{% set title_heading = true %}
+{% block title %}{{ poll.title }} · AGaura{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/live.css') }}">{% endblock %}
+{% block session_title %}{{ assembly_title }}{% endblock %}
+{% block content %}
+{{ section }}
+<p><a href="/{{ public_id }}">{{ _("Back to the session page") }}</a></p>
+{% endblock %}

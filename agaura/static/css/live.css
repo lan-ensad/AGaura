@@ -1,0 +1,269 @@
+/* AGaura — voter pages: join form, live page, ballots (SPEC §6.5, NFR-06).
+   Touch targets of at least 44 px, visible keyboard focus, colour never used alone. */
+
+/* The session title of the top bar is the page's level-one heading, at the bar's size. */
+h1.voter-title { font-size: inherit; line-height: inherit; }
+
+/* live.js keeps the reading position itself when content changes above it (Safari has no
+   scroll anchoring): the browser's own anchoring would add to it. */
+body.voter { overflow-anchor: none; }
+
+.live > * + * { margin-top: 0; }
+
+/* Summary of the open polls (two or more), stuck to the top of the screen while scrolling:
+   counts, then one link per poll still to vote, in a row that scrolls sideways on its own. */
+.live-summary {
+  position: sticky; top: 0; z-index: 5;
+  margin: -0.25rem -1rem 1rem; padding: 0.5rem 1rem;
+  background: var(--accent-soft); border-bottom: 1px solid var(--border);
+}
+.summary-counts { margin: 0; font-weight: 700; font-size: 0.95rem; }
+.summary-links {
+  display: flex; gap: 0.4rem; margin: 0.35rem 0 0; padding: 0; list-style: none;
+  overflow-x: auto; scrollbar-width: thin;
+}
+.summary-links li { flex: 0 0 auto; max-width: 75%; }
+.summary-links a {
+  display: block; min-height: 44px; max-width: 14em; padding: 0.6rem 0.85rem; line-height: 1.4;
+  border: 1px solid var(--accent); border-radius: 999px; background: var(--surface);
+  font-size: 0.95rem; font-weight: 600; text-decoration: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.summary-links a:focus-visible { outline-offset: -4px; }
+/* A poll whose summary waits for its confirmation on this device ("À confirmer · …", live.js):
+   the words first, then a hollow dot and the amber of what is not done yet. */
+.summary-links a.is-review { max-width: 19em; border-color: var(--warning); background: var(--warning-soft); color: var(--warning); }
+.summary-links a.is-review::before {
+  content: ""; display: inline-block; width: 0.55em; height: 0.55em; margin-right: 0.35em;
+  border: 2px solid currentColor; border-radius: 50%; vertical-align: 0.02em;
+}
+.summary-counts .live-dot { color: var(--live); }
+/* A link of the summary, or the focus after a ballot step, never lands under it. */
+.live-summary ~ *, .live-summary ~ * [data-focus] { scroll-margin-top: 6.5rem; }
+
+.poll-head { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; align-items: baseline; justify-content: space-between; }
+.poll-head h2 { margin-bottom: 0.4rem; }
+.poll-head h2:focus { outline: none; }
+.poll-head h2:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.timer {
+  margin: 0 0 0.4rem; padding: 0.1rem 0.6rem; border-radius: 999px;
+  background: var(--warning-soft); color: var(--warning); font-weight: 700; font-size: 0.9rem;
+}
+.poll-description { white-space: pre-line; color: var(--muted); }
+.eyebrow { margin: 0 0 0.2rem; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.ballot, .review { display: flex; flex-direction: column; gap: 0.75rem; }
+.ballot fieldset, .review fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+
+/* Single choice and approval: one large row per option and one for the blank vote, alike;
+   the whole row is clickable. */
+.choices { display: flex; flex-direction: column; gap: 0.5rem; }
+.choice { position: relative; display: block; cursor: pointer; }
+.choice input {
+  position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%);
+  width: 1.4rem; height: 1.4rem; margin: 0; accent-color: var(--accent);
+}
+.choice-text {
+  display: block; min-height: var(--tap); padding: 0.7rem 1rem 0.7rem 3.1rem;
+  border: 2px solid var(--border); border-radius: var(--radius); background: var(--surface);
+  font-weight: 600; overflow-wrap: anywhere;
+}
+.choice-hint { display: block; font-weight: 400; font-size: 0.9rem; color: var(--muted); }
+.choice input:checked + .choice-text { border-color: var(--accent); background: var(--accent-soft); }
+.choice input:focus-visible + .choice-text { outline: 3px solid var(--accent); outline-offset: 2px; }
+.choice:hover .choice-text { border-color: var(--accent); }
+/* Approval at its maximum: the boxes left unchecked refuse a tick (aria-disabled, still
+   focusable, so the counter's reason is heard); live.js keeps them unchecked. */
+.choice.is-blocked { cursor: not-allowed; }
+.choice.is-blocked .choice-text { background: var(--bg); border-style: dashed; color: var(--muted); }
+.choice.is-blocked:hover .choice-text { border-color: var(--border); }
+/* Counters (approval, Majority Judgment): a status after the options, written in what remains
+   ("Encore 1 choix possible"); a state is said in words, then a glyph, then a colour. */
+.counter { margin: 0; font-size: 1rem; font-weight: 600; color: var(--text); }
+.counter.is-full, .counter.is-over { color: var(--warning); }
+.counter.is-full::before, .counter.is-over::before { content: "\25cf\00a0"; content: "\25cf\00a0" / ""; }
+.counter.is-complete { color: var(--success); }
+.counter.is-complete::before { content: "\2713\00a0"; content: "\2713\00a0" / ""; }
+.counter .counter-help { display: block; font-weight: 400; font-size: 0.9rem; color: var(--muted); }
+
+/* Majority Judgment: one row of grade buttons per option, grade text plus colour. */
+/* border-radius: 0, or the rule drawn above each option bends at both ends (app.css gives every
+   fieldset a 10 px radius). */
+.ballot .mj-option { border-top: 1px solid var(--border); border-radius: 0; padding-top: 0.75rem; }
+.mj-option legend { font-weight: 700; font-size: 1.05rem; padding: 0; margin-bottom: 0.5rem; float: left; width: 100%; }
+.mj-option legend + * { clear: both; }
+.grades { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; clear: both; }
+@media (min-width: 420px) { .grades { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.grade-choice { position: relative; display: block; cursor: pointer; }
+.grade-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.grade-pill {
+  position: relative; display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: var(--tap); padding: 0.45rem 0.35rem; border-radius: var(--radius-sm);
+  /* The edge is the only outline of the control (its radio is invisible): 3:1, WCAG 1.4.11. */
+  border: 1px solid var(--border-strong); background: var(--surface); color: var(--text);
+  font-weight: 700; font-size: 0.95rem; line-height: 1.2;
+  -webkit-hyphens: auto; hyphens: auto; overflow-wrap: anywhere;
+  box-shadow: inset 0 -5px 0 var(--grade, #5b6470);
+}
+.grade-pill.g0 { --grade: var(--grade-0); }
+.grade-pill.g1 { --grade: var(--grade-1); }
+.grade-pill.g2 { --grade: var(--grade-2); }
+.grade-pill.g3 { --grade: var(--grade-3); }
+.grade-pill.g4 { --grade: var(--grade-4); }
+.grade-pill.g5 { --grade: var(--grade-5); }
+/* Selected: filled with the grade colour, a check mark and a thicker frame. Text sizes and
+   colours keep the WCAG AA contrast of the shared .grade-N badges (large bold text). The
+   padding shrinks by the extra pixel of the frame, so the label does not move. */
+.grade-choice:hover .grade-pill { border-color: var(--accent); }
+.grade-choice input:checked + .grade-pill {
+  background: var(--grade, #5b6470); border: 2px solid var(--text); padding: 0.4rem 0.3rem; color: #fff;
+  font-size: 1.2rem; box-shadow: none;
+}
+.grade-choice input:checked + .grade-pill::after {
+  content: "\2713"; position: absolute; top: 0.1rem; right: 0.35rem; font-size: 0.9rem;
+}
+.grade-choice input:checked + .grade-pill.g2,
+.grade-choice input:checked + .grade-pill.g3,
+.grade-choice input:checked + .grade-pill.g4 { color: var(--text); }
+.grade-choice input:focus-visible + .grade-pill { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* The blank vote, after the last option and its rule like one more option: a button like the
+   grades', without a grade's colour; filled with the accent once chosen. */
+.mj-blank .grade-pill { --grade: var(--accent); box-shadow: none; }
+
+/* Condorcet: one row per option, its label then its list of ranks, rules between the rows. A
+   list with a rank chosen is framed like a choice made (where :has() is supported). */
+.ranks { gap: 0; }
+.ranks > .hint { margin-bottom: 0.5rem; }
+.rank-option {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(8.5rem, auto); gap: 0.35rem 0.75rem;
+  align-items: center; padding: 0.55rem 0; border-top: 1px solid var(--border);
+}
+.rank-option label { overflow-wrap: anywhere; }
+.rank-name { display: block; font-weight: 700; font-size: 1.05rem; }
+.rank-option select { font-weight: 600; }
+.rank-option select:not(:has(option[value=""]:checked)) {
+  border: 2px solid var(--accent); background-color: var(--accent-soft); padding: calc(0.6rem - 1px) calc(0.75rem - 1px);
+}
+/* The blank vote, one more row of the ranking: its name, then a box in the column of the
+   lists; the whole row is its label. */
+.rank-blank { min-height: var(--tap); cursor: pointer; }
+.rank-blank input {
+  justify-self: start; width: 1.4rem; height: 1.4rem; margin: 0 0 0 0.75rem; accent-color: var(--accent);
+}
+.ranks .counter { margin-top: 0.5rem; }
+
+/* Summary before submission. */
+.review h3 { margin: 0; }
+.review .ungraded { margin: 0; }
+.summary-main { font-size: 1.2rem; font-weight: 800; margin: 0; }
+.summary-list { margin: 0; padding-left: 1.2rem; font-weight: 700; }
+.summary-grades { margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+/* One line per option: the option on the left, its grade on the right, rules between lines. */
+.summary-grades div {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 0.75rem; align-items: center;
+  padding: 0.35rem 0; border-bottom: 1px solid var(--border);
+}
+.summary-grades div:last-child { border-bottom: 0; }
+.summary-grades dt { font-weight: 600; overflow-wrap: anywhere; }
+.summary-grades dd { margin: 0; display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+/* Condorcet: the ranking, best first; the rank in a fixed column, "Non classée" dashed. */
+.summary-ranks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.summary-ranks li {
+  display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 0.75rem; align-items: center;
+  padding: 0.35rem 0; border-bottom: 1px solid var(--border);
+}
+.summary-ranks li:last-child { border-bottom: 0; }
+.summary-ranks .rank {
+  justify-self: start; padding: 0.1rem 0.5rem; border-radius: var(--radius-xs);
+  background: var(--accent-soft); color: var(--accent); font-weight: 700; white-space: nowrap;
+}
+.summary-ranks .rank.is-default {
+  background: var(--surface); color: var(--muted); border: 2px dashed var(--border-strong);
+  padding: calc(0.1rem - 2px) calc(0.5rem - 2px);
+}
+.summary-ranks .rank-label { font-weight: 600; overflow-wrap: anywhere; }
+/* A grade given by default (an option left without one): dashed, so it never reads as chosen. */
+.grade.is-default {
+  background: var(--surface); color: var(--grade-5); border: 2px dashed var(--grade-5);
+  padding: calc(0.1rem - 2px) calc(0.5rem - 2px);
+}
+/* The ballot is not in the ballot box yet: the amber pair of the green "Vote enregistré". */
+.pending-flag {
+  display: flex; align-items: center; gap: 0.5rem; margin: 0; padding: 0.5rem 0.75rem;
+  border: 1px solid var(--warning-line); border-left: 4px solid var(--warning); border-radius: var(--radius-sm);
+  background: var(--warning-soft); color: var(--warning); font-weight: 700;
+}
+.pending-flag::before { content: ""; flex: none; width: 0.85em; height: 0.85em; border: 2px solid currentColor; border-radius: 50%; }
+.poll-review { border-color: var(--warning-line); }
+/* Steps of the ballot box under the title (review, after the deposit). */
+.poll .stepper { margin: 0 0 0.75rem; font-size: 0.85rem; gap: 0.25rem 0.9rem; }
+.poll .stepper li::before { width: 1.4rem; height: 1.4rem; }
+/* Secrecy, said where it matters: the review and the confirmation. */
+.secret-line { display: flex; align-items: center; gap: 0.45rem; margin: 0; color: var(--muted); font-size: 0.95rem; }
+.secret-line svg.icon { color: var(--success); width: 1.2rem; height: 1.2rem; }
+
+/* After voting. */
+.voted-mark { display: flex; align-items: center; gap: 0.45rem; font-size: 1.3rem; font-weight: 800; color: var(--success); margin: 0 0 0.4rem; }
+.voted-mark svg.icon { width: 1.6rem; height: 1.6rem; }
+.voted-mark:focus { outline: none; }
+.voted-mark:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.poll-voted { border-color: var(--success-line); background: var(--success-soft); }
+/* Right after a ballot: the next poll still to vote, on this page (an anchor; live.js). */
+.next-vote { margin: 0.75rem 0 0; }
+.next-vote .button { justify-content: space-between; gap: 0.75rem; text-align: left; }
+.next-vote .button span { min-width: 0; overflow-wrap: anywhere; }
+.next-vote.is-above svg.icon { transform: rotate(180deg); }
+/* On the page afterwards: one line per poll voted on. */
+.poll-recorded {
+  margin-bottom: 1rem; padding: 0.55rem 1rem;
+  border: 1px solid var(--success-line); border-left: 4px solid var(--success); border-radius: var(--radius);
+  background: var(--success-soft);
+}
+.poll-recorded h2 { margin: 0; font-size: 1rem; overflow-wrap: anywhere; }
+.recorded-mark, .recorded-state { color: var(--success); }
+.recorded-state { font-weight: 600; }
+.poll-recorded .hint { margin-top: 0.1rem; }
+
+/* Waiting screen. */
+.waiting { text-align: center; padding: 3rem 1rem 2rem; }
+.waiting-mark {
+  display: block; width: 1rem; height: 1rem; margin: 0 auto 1.25rem; border-radius: 50%;
+  background: var(--accent); animation: waiting-pulse 1.6s ease-in-out infinite;
+}
+@keyframes waiting-pulse { 0%, 100% { opacity: 0.25; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
+@media (prefers-reduced-motion: reduce) { .waiting-mark { animation: none; } }
+/* The device is in: the first worry of a voter who waits. */
+.waiting-joined {
+  display: inline-flex; align-items: center; gap: 0.4rem; margin: 1.25rem 0 0; padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill); background: var(--success-soft); color: var(--success); font-size: 0.95rem; font-weight: 700;
+}
+
+/* Published results, under their own heading. */
+.group-title { margin: 1.75rem 0 0.75rem; font-size: 1.1rem; color: var(--muted); }
+.live > .group-title:first-child { margin-top: 0; }
+.result-card h3 { font-size: 1.25rem; }
+.result-card .result-table th, .result-card .result-table td { padding-left: 0.25rem; padding-right: 0.25rem; }
+/* The verdict first, in words, then its glyph (screen readers skip it), then its colour. */
+.result-card .verdict { display: flex; align-items: baseline; gap: 0.4rem; font-size: 1.35rem; margin-bottom: 0.5rem; }
+.result-card .verdict::before { flex: none; }
+.result-card .verdict.success::before { content: "\2713"; content: "\2713" / ""; }
+.result-card .verdict.danger::before { content: "\2717"; content: "\2717" / ""; }
+.result-card .verdict.warning::before { content: "\25cf"; content: "\25cf" / ""; }
+/* "Voix par mention": a 44 px target like every voter control. */
+.result-card .merit-details > summary { min-height: 44px; padding-block: 0.55rem; line-height: 1.5; }
+
+/* "Terminer": two steps, so a stray tap never logs a voter out. */
+.leave { margin-top: 2rem; }
+.leave summary {
+  display: flex; align-items: center; justify-content: center; min-height: var(--tap);
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  font-weight: 600; cursor: pointer; list-style: none;
+}
+.leave summary::-webkit-details-marker { display: none; }
+.leave summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.leave[open] summary { margin-bottom: 0.75rem; }
+
+.join h2, .session-state h2 { font-size: 1.35rem; }
+/* The secret in one line, under the join form (FR-40a). */
+.join-promise { margin: 1rem 0 0; color: var(--muted); font-size: 0.9rem; text-align: center; }
+.join-promise svg.icon { color: var(--success); margin-right: 0.15rem; }
+@media (max-width: 380px) { .live .card { padding: 1rem; } }

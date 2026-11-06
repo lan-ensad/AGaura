@@ -1,0 +1,91 @@
+{#- Finished polls (FR-51): counts, turnout, detailed result, digest, and the way to the poll's
+    exports, which sit in Documents with every other download (D-H: its row #exports-<id>, the
+    owner's only). They stay here after the session is closed (FR-52). Most recent first. Two
+    separate choices for each
+    closed poll: publish the result to voters (FR-36), and show it on the projection screen or
+    take it off (FR-75), the screen giving the count of each option only from 10 ballots; never
+    for a cancelled poll (FR-72). The pills follow the life cycle of a poll (Clos, ✓ Publié,
+    Annulé), then "À l'écran" while the screen shows the result. One primary button in the card
+    (R12): "Publish the result to voters" of the most recent poll whose result voters do not
+    see; the others, the screen's included, are secondary. Both routes redirect without an
+    anchor: these forms come back to their poll (#poll-<id>), the "Vote clos" command of
+    Steering to Steering (D-K). A trial vote (D-I) says so, and has no number and no export:
+    the minutes and the exports leave it out. Each poll is a tile folded by default (title and
+    pills; macros/polls.html), unfolded by the address of an action that comes back to it. -#}
+{% from "macros/forms.html" import csrf, field with context %}
+{% from "macros/icons.html" import icon with context %}
+{% from "macros/results.html" import result_block %}
+{% from "macros/polls.html" import tile_head with context %}
+{% set session_active = assembly.status.value != "closed" %}
+{% set publishable = state.finished | rejectattr("poll.shown_to_voters") | rejectattr("poll.status.value", "equalto", "cancelled") | first %}
+<section class="card" id="results" aria-labelledby="results-title">
+  <h2 id="results-title">{{ _("Finished polls") }}</h2>
+  <p class="hint">{{ _("Two separate actions: publish, on the voters' phones; show on the screen, in the room, the verdict and, from %(num)s ballots, the count of each option. A cancelled poll is never shown.", num=polls_screen_detail_min) }}</p>
+  {% if state.finished %}
+  <div class="poll-list">
+  {% for view in state.finished %}
+  {% set poll = view.poll %}
+  {% set number = exports_numbers.get(poll.id) %}
+  {% set base = "/manage/" ~ assembly.public_id ~ "/polls/" ~ poll.id %}
+  <details class="finished-poll poll-tile" id="poll-{{ poll.id }}">
+    {{ tile_head(poll, number=number, trial=poll.trial, shown_to_voters=poll.shown_to_voters, on_screen=poll.shown_on_screen and poll.status.value != "cancelled") }}
+    <p class="muted small">{{ poll_method_label(poll) }} · {{ _("closed at %(time)s", time=poll.closed_at | time_of_day) }}</p>
+    {% if poll.status.value == "cancelled" %}
+    <p>{{ _("Cancelled: %(reason)s", reason=poll.cancel_reason) }}</p>
+    <p class="muted small">{{ ngettext("%(num)s ballot kept, not counted.", "%(num)s ballots kept, not counted.", view.turnout) }}</p>
+    {% elif poll.result %}
+    {{ result_block(poll, poll.result.data, show_turnout=true) }}
+    <p class="muted small mono digest">SHA-256 {{ poll.result.ballots_sha256 }}</p>
+    {% endif %}
+    {% if poll.trial %}
+    <p class="muted small">{{ _("Trial vote: left out of the minutes and the exports.") }}</p>
+    {% elif can.owner %}
+    <p class="export-links"><a class="to-home" href="#exports-{{ poll.id }}">{{ icon("scroll-text", size="sm") }}<span>{{ _("Exports of this poll, in Documents") }}</span>{{ icon("chevron-right", size="sm") }}</a></p>
+    {% endif %}
+    {% if poll.status.value != "cancelled" %}
+    <div class="actions">
+      {% if poll.shown_to_voters %}
+      <form method="post" action="{{ base }}/dismiss" class="inline">
+        {{ csrf() }}<button type="submit" class="button small">{{ _("Hide the result") }}</button>
+      </form>
+      {% else %}
+      <form method="post" action="{{ base }}/publish#poll-{{ poll.id }}" class="inline">
+        {{ csrf() }}<input type="hidden" name="voters" value="1">
+        <button type="submit" class="button{{ ' primary' if publishable and publishable.poll.id == poll.id }} small">{{ _("Publish the result to voters") }}</button>
+      </form>
+      {% endif %}
+      {% if poll.result %}
+      <form method="post" action="{{ base }}/screen#poll-{{ poll.id }}" class="inline">
+        {{ csrf() }}<input type="hidden" name="shown" value="{{ '0' if poll.shown_on_screen else '1' }}">
+        {% if poll.shown_on_screen %}
+        <button type="submit" class="button small">{{ icon("eye-off") }} {{ _("Take off the screen") }}</button>
+        {% else %}
+        <button type="submit" class="button small">{{ icon("presentation") }} {{ _("Display on the screen") }}</button>
+        {% endif %}
+      </form>
+      {% if poll.result.data.counts.cast < polls_screen_detail_min %}
+      <span class="muted small">{{ _("Fewer than %(num)s ballots: the screen shows the verdict only.", num=polls_screen_detail_min) }}</span>
+      {% endif %}
+      {% endif %}
+    </div>
+    <details class="cancel">
+      <summary>{{ _("Cancel this poll") }}</summary>
+      <form method="post" action="{{ base }}/cancel" class="row">
+        {{ csrf() }}
+        <label class="inline-field grow">{{ _("Reason (appears in the minutes)") }} <input name="reason" required maxlength="500"></label>
+        <button type="submit" class="button danger small">{{ _("Cancel the poll") }}</button>
+      </form>
+    </details>
+    {% endif %}
+    {% if session_active %}
+    <form method="post" action="{{ base }}/duplicate" class="inline">
+      {{ csrf() }}<button type="submit" class="link">{{ _("Copy as a new draft (to vote again)") }}</button>
+    </form>
+    {% endif %}
+  </details>
+  {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted">{{ _("Results appear here once a poll is closed.") }}</p>
+  {% endif %}
+</section>

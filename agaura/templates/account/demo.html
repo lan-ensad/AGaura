@@ -1,0 +1,23 @@
+{# Demo (FR-09a): what it holds, how long it lasts, and the anti-robot check before it opens. #}
+{% extends "layouts/admin.html" %}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/demo.html" import limits with context %}
+{% block title %}{{ _("Try the demonstration") }} · AGaura{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/account.css') }}">{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ _("Try the demonstration") }}</h1>
+  <p>{{ _("The demonstration opens an account of your own, without an email address or a password, with two example sessions: one to prepare and run, one already voted on with its results.") }}</p>
+  <h2 class="demo-limits-title">{{ _("Limits of the demonstration") }}</h2>
+  {{ limits() }}
+  {% if user and not user.is_demo %}
+  <p class="alert alert-warning">{{ _("Opening the demonstration logs you out of your account on this browser.") }}</p>
+  {% endif %}
+  <form method="post" action="/demo" class="stack">
+    {{ csrf() }}
+    {% include "account/pow_widget.html" %}
+    <button type="submit" class="button primary" disabled>{{ _("Open the demonstration") }}</button>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/pow.js') }}" defer></script>{% endblock %}

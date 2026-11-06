@@ -1,0 +1,11 @@
+/* AGaura — public results page (FR-17): one column, read on phones. Shared result rules
+   (bars, merit profile) are in app.css. */
+
+.results-head { margin-bottom: 1rem; }
+.results-head h1 { font-size: 1.45rem; margin-bottom: 0.25rem; }
+.eyebrow { margin: 0 0 0.2rem; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.public-result h2 { font-size: 1.2rem; margin-bottom: 0.3rem; overflow-wrap: anywhere; }
+.poll-description { white-space: pre-line; color: var(--muted); }
+.public-result .result-table th, .public-result .result-table td { padding-left: 0.25rem; padding-right: 0.25rem; }
+.public-result .result-table td { overflow-wrap: anywhere; }
+.digest { word-break: break-all; margin-top: 0.75rem; }

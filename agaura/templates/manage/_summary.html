@@ -1,0 +1,62 @@
+{#- Steering once the session is closed: the summary, then the minutes as the primary action and
+    the complete data, then three commands that lead to their card (command_head of
+    macros/console.html): the results, in Polls; the public results link, in Documents, where
+    every download sits (D-H); the corrections still possible, in Meeting and in Session notes
+    (the tribune and the notes stay editable after closing, each change logged, and the minutes
+    follow). A trial vote
+    (D-I) counts in no figure, as in the minutes. Owner only: a delegate link ends with the
+    session. -#}
+{% from "macros/console.html" import command_head with context %}
+{% from "macros/icons.html" import icon with context %}
+{% from "macros/demo.html" import exports_note with context %}
+{% set record = state.finished | rejectattr("poll.trial") | list %}
+{% set held_polls = record | rejectattr("poll.status.value", "equalto", "cancelled") | list %}
+{% set held = held_polls | length %}
+{% set cancelled = (record | length) - held %}
+{% set unpublished = held_polls | selectattr("poll.status.value", "equalto", "closed") | map(attribute="poll.title") | list %}
+{% set published = held - (unpublished | length) %}
+<section class="card summary-card" id="summary" aria-labelledby="summary-title">
+  <h2 id="summary-title">{{ _("The session is over") }}</h2>
+  <dl class="summary-figures">
+    {% if assembly.opened_at %}<div><dt>{{ _("Opened") }}</dt><dd>{{ assembly.opened_at | short_datetime }}</dd></div>{% endif %}
+    {% if assembly.closed_at %}<div><dt>{{ _("Closed") }}</dt><dd>{{ assembly.closed_at | short_datetime }}</dd></div>{% endif %}
+    <div><dt>{{ _("Polls held") }}</dt><dd>{{ held }}</dd></div>
+    {% if cancelled %}<div><dt>{{ _("Polls cancelled") }}</dt><dd>{{ cancelled }}</dd></div>{% endif %}
+    <div><dt>{{ _("Attendees") }}</dt><dd>{{ state.panel.attendees }}</dd></div>
+  </dl>
+  {% if assembly.is_demo %}
+  {{ exports_note("summary-demo") }}
+  <div class="actions">
+    <button type="button" class="button primary" disabled aria-describedby="summary-demo">{{ icon("lock") }} {{ _("Minutes (PDF)") }}</button>
+    <button type="button" class="button" disabled aria-describedby="summary-demo">{{ icon("lock") }} {{ _("Complete data (JSON)") }}</button>
+  </div>
+  {% else %}
+  <p>{{ _("Download the minutes and the complete data, and keep them: they are the record of the votes.") }}</p>
+  <div class="actions">
+    <a class="button primary" href="/manage/{{ assembly.public_id }}/minutes.pdf" download>{{ icon("scroll-text") }} {{ _("Minutes (PDF)") }}</a>
+    <a class="button" href="/manage/{{ assembly.public_id }}/export.json" download>{{ icon("file-json") }} {{ _("Complete data (JSON)") }}</a>
+  </div>
+  {% endif %}
+</section>
+<div class="grid-2 after-commands">
+  <section class="card cmd" id="after-results" aria-labelledby="after-results-title">
+    {{ command_head("vote", _("Results"), "polls", "results", _("In Polls"), "after-results-title") }}
+    <p class="cmd-state">
+      {%- if not held %}{{ _("No poll held.") }}
+      {%- elif not unpublished %}{{ _("Every result was published to voters.") }}
+      {%- elif not published %}{{ _("No result was published to voters.") }}
+      {%- else %}{{ ngettext("%(num)s result published to voters.", "%(num)s results published to voters.", published) }}
+      {%- if unpublished | length <= 3 %} {{ ngettext("Not published: %(titles)s.", "Not published: %(titles)s.", unpublished | length, titles="« " ~ (unpublished | join(" », « ")) ~ " »") }}
+      {%- else %} {{ ngettext("%(num)s result not published.", "%(num)s results not published.", unpublished | length) }}{% endif %}
+      {%- endif %}</p>
+  </section>
+  <section class="card cmd" id="after-public" aria-labelledby="after-public-title">
+    {{ command_head("link", _("Public results link"), "documents", "public-results", _("In Documents"), "after-public-title") }}
+    <p class="cmd-state">{% if links_results_url %}{{ _("Enabled: members who could not attend see the published results.") }}{% else %}{{ _("Disabled. Once enabled, it shows the results to the members who could not attend.") }}{% endif %}</p>
+  </section>
+  <section class="card cmd" id="after-fix" aria-labelledby="after-fix-title">
+    {{ command_head("users-round", _("Correct before archiving"), "meeting", "tribune", _("In Meeting"), "after-fix-title") }}
+    <p class="cmd-state">{{ _("The tribune and the notes can still be changed after closing, and the minutes follow. The session log records each correction.") }}</p>
+    <p class="export-links"><a class="to-home" href="#notes">{{ icon("notebook-pen", size="sm") }}<span>{{ _("All the notes") }}</span>{{ icon("chevron-right", size="sm") }}</a></p>
+  </section>
+</div>

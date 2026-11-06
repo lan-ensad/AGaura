@@ -1,0 +1,421 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: templates/manage/_links.html:7
+msgid "Projection screen"
+msgstr "Écran de projection"
+
+#: templates/manage/_links.html:10
+msgid "Projection screen link"
+msgstr "Lien de l'écran de projection"
+
+#: templates/manage/_links.html:11 templates/manage/_links.html:26
+msgid "Copied"
+msgstr "Copié"
+
+#: templates/manage/_links.html:11 templates/manage/_links.html:26
+msgid "Copy"
+msgstr "Copier"
+
+#: templates/manage/_links.html:12
+msgid "Open the screen"
+msgstr "Ouvrir l'écran"
+
+#: templates/manage/_links.html:14
+msgid "Create a new screen link? The current link stops working, including on a screen already open."
+msgstr "Créer un nouveau lien d'écran ? Le lien actuel ne fonctionnera plus, y compris sur un écran déjà ouvert."
+
+#: templates/manage/_links.html:16
+msgid "New screen link"
+msgstr "Nouveau lien d'écran"
+
+#: templates/manage/_links.html:21 templates/manage/_links.html:25
+msgid "Public results link"
+msgstr "Lien public des résultats"
+
+#: templates/manage/_links.html:23
+msgid "Anyone with this secret link can see the results of the session. Share it with the members."
+msgstr "Toute personne disposant de ce lien secret peut voir les résultats de la session. Partagez-le avec les membres."
+
+#: templates/manage/_links.html:27
+msgid "Open the page"
+msgstr "Ouvrir la page"
+
+#: templates/manage/_links.html:29
+msgid "Disable the public results link? It stops working for everyone who has it."
+msgstr "Désactiver le lien public des résultats ? Il ne fonctionnera plus pour personne."
+
+#: templates/manage/_links.html:32
+msgid "Disable the link"
+msgstr "Désactiver le lien"
+
+#: templates/manage/_links.html:35
+msgid "Disabled. Once enabled, a secret link shows the results of the session to anyone who has it, for example the members who could not attend."
+msgstr "Désactivé. Une fois activé, un lien secret montre les résultats de la session à toute personne qui le possède, par exemple les membres absents."
+
+#: templates/manage/_links.html:39
+msgid "Enable the public link"
+msgstr "Activer le lien public"
+
+#: templates/screen/_state.html:38 templates/screen/macros.html:22
+msgid "The session will start shortly."
+msgstr "La session va bientôt commencer."
+
+#: templates/screen/macros.html:51
+msgid "To vote"
+msgstr "Pour voter"
+
+#: templates/screen/macros.html:28
+msgid "Or scan the QR code: it joins directly."
+msgstr "Ou scannez le QR code : il vous connecte directement."
+
+#: templates/screen/macros.html:30
+msgid "Then enter the code printed on your card, or scan the QR code of your card."
+msgstr "Puis saisissez le code imprimé sur votre carte, ou scannez le QR code de la carte."
+
+#: templates/screen/macros.html:32
+msgid "You can already scan: your phone will join as soon as the session opens."
+msgstr "Vous pouvez déjà scanner : votre téléphone rejoindra la session dès son ouverture."
+
+#: templates/screen/macros.html:41
+msgid "Closes in"
+msgstr "Clôture dans"
+
+#: templates/screen/macros.html:51
+msgid "Vote in progress"
+msgstr "Vote en cours"
+
+#: templates/screen/macros.html:60
+msgid "Grade each option."
+msgstr "Évaluez chaque option."
+
+#: templates/screen/page.html:13
+msgid "Full screen"
+msgstr "Plein écran"
+
+#: web/manage/links.py:26
+msgid "New screen link created: the previous one no longer works."
+msgstr "Nouveau lien d'écran créé : l'ancien ne fonctionne plus."
+
+#: web/manage/links.py:27
+msgid "Public results link enabled."
+msgstr "Lien public des résultats activé."
+
+#: web/manage/links.py:28
+msgid "Public results link disabled: it no longer works."
+msgstr "Lien public des résultats désactivé : il ne fonctionne plus."
+
+#: templates/manage/_finished.html:16
+msgid "Two separate actions: publish, on the voters' phones; show on the screen, in the room, the verdict and, from %(num)s ballots, the count of each option. A cancelled poll is never shown."
+msgstr "Deux gestes indépendants : publier, sur les téléphones des votants ; afficher sur l'écran, dans la salle, le verdict et, à partir de %(num)s bulletins, le détail des voix. Un vote annulé ne s'affiche jamais."
+
+#: templates/manage/_finished.html:45
+msgid "Publish the result to voters"
+msgstr "Publier le résultat aux votants"
+
+#: templates/manage/_timer.html:13 templates/screen/macros.html:55
+msgid "Chronometer"
+msgstr "Chronomètre"
+
+#: templates/manage/_timer.html:14
+msgid "Shown on the screen"
+msgstr "Affiché à l'écran"
+
+#: templates/manage/_timer.html:14
+msgid "Not on the screen"
+msgstr "Non affiché à l'écran"
+
+#: templates/manage/_timer.html:20 templates/screen/macros.html:58
+msgid "Time is up"
+msgstr "Temps écoulé"
+
+#: templates/manage/_timer.html:21
+msgid "Running"
+msgstr "En marche"
+
+#: templates/manage/_timer.html:21 templates/screen/macros.html:59
+msgid "Paused"
+msgstr "En pause"
+
+#: templates/manage/_timer.html:27
+msgid "Pause"
+msgstr "Pause"
+
+#: templates/manage/_timer.html:29
+msgid "Resume"
+msgstr "Reprendre"
+
+#: templates/manage/_timer.html:29 templates/manage/_timer.html:55
+msgid "Start"
+msgstr "Démarrer"
+
+#: templates/manage/_timer.html:32
+msgid "+1 min"
+msgstr "+1 min"
+
+#: templates/manage/_timer.html:35
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: templates/manage/_timer.html:39
+msgid "Hide from the screen"
+msgstr "Retirer de l'écran"
+
+#: templates/manage/_timer.html:39 templates/manage/_timer.html:63
+msgid "Show on the screen"
+msgstr "Afficher à l'écran"
+
+#: templates/manage/_timer.html:48
+msgid "Label (optional)"
+msgstr "Libellé (facultatif)"
+
+#: templates/manage/_timer.html:49
+msgid "Speaking time"
+msgstr "Temps de parole"
+
+#: templates/manage/_timer.html:53
+msgid "Minutes"
+msgstr "Minutes"
+
+#: templates/manage/_timer.html:53
+msgid "min"
+msgstr "min"
+
+#: templates/manage/_timer.html:54
+msgid "Seconds"
+msgstr "Secondes"
+
+#: templates/manage/_timer.html:54
+msgid "s"
+msgstr "s"
+
+#: templates/manage/_timer.html:59
+msgid "%(num)s min"
+msgstr "%(num)s min"
+
+#: templates/screen/macros.html:21
+msgid "Entries open"
+msgstr "Entrées ouvertes"
+
+#: templates/screen/macros.html:22
+msgid "Entries closed"
+msgstr "Entrées fermées"
+
+#: templates/screen/macros.html:23
+msgid "Opening soon"
+msgstr "Ouverture prochaine"
+
+#: templates/screen/macros.html:24
+msgid "Session over"
+msgstr "Session terminée"
+
+#: templates/screen/macros.html:69
+msgid "%(num)s earlier item"
+msgid_plural "%(num)s earlier items"
+msgstr[0] "%(num)s point précédent"
+msgstr[1] "%(num)s points précédents"
+
+#: templates/screen/macros.html:75
+msgid "Now"
+msgstr "En cours"
+
+#: templates/screen/macros.html:79
+msgid "%(num)s more item"
+msgid_plural "%(num)s more items"
+msgstr[0] "%(num)s point suivant"
+msgstr[1] "%(num)s points suivants"
+
+#: templates/screen/macros.html:128
+msgid "Questions put to the vote"
+msgstr "Questions mises aux voix"
+
+#: templates/screen/macros.html:134
+msgid "Vote cancelled"
+msgstr "Vote annulé"
+
+#: templates/screen/macros.html:134
+msgid "Vote closed"
+msgstr "Vote clos"
+
+#: templates/screen/macros.html:138
+msgid "%(num)s earlier vote"
+msgid_plural "%(num)s earlier votes"
+msgstr[0] "%(num)s vote précédent"
+msgstr[1] "%(num)s votes précédents"
+
+#: web/manage/timer.py:32
+msgid "Choose a duration between 1 second and 10 hours."
+msgstr "Choisissez une durée entre 1 seconde et 10 heures."
+
+#: web/manage/timer.py:38
+msgid "Chronometer started."
+msgstr "Chronomètre démarré."
+
+#: web/manage/timer.py:42
+msgid "One minute added."
+msgstr "Une minute ajoutée."
+
+#: templates/manage/_timer.html:13 templates/manage/_timer.html:36 templates/screen/macros.html:56
+msgid "Countdown"
+msgstr "Compte à rebours"
+
+#: templates/manage/_timer.html:17
+msgid "Chronometer and countdown"
+msgstr "Chronomètre et compte à rebours"
+
+#: templates/manage/_timer.html:27
+msgid "The screen shows %(time)s, stopped."
+msgstr "L'écran affiche %(time)s, à l'arrêt."
+
+#: templates/manage/_timer.html:34
+msgid "Mode"
+msgstr "Mode"
+
+#: templates/manage/_timer.html:36
+msgid "from a duration down to zero"
+msgstr "d'une durée jusqu'à zéro"
+
+#: templates/manage/_timer.html:37
+msgid "counts the elapsed time"
+msgstr "mesure le temps écoulé"
+
+#: templates/manage/_timer.html:41
+msgid "Duration of the countdown"
+msgstr "Durée du compte à rebours"
+
+#: templates/manage/_timer.html:46
+msgid "Other duration"
+msgstr "Autre durée"
+
+#: templates/manage/_timer.html:51
+msgid "with “Other duration”"
+msgstr "avec « Autre durée »"
+
+#: templates/manage/_timer.html:68
+msgid "Countdown from %(time)s"
+msgstr "Compte à rebours de %(time)s"
+
+#: web/manage/timer.py:38
+msgid "Choose a countdown or a chronometer."
+msgstr "Choisissez un compte à rebours ou un chronomètre."
+
+#: web/manage/timer.py:39
+msgid "Only a countdown has a duration to extend."
+msgstr "Seul un compte à rebours a une durée à prolonger."
+
+#: web/manage/timer.py:44
+msgid "Countdown started."
+msgstr "Compte à rebours démarré."
+
+#: web/manage/timer.py:46
+msgid "Paused: the time is stopped."
+msgstr "En pause : le temps est arrêté."
+
+#: web/manage/timer.py:47
+msgid "The time runs again."
+msgstr "Le temps repart."
+
+#: web/manage/timer.py:48
+msgid "Reset: set up the next one."
+msgstr "Réinitialisé : préparez le suivant."
+
+#: web/manage/timer.py:50
+msgid "Shown on the screen."
+msgstr "Affiché à l'écran."
+
+#: web/manage/timer.py:51
+msgid "Hidden from the screen."
+msgstr "Retiré de l'écran."
+
+# Results on the projection screen (FR-75): console of the finished polls.
+
+#: templates/manage/_finished.html:28
+msgid "On the screen"
+msgstr "À l'écran"
+
+#: templates/manage/_finished.html:64
+msgid "Display on the screen"
+msgstr "Afficher sur l'écran"
+
+#: templates/manage/_finished.html:62
+msgid "Take off the screen"
+msgstr "Retirer de l'écran"
+
+#: templates/manage/_finished.html:68
+msgid "Fewer than %(num)s ballots: the screen shows the verdict only."
+msgstr "Moins de %(num)s bulletins : l'écran n'affiche que le verdict."
+
+#: templates/manage/_links.html:5
+msgid "Open this secret link on the computer connected to the projector: it updates by itself and shows a result only when the tribune chooses to, poll by poll."
+msgstr "Ouvrez ce lien secret sur l'ordinateur relié au vidéoprojecteur : il se met à jour tout seul et n'affiche un résultat que si la tribune le choisit, vote par vote."
+
+#: web/manage/polls.py:36
+msgid "Result shown on the screen."
+msgstr "Résultat affiché à l'écran."
+
+#: web/manage/polls.py:37
+msgid "Result taken off the screen."
+msgstr "Résultat retiré de l'écran."
+
+#: web/manage/polls.py:42
+msgid "Result shown on the screen"
+msgstr "Résultat affiché à l'écran"
+
+#: web/manage/polls.py:43
+msgid "Result taken off the screen"
+msgstr "Résultat retiré de l'écran"
+
+# Results on the projection screen (FR-75): the night card.
+
+#: templates/screen/macros.html:173
+msgid "Result"
+msgstr "Résultat"
+
+#: templates/screen/macros.html:175
+msgid "closed at %(time)s · %(num)s ballot"
+msgid_plural "closed at %(time)s · %(num)s ballots"
+msgstr[0] "clos à %(time)s · %(num)s bulletin"
+msgstr[1] "clos à %(time)s · %(num)s bulletins"
+
+#: templates/screen/macros.html:137
+msgid "Tie: to be settled under the bylaws"
+msgstr "Égalité : à trancher selon les statuts"
+
+#: templates/screen/macros.html:181
+msgid "Tied: %(names)s."
+msgstr "À égalité : %(names)s."
+
+#: templates/screen/macros.html:141
+msgid "%(option)s, majority grade “%(grade)s”"
+msgstr "%(option)s, mention majoritaire « %(grade)s »"
+
+#: templates/screen/macros.html:187
+msgid "Ranking by majority grade; an option left ungraded counts as “%(grade)s”."
+msgstr "Classement par mention majoritaire ; une option sans mention compte « %(grade)s »."
+
+#: templates/screen/macros.html:234
+msgid "Count of votes not shown: fewer than %(num)s ballots"
+msgstr "Détail des voix non affiché : moins de %(num)s bulletins"
+
+#: templates/manage/_timer.html:39
+msgid "Settings, in Screen"
+msgstr "Réglages, dans Écran"
+
+msgid "Settings, in Meeting"
+msgstr "Réglages, dans Séance"
+
+msgid "Rank the options in order of preference."
+msgstr "Classez les options par ordre de préférence."
+
+msgid "Ranking by one-on-one duels (Condorcet, then Schulze); an option left unranked comes after the ranked ones."
+msgstr "Classement par duels un contre un (Condorcet, puis Schulze) ; une option non classée passe après les options classées."
+
+msgid "%(num)s duel won"
+msgid_plural "%(num)s duels won"
+msgstr[0] "%(num)s duel gagné"
+msgstr[1] "%(num)s duels gagnés"

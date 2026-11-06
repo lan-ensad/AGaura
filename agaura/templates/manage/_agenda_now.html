@@ -1,0 +1,36 @@
+{#- Body of the "Item under discussion" command of Steering (#agenda-now in _cockpit.html, under
+    its head), and the live part "agenda-now" of GET /manage/{id}/panel, answered during the
+    session with the agenda right only: manage.js swaps it in when another console moves the
+    item. With the right, "Previous" and "Next" (data-live-form: manage.js sends them with fetch,
+    so the page neither reloads nor scrolls and the button keeps the focus; without script they
+    post and redirect); without it, the item read only. Needs assembly and can. -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/icons.html" import icon with context %}
+{% set agenda_items = assembly.agenda or [] %}
+{% set current = assembly.agenda_current %}
+{% if agenda_items %}
+{% if can.agenda %}
+<form method="post" action="/manage/{{ assembly.public_id }}/agenda/current#tab-cockpit" class="agenda-step" data-live-form>
+  {{ csrf() }}
+  <input type="hidden" name="seen" value="{{ current or '' }}">
+  <div class="agenda-now-text">
+    <p class="muted small">{% if current %}{{ _("Item %(number)s of %(count)s", number=current, count=agenda_items | length) }}{% else %}{{ _("No item under discussion") }}{% endif %}</p>
+    <p class="agenda-now-item">{% if current %}{{ agenda_items[current - 1].title }}{% else %}{{ _("Next: %(title)s", title=agenda_items[0].title) }}{% endif %}</p>
+  </div>
+  <div class="agenda-step-buttons">
+    <button type="submit" name="item" value="previous" class="button"{% if not current or current <= 1 %} disabled{% endif %}>{{ icon("arrow-left") }} {{ _("Previous") }}</button>
+    <button type="submit" name="item" value="next" class="button primary"{% if current and current >= agenda_items | length %} disabled{% endif %}>{{ _("Next") }} {{ icon("arrow-right") }}</button>
+  </div>
+</form>
+{% else %}
+<div class="agenda-now-text">
+  <p class="muted small">{% if current %}{{ _("Item %(number)s of %(count)s", number=current, count=agenda_items | length) }}{% else %}{{ _("No item under discussion") }}{% endif %}</p>
+  {% if current %}<p class="agenda-now-item">{{ agenda_items[current - 1].title }}</p>{% endif %}
+</div>
+{% endif %}
+<ol class="agenda-track" aria-hidden="true">
+  {% for item in agenda_items %}<li class="{{ 'is-done' if current and loop.index < current }}{{ 'is-current' if loop.index == current }}" title="{{ loop.index }}. {{ item.title }}"></li>{% endfor %}
+</ol>
+{% else %}
+<p class="muted">{{ _("No agenda yet.") }} <a href="#agenda">{{ _("Fill in the agenda") }}</a></p>
+{% endif %}

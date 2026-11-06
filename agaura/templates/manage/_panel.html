@@ -1,0 +1,12 @@
+{#- Live parts of the console, answered by GET /manage/{id}/panel: manage.js swaps each
+    [data-live-part] into the elements of the same name on the page (FR-26, FR-28, FR-33, FR-91):
+    the status bar; the polls open now (polls right: Steering's list and the tiles of Polls); during the session, the commands of
+    Steering that other consoles change: the item under discussion (agenda right) and the next
+    poll with the count of drafts in its head (polls right); the list of "Ce que la salle voit"
+    (owner, or the right "screen"). Fetched on every console event, so it holds nothing else. -#}
+{% from "macros/console.html" import ready_link with context %}
+<div data-live-part="status">{% include "manage/_status.html" %}</div>
+{% if can.polls %}<div data-live-part="polls">{% include "manage/_live_polls.html" %}</div><div data-live-part="poll-tiles">{% include "manage/_live_poll_tiles.html" %}</div>{% endif %}
+{% if in_session and can.agenda %}<div data-live-part="agenda-now">{% include "manage/_agenda_now.html" %}</div>{% endif %}
+{% if in_session and can.polls %}<div data-live-part="ready">{% include "manage/_ready.html" %}</div><span data-live-part="ready-link">{{ ready_link(drafts) }}</span>{% endif %}
+{% if links_screen_view %}<div data-live-part="screen-now">{% include "manage/_screen_recap_list.html" %}</div>{% endif %}

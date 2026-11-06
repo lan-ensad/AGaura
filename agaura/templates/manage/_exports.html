@@ -1,0 +1,100 @@
+{#- Documents (D-H): every file that leaves AGaura, in one place, the owner's only. The minutes
+    (PDF) and the complete data (JSON) of the session, at any time (FR-61, FR-62); the code
+    cards, which are no download here: shown once, when they are generated (FR-23), they stay
+    in Access and attendance, where this list points; then "Par vote", one row per poll pushed
+    in the order of the session, numbered as in the minutes and the file names
+    (exports_polls of exports_context): its ballots (CSV) and complete data (JSON) once voting
+    on it has stopped, no link while it is open (those routes answer 409), and no row for a
+    trial vote (D-I), which no export carries. A finished poll of Polls leads to its row
+    (#exports-<id>). The title of each row is its header cell, the context of its two links
+    (WCAG 2.4.4); each "Télécharger" names its file for a screen reader. Icons are
+    decorative. A demo session (FR-09a) exports nothing: the same rows, with greyed buttons
+    described by the note that says why and where to ask for an account. -#}
+{% from "macros/icons.html" import icon with context %}
+{% from "macros/demo.html" import exports_note with context %}
+{% set base = "/manage/" ~ assembly.public_id %}
+{% set demo = assembly.is_demo %}
+{% set has_codes = assembly.access_mode.value == "codes" or state.batches %}
+<section class="card" id="exports" aria-labelledby="exports-title">
+  <h2 id="exports-title">{{ _("Minutes and data of the session") }}</h2>
+  {% if demo %}{{ exports_note("exports-demo") }}{% endif %}
+  <ul class="doc-list">
+    <li class="doc-item">
+      {{ icon("scroll-text") }}
+      <div>
+        <p class="doc-what">{{ _("Minutes (PDF)") }}</p>
+        <p class="muted small">{{ _("Details, tribune, attendance, agenda, the course of the session with its notes, each poll with its result and its digest, the anchor of the session log.") }}</p>
+      </div>
+      {% if demo %}
+      <button type="button" class="button primary" disabled aria-describedby="exports-demo">{{ icon("lock") }} {{ _("Download") }}<span class="visually-hidden">, {{ _("Minutes (PDF)") }}</span></button>
+      {% else %}
+      <a class="button primary" href="{{ base }}/minutes.pdf" download>{{ _("Download") }}<span class="visually-hidden">, {{ _("Minutes (PDF)") }}</span></a>
+      {% endif %}
+    </li>
+    <li class="doc-item">
+      {{ icon("file-json") }}
+      <div>
+        <p class="doc-what">{{ _("Complete data (JSON)") }}</p>
+        <p class="muted small">{{ _("Definitions, anonymous ballots and results: enough to recount every poll independently.") }}</p>
+      </div>
+      {% if demo %}
+      <button type="button" class="button" disabled aria-describedby="exports-demo">{{ icon("lock") }} {{ _("Download") }}<span class="visually-hidden">, {{ _("Complete data (JSON)") }}</span></button>
+      {% else %}
+      <a class="button" href="{{ base }}/export.json" download>{{ _("Download") }}<span class="visually-hidden">, {{ _("Complete data (JSON)") }}</span></a>
+      {% endif %}
+    </li>
+    {% if has_codes %}
+    <li class="doc-item">
+      {{ icon("ticket") }}
+      <div>
+        <p class="doc-what">{{ _("Code cards (PDF)") }}</p>
+        <p class="muted small">{{ _("Downloaded once, when they are generated, in Access and attendance: AGaura keeps no copy of the codes.") }}</p>
+      </div>
+      <a class="to-home" href="#codes">{{ icon("door-open", size="sm") }}<span>{{ _("In Access") }}</span>{{ icon("chevron-right", size="sm") }}</a>
+    </li>
+    {% endif %}
+  </ul>
+  {% if not demo %}<p class="hint">{{ _("Download them after each session and keep them: they are the record of the votes.") }}</p>{% endif %}
+</section>
+
+<section class="card" id="poll-exports" aria-labelledby="poll-exports-title">
+  <h2 id="poll-exports-title">{{ _("Per poll") }}</h2>
+  {% if demo %}{{ exports_note("poll-exports-demo") }}{% else %}<p class="hint">{{ _("Available once a poll is closed; never while it is open.") }}</p>{% endif %}
+  {% if exports_polls %}
+  <div class="table-wrap">
+    {#- A table on a computer; on a phone each row becomes a block (number and title, then the
+        files). The roles keep the table semantics that some browsers drop once the display
+        changes. -#}
+    <table class="data poll-exports" role="table">
+      <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">{{ _("No.") }}</th><th scope="col" role="columnheader">{{ _("Poll") }}</th><th scope="col" role="columnheader">{{ _("Files") }}</th></tr></thead>
+      <tbody role="rowgroup">
+      {% for row in exports_polls %}
+      {% set poll = row.poll %}
+      {% set kind = "resolution" if poll.method == "single_choice" and "adopt_option" in poll.params else poll.method %}
+      <tr id="exports-{{ poll.id }}" role="row">
+        <td class="nowrap" role="cell">{{ _("No. %(number)s", number=row.number) }}</td>
+        <th scope="row" role="rowheader">{{ icon({"resolution": "file-check", "single_choice": "circle-dot", "approval": "list-checks", "condorcet": "podium"}.get(kind, "chart-bar-stacked"), size="sm") }} {{ poll.title }}{% if poll.status.value == "cancelled" %} <span class="badge danger">{{ poll_status_label(poll.status) }}</span>{% endif %}</th>
+        <td role="cell">
+          {% if demo %}
+          <span class="row">
+            <button type="button" class="button small" disabled aria-describedby="poll-exports-demo">{{ icon("lock", size="sm") }}{{ _("Ballots (CSV)") }}</button>
+            <button type="button" class="button small" disabled aria-describedby="poll-exports-demo">{{ icon("lock", size="sm") }}{{ _("Data (JSON)") }}</button>
+          </span>
+          {% elif row.ready %}
+          <span class="row">
+            <a href="{{ base }}/polls/{{ poll.id }}/ballots.csv" download>{{ icon("file-spreadsheet", size="sm") }}{{ _("Ballots (CSV)") }}</a>
+            <a href="{{ base }}/polls/{{ poll.id }}/export.json" download>{{ icon("file-json", size="sm") }}{{ _("Data (JSON)") }}</a>
+          </span>
+          {% else %}
+          <span class="muted small">{{ _("Vote in progress: files at closing") }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="muted">{{ _("No poll put to the vote yet.") }}</p>
+  {% endif %}
+</section>

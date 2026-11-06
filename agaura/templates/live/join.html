@@ -1,0 +1,46 @@
+{# Join form. Without an assembly, the neutral form of a scanning address (agaura.web.limits):
+   the same page for every session ID, so nothing here may depend on the session.
+   ``password_numeric`` and ``password_digits``: see ``routes._password_field``. #}
+{% extends "layouts/voter.html" %}
+{% from "macros/forms.html" import csrf, field with context %}
+{% from "macros/icons.html" import voter_icon as icon with context %}
+{% set title_heading = true %}
+{% block title %}{% if assembly %}{{ assembly.title }} · {% endif %}AGaura{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_url('css/live.css') }}">{% endblock %}
+{% block session_title %}{% if assembly %}{{ assembly.title }}{% else %}{{ super() }}{% endif %}{% endblock %}
+{% block content %}
+<section class="card join">
+  <h2>{{ _("Join the session") }}</h2>
+  {% if not assembly %}
+  {% set label = _("Session password or individual code") %}
+  {% set hint = _("Shown in the room, or printed on your card. You can also scan the QR code.") %}
+  {% set attrs = {"autocapitalize": "none", "autocorrect": "off", "spellcheck": "false", "maxlength": "60", "enterkeyhint": "go"} %}
+  {% elif assembly.access_mode.value == "codes" %}
+  {% set label = _("Your individual code") %}
+  {% set hint = _("Printed on your card, for example K7M4-QX9P. You can also scan the QR code of the card.") %}
+  {% set attrs = {"autocapitalize": "characters", "autocorrect": "off", "spellcheck": "false", "maxlength": "40", "enterkeyhint": "go"} %}
+  {% else %}
+  {% set label = _("Session password") %}
+  {% if password_digits %}
+  {% set hint = _("Shown in the room: %(num)s digits. You can also scan the QR code shown on the screen.", num=password_digits) %}
+  {% else %}
+  {% set hint = _("Shown in the room. You can also scan the QR code shown on the screen.") %}
+  {% endif %}
+  {% set attrs = {"autocapitalize": "none", "autocorrect": "off", "spellcheck": "false", "maxlength": "60", "enterkeyhint": "go"} %}
+  {# A digit keypad for a password of digits only; pasting and autofill stay possible, and the
+     field still takes spaces (no pattern, type text). #}
+  {% if password_numeric %}{% set attrs = dict(attrs, inputmode="numeric") %}{% endif %}
+  {% endif %}
+  <form method="post" action="/{{ public_id }}/join" class="stack" data-autojoin>
+    {{ csrf() }}
+    {{ field("secret", label, required=true, autocomplete="off", hint=hint, attrs=attrs, error_id="page-error" if error else none) }}
+    <button type="submit" class="button primary wide">{{ _("Join") }}</button>
+  </form>
+  <p class="muted" role="status" data-joining hidden>{{ _("Joining the session…") }}</p>
+  {# FR-40a: the secret in one line, the same for every session and in the neutral form. It
+     says what the code does (no ballot keeps a link to a credential or a person, SPEC §9.2),
+     as the first commitment of macros/ethics.html: change them together. #}
+  <p class="join-promise">{{ icon("shield-check") }} {{ _("Secret ballot: no ballot is linked to a person or to their phone.") }}</p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/live.js') }}" defer></script>{% endblock %}

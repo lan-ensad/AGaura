@@ -1,0 +1,612 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-11-03 06:22+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: templates/manage/_codes.html:11
+msgid "Download the card PDF"
+msgstr "Télécharger le PDF des cartes"
+
+#: templates/manage/_drafts.html:16
+msgid "Order"
+msgstr "Ordre"
+
+#: templates/manage/_drafts.html:19
+#, python-format
+msgid "Move up: %(title)s"
+msgstr "Monter : %(title)s"
+
+#: templates/manage/_drafts.html:23
+#, python-format
+msgid "Move down: %(title)s"
+msgstr "Descendre : %(title)s"
+
+#: templates/manage/_drafts.html:41
+msgid "Edit"
+msgstr "Modifier"
+
+#: templates/manage/_drafts.html:63
+msgid "Session to copy from"
+msgstr "Session à copier"
+
+#: templates/manage/_drafts.html:66
+#, python-format
+msgid "%(num)s poll"
+msgid_plural "%(num)s polls"
+msgstr[0] "%(num)s vote"
+msgstr[1] "%(num)s votes"
+
+#: templates/manage/_drafts.html:69
+msgid ""
+"Every poll of that session is copied here as a draft, except cancelled ones. Nothing is pushed: "
+"edit, reorder or delete the copies as needed."
+msgstr ""
+"Tous les votes de cette session sont copiés ici en brouillon, sauf les votes annulés. Rien n'est "
+"lancé : modifiez, réordonnez ou supprimez les copies selon vos besoins."
+
+#: templates/manage/_drafts.html:71
+msgid "Copy as drafts"
+msgstr "Copier en brouillons"
+
+#: templates/manage/editor.html:32
+msgid "Comparison"
+msgstr "Comparaison"
+
+#: templates/manage/editor.html:33
+msgid "at least"
+msgstr "au moins"
+
+#: templates/manage/editor.html:34
+msgid "more than"
+msgstr "plus de"
+
+#: templates/manage/editor.html:43 templates/manage/editor.html:44 templates/manage/editor.html:121
+#, python-format
+msgid "Option %(number)s"
+msgstr "Option %(number)s"
+
+#: templates/manage/editor.html:45 templates/manage/editor.html:122
+#, python-format
+msgid "Description of option %(number)s"
+msgstr "Description de l'option %(number)s"
+
+#: templates/manage/editor.html:46
+msgid "Description (optional)"
+msgstr "Description (facultatif)"
+
+#: templates/manage/editor.html:48 templates/manage/editor.html:123
+#, python-format
+msgid "Remove option %(number)s"
+msgstr "Retirer l'option %(number)s"
+
+#: templates/manage/editor.html:53 templates/manage/editor.html:62
+msgid "Edit the draft"
+msgstr "Modifier le brouillon"
+
+#: templates/manage/editor.html:63
+msgid "Drafts stay invisible to voters until they are pushed."
+msgstr "Les brouillons restent invisibles pour les votants tant qu'ils ne sont pas lancés."
+
+#: templates/manage/editor.html:67 web/manage/editor.py:54
+msgid "The poll was not saved: correct the fields marked below."
+msgstr "Le vote n'a pas été enregistré : corrigez les champs signalés ci-dessous."
+
+#: templates/manage/editor.html:97
+msgid "Explanatory text"
+msgstr "Texte explicatif"
+
+#: templates/manage/editor.html:97 templates/manage/editor.html:208 templates/manage/editor.html:233
+msgid "(optional)"
+msgstr "(facultatif)"
+
+#: templates/manage/editor.html:117
+msgid "Options"
+msgstr "Options"
+
+#: templates/manage/editor.html:129
+msgid "Add options"
+msgstr "Ajouter des options"
+
+#: templates/manage/editor.html:140
+msgid "Settings"
+msgstr "Réglages"
+
+#: templates/manage/editor.html:145
+msgid "Who wins"
+msgstr "Qui l'emporte"
+
+#: templates/manage/editor.html:147
+msgid "Depends on the number of options"
+msgstr "Selon le nombre d'options"
+
+#: templates/manage/editor.html:147
+msgid "With 2 options, more than half of the votes; with more, the option with the most votes."
+msgstr "Avec 2 options, plus de la moitié des voix ; au-delà, l'option qui obtient le plus de voix."
+
+#: templates/manage/editor.html:148
+msgid "The most votes (relative majority)"
+msgstr "Le plus de voix (majorité relative)"
+
+#: templates/manage/editor.html:148
+msgid "The option with the most votes wins, whatever its share."
+msgstr "L'option qui obtient le plus de voix l'emporte, quel que soit son score."
+
+#: templates/manage/editor.html:149
+msgid "More than half (absolute majority)"
+msgstr "Plus de la moitié (majorité absolue)"
+
+#: templates/manage/editor.html:150
+msgid "At least two thirds"
+msgstr "Au moins les deux tiers"
+
+#: templates/manage/editor.html:151
+msgid "At least three quarters"
+msgstr "Au moins les trois quarts"
+
+#: templates/manage/editor.html:153
+msgid "Another threshold"
+msgstr "Autre seuil"
+
+#: templates/manage/editor.html:156
+msgid "Threshold in percent"
+msgstr "Seuil en pourcentage"
+
+#: templates/manage/editor.html:162
+msgid ""
+"Below the threshold, the result reads \"No option reaches the required threshold\". A tie is "
+"reported, never broken."
+msgstr ""
+"Sous le seuil, le résultat indique « Aucune option n'atteint le seuil requis ». Une égalité est "
+"signalée, jamais départagée."
+
+#: templates/manage/editor.html:166
+msgid "Shares are computed on"
+msgstr "Les pourcentages sont calculés sur"
+
+#: templates/manage/editor.html:168
+msgid "Blank votes are left out: the usual rule."
+msgstr "Les votes blancs ne comptent pas : c'est la règle habituelle."
+
+#: templates/manage/editor.html:169
+msgid "Blank votes count, and weigh like votes against."
+msgstr "Les votes blancs comptent, et pèsent comme des votes contre."
+
+#: templates/manage/editor.html:170
+msgid "Everyone who joined counts: not voting weighs like a vote against."
+msgstr "Toutes les personnes entrées comptent : ne pas voter pèse comme un vote contre."
+
+#: templates/manage/editor.html:194
+msgid "Boxes each voter may tick"
+msgstr "Cases que chaque votant peut cocher"
+
+#: templates/manage/editor.html:196
+msgid "As many as seats to fill"
+msgstr "Autant que de sièges à pourvoir"
+
+#: templates/manage/editor.html:196
+msgid "The usual rule for an election."
+msgstr "La règle habituelle pour une élection."
+
+#: templates/manage/editor.html:197
+msgid "No limit"
+msgstr "Sans limite"
+
+#: templates/manage/editor.html:197
+msgid "Voters tick every option they accept."
+msgstr "Les votants cochent toutes les options qu'ils acceptent."
+
+#: templates/manage/editor.html:199
+msgid "At most"
+msgstr "Au plus"
+
+#: templates/manage/editor.html:201
+msgid "Maximum number of boxes"
+msgstr "Nombre maximum de cases"
+
+#: templates/manage/editor.html:208
+msgid "Minimum score to be elected"
+msgstr "Score minimum pour être élu"
+
+#: templates/manage/editor.html:209
+msgid "Share of valid votes an option needs to win a seat. Leave empty for no minimum."
+msgstr ""
+"Part des suffrages exprimés qu'une option doit obtenir pour remporter un siège. Laissez vide pour"
+" ne fixer aucun minimum."
+
+#: templates/manage/editor.html:221
+msgid "Each voter gives every option one of these grades:"
+msgstr "Chaque votant attribue à chaque option l'une de ces mentions :"
+
+#: templates/manage/editor.html:230
+msgid "Push"
+msgstr "Lancement"
+
+#: templates/manage/editor.html:242
+msgid "Cancel"
+msgstr "Annuler"
+
+#: web/manage/editor.py:55
+msgid "Give this option a label, or empty its description."
+msgstr "Donnez un intitulé à cette option, ou videz sa description."
+
+#: web/manage/editor.py:56
+msgid "Enter a percentage above 0 and up to 100, e.g. 60 or 66.67."
+msgstr "Saisissez un pourcentage supérieur à 0 et d'au plus 100, par exemple 60 ou 66,67."
+
+#: web/manage/editor.py:57
+msgid "Enter a whole number of at least 1."
+msgstr "Saisissez un nombre entier supérieur ou égal à 1."
+
+#: web/manage/editor.py:58
+msgid "The option to adopt does not exist."
+msgstr "L'option à adopter n'existe pas."
+
+#: web/manage/editor.py:60
+msgid ""
+"This poll has already been pushed and can no longer be edited. Copy it as a new draft to change "
+"it."
+msgstr ""
+"Ce vote a déjà été lancé et ne peut plus être modifié. Copiez-le en nouveau brouillon pour le "
+"changer."
+
+#: web/manage/editor.py:63
+msgid "Choose another session to copy from."
+msgstr "Choisissez une autre session à copier."
+
+#: web/manage/editor.py:64
+msgid "That session has no poll to copy."
+msgstr "Cette session n'a aucun vote à copier."
+
+#: web/manage/editor.py:69
+msgid "Draft saved."
+msgstr "Brouillon enregistré."
+
+#: web/manage/editor.py:70
+msgid "Polls copied as drafts, after the existing ones."
+msgstr "Votes copiés en brouillons, à la suite des brouillons existants."
+
+#: web/manage/editor.py:71
+msgid "Order of the drafts changed."
+msgstr "Ordre des brouillons modifié."
+
+
+#: templates/manage/_editor_form.html:39
+msgid "Candidate %(number)s"
+msgstr "Candidat·e %(number)s"
+
+#: templates/manage/_editor_form.html:51
+msgid "Remove"
+msgstr "Retirer"
+
+#: templates/manage/_editor_form.html:91 templates/manage/_editor_form.html:274 templates/manage/_editor_form.html:276
+msgid "Save the draft"
+msgstr "Enregistrer le brouillon"
+
+#: templates/manage/_editor_form.html:103
+msgid "Voting method:"
+msgstr "Mode de scrutin :"
+
+#: templates/manage/_editor_form.html:105
+msgid "Change the method"
+msgstr "Changer de mode"
+
+#: templates/manage/_editor_form.html:111
+msgid "Title of the resolution"
+msgstr "Titre de la résolution"
+
+#: templates/manage/_editor_form.html:111
+msgid "Title of the election"
+msgstr "Titre de l'élection"
+
+#: templates/manage/_editor_form.html:116
+msgid "Text of the resolution"
+msgstr "Texte de la résolution"
+
+#: templates/manage/_editor_form.html:118
+msgid "Shown to voters under the title."
+msgstr "Affiché aux votants sous le titre."
+
+#: templates/manage/_editor_form.html:119
+msgid "Shown to voters under the title: offices, length of the term…"
+msgstr "Affiché aux votants sous le titre : postes, durée du mandat…"
+
+#: templates/manage/_editor_form.html:120
+msgid "Shown to voters under the question: budget, criteria…"
+msgstr "Affiché aux votants sous la question : budget, critères…"
+
+#: templates/manage/_editor_form.html:121
+msgid "Shown to voters under the question: context, conditions…"
+msgstr "Affiché aux votants sous la question : contexte, conditions…"
+
+#: templates/manage/_editor_form.html:131
+msgid "Voters will see:"
+msgstr "Les votants verront :"
+
+#: templates/manage/_editor_form.html:134
+msgid "(blank vote)"
+msgstr "(vote blanc)"
+
+#: templates/manage/_editor_form.html:138
+msgid "Edit the labels"
+msgstr "Modifier les intitulés"
+
+#: templates/manage/_editor_form.html:146
+msgid "Seats and candidates"
+msgstr "Sièges et candidat·es"
+
+#: templates/manage/_editor_form.html:146
+msgid "Options to grade"
+msgstr "Options à évaluer"
+
+#: templates/manage/_editor_form.html:150
+msgid "The names ticked by the most voters are elected, up to this number."
+msgstr "Les noms les plus cochés sont élus, dans la limite de ce nombre."
+
+#: templates/manage/_editor_form.html:161
+msgid "From 3 options, majority judgment avoids splitting the votes."
+msgstr "À partir de 3 options, le jugement majoritaire évite de disperser les voix."
+
+#: templates/manage/_editor_form.html:162
+msgid "Switch to majority judgment"
+msgstr "Passer au jugement majoritaire"
+
+#: templates/manage/_editor_form.html:162
+msgid "the options are kept"
+msgstr "les options sont gardées"
+
+#: templates/manage/_editor_form.html:175
+msgid "Rule of the result"
+msgstr "Règle du résultat"
+
+#: templates/manage/_editor_form.html:177
+msgid "Rule chosen"
+msgstr "Règle retenue"
+
+#: templates/manage/_editor_form.html:180
+msgid "Valid votes: the ballots without the blank votes. A tie is reported, never broken."
+msgstr "Suffrages exprimés : les bulletins sans les votes blancs. Une égalité est signalée, jamais départagée."
+
+#: templates/manage/_editor_form.html:182
+msgid "A tie for the last seat is reported, never broken: the tribune applies the bylaws."
+msgstr "Une égalité pour le dernier siège est signalée, jamais départagée : la tribune applique les statuts."
+
+#: templates/manage/_editor_form.html:183
+msgid "An option left without a grade counts as “Reject”. A tie is reported, never broken. Nothing to set."
+msgstr "Une option sans mention compte « À rejeter ». Une égalité est signalée, jamais départagée. Rien à régler."
+
+#: templates/manage/_editor_form.html:189 templates/manage/_editor_form.html:229
+msgid "Edit the rule"
+msgstr "Modifier la règle"
+
+#: templates/manage/_editor_form.html:192
+msgid "Threshold of adoption"
+msgstr "Seuil d'adoption"
+
+#: templates/manage/_editor_form.html:197
+msgid "The usual rule of a resolution."
+msgstr "La règle habituelle d'une résolution."
+
+#: templates/manage/_editor_form.html:202
+msgid "In percent, e.g. 60."
+msgstr "En pourcentage, par exemple 60."
+
+#: templates/manage/_editor_form.html:263
+msgid "Automatic closing"
+msgstr "Clôture automatique"
+
+#: templates/manage/_editor_form.html:264
+msgid "In minutes, for “Push to voters”. Without a duration, the poll is closed from the console."
+msgstr "En minutes, pour « Lancer le vote ». Sans durée, le vote se clôt depuis la console."
+
+#: templates/manage/_editor_methods.html:13
+msgid "Example:"
+msgstr "Exemple :"
+
+#: templates/manage/_editor_methods.html:14
+msgid "When:"
+msgstr "Quand :"
+
+#: templates/manage/_editor_methods.html:19
+msgid "Choose the voting method"
+msgstr "Choisir le mode de scrutin"
+
+#: templates/manage/_editor_methods.html:20
+msgid "The method sets the form of the ballot and the rule of the result. The next step shows its settings only."
+msgstr "Le mode décide de la forme du bulletin et de la règle du résultat. La suite ne montre que ses réglages."
+
+#: templates/manage/_editor_methods.html:69
+msgid "Take up the polls of a past session"
+msgstr "Reprendre les votes d'une session passée"
+
+#: templates/manage/editor.html:21
+msgid "Back to Polls"
+msgstr "Retour à Votes"
+
+#: templates/manage/editor.html:26
+msgid "Steps of the poll"
+msgstr "Étapes de création du vote"
+
+#: templates/manage/editor.html:27
+msgid "Voting method"
+msgstr "Mode de scrutin"
+
+#: templates/manage/editor.html:28
+msgid "Question and settings"
+msgstr "Question et réglages"
+
+#: web/manage/editor.py:84
+msgid "Choose a voting method."
+msgstr "Choisissez un mode de scrutin."
+
+#: web/manage/editor.py:125
+msgid "Approve the annual report"
+msgstr "Approuver le rapport moral"
+
+#: web/manage/editor.py:145
+msgid "Each voter ticks the names they accept, up to the number of seats."
+msgstr "Chaque votant coche les noms retenus, jusqu'au nombre de sièges."
+
+#: web/manage/editor.py:146
+msgid "Elect 2 people to the board"
+msgstr "Élire 2 personnes au conseil"
+
+#: web/manage/editor.py:147
+msgid "Elections to one seat or several."
+msgstr "Élections à un ou plusieurs sièges."
+
+#: web/manage/editor.py:154
+msgid "Grades, from “Very good” to “Reject”"
+msgstr "Mentions, de « Très bien » à « À rejeter »"
+
+#: web/manage/editor.py:155
+msgid "Each voter grades every option."
+msgstr "Chaque votant donne une mention à chaque option."
+
+#: web/manage/editor.py:156
+msgid "Rank projects"
+msgstr "Classer des projets"
+
+#: web/manage/editor.py:157
+msgid "To rank, or to choose among three options or more without splitting the votes."
+msgstr "Classer, ou choisir parmi trois options ou plus sans disperser les voix."
+
+#: web/manage/editor.py:166
+msgid "Voting methods"
+msgstr "Modes de scrutin"
+
+#: web/manage/editor.py:520
+msgid "Adopted if “%(option)s” gets more than half %(base)s."
+msgstr "Adoptée si « %(option)s » obtient plus de la moitié %(base)s."
+
+#: web/manage/editor.py:521
+msgid "Adopted if “%(option)s” gets at least two thirds %(base)s."
+msgstr "Adoptée si « %(option)s » obtient au moins les deux tiers %(base)s."
+
+#: web/manage/editor.py:523
+msgid "Adopted if “%(option)s” gets at least three quarters %(base)s."
+msgstr "Adoptée si « %(option)s » obtient au moins les trois quarts %(base)s."
+
+#: web/manage/editor.py:525
+msgid "Adopted if “%(option)s” gets more than %(share)s %(base)s."
+msgstr "Adoptée si « %(option)s » obtient plus de %(share)s %(base)s."
+
+#: web/manage/editor.py:526
+msgid "Adopted if “%(option)s” gets at least %(share)s %(base)s."
+msgstr "Adoptée si « %(option)s » obtient au moins %(share)s %(base)s."
+
+#: web/manage/editor.py:527
+msgid "Adopted if “%(option)s” gets the most votes, alone at the top."
+msgstr "Adoptée si « %(option)s » obtient le plus de voix, seule en tête."
+
+#: web/manage/editor.py:528
+msgid "The option with the most votes wins, if it is alone at the top."
+msgstr "L'option qui obtient le plus de voix l'emporte, si elle est seule en tête."
+
+#: web/manage/editor.py:529
+msgid "The option that gets more than half %(base)s wins."
+msgstr "L'option qui obtient plus de la moitié %(base)s l'emporte."
+
+#: web/manage/editor.py:530
+msgid "The option that gets at least two thirds %(base)s wins."
+msgstr "L'option qui obtient au moins les deux tiers %(base)s l'emporte."
+
+#: web/manage/editor.py:531
+msgid "The option that gets at least three quarters %(base)s wins."
+msgstr "L'option qui obtient au moins les trois quarts %(base)s l'emporte."
+
+#: web/manage/editor.py:532
+msgid "The option that gets more than %(share)s %(base)s wins."
+msgstr "L'option qui obtient plus de %(share)s %(base)s l'emporte."
+
+#: web/manage/editor.py:533
+msgid "The option that gets at least %(share)s %(base)s wins."
+msgstr "L'option qui obtient au moins %(share)s %(base)s l'emporte."
+
+#: web/manage/editor.py:536 web/manage/editor.py:541
+msgid "The most ticked candidate is elected."
+msgid_plural "The %(num)s most ticked candidates are elected."
+msgstr[0] "Le ou la candidat·e le plus coché·e est élu·e."
+msgstr[1] "Les %(num)s candidat·es les plus coché·es sont élu·es."
+
+#: web/manage/editor.py:546 web/manage/editor.py:549
+msgid "Each voter ticks one name at most."
+msgid_plural "Each voter ticks %(num)s names at most."
+msgstr[0] "Chaque votant coche un nom au plus."
+msgstr[1] "Chaque votant coche au plus %(num)s noms."
+
+#: web/manage/editor.py:551
+msgid "Each voter ticks as many names as they wish."
+msgstr "Chaque votant coche autant de noms qu'il le souhaite."
+
+#: web/manage/editor.py:554
+msgid "The option with the best majority grade wins."
+msgstr "L'option dont la mention majoritaire est la meilleure l'emporte."
+
+msgid "Options to rank"
+msgstr "Options à classer"
+
+msgid "Each voter gives every option a rank, from “%(first)s” to the last; options may share a rank."
+msgstr "Chaque votant donne un rang à chaque option, du « %(first)s » au dernier ; des options peuvent partager un rang."
+
+msgid "An option left unranked comes after the ranked ones. A tie is reported, never broken. Nothing to set."
+msgstr "Une option non classée passe après les options classées. Une égalité est signalée, jamais tranchée. Rien à régler."
+
+msgid "Ranking, from the 1st choice to the last"
+msgstr "Classement, du 1er choix au dernier"
+
+msgid "Each voter ranks the options in order of preference."
+msgstr "Chaque votant classe les options par ordre de préférence."
+
+msgid "Choose the name of the association"
+msgstr "Choisir le nom de l'association"
+
+msgid "To choose among three options or more: the option preferred to each of the others, one on one, wins."
+msgstr "Choisir parmi trois options ou plus : l'option préférée à chacune des autres, en duel, l'emporte."
+
+msgid "The option preferred to each of the others, one on one, wins; a cycle is settled by the strongest chains of duels won (Schulze)."
+msgstr "L'option préférée à chacune des autres, en duel, l'emporte ; un cycle se règle par les chaînes de duels gagnés les plus fortes (Schulze)."
+
+msgid "Ballots cast: every ballot, blank votes included. A tie is reported, never broken."
+msgstr "Bulletins déposés : tous les bulletins, votes blancs compris. Une égalité est signalée, jamais départagée."
+
+msgid "Attendees: everyone who joined the session, whether they vote or not. A tie is reported, never broken."
+msgstr "Présents : toutes les personnes qui ont rejoint la session, qu'elles votent ou non. Une égalité est signalée, jamais départagée."
+
+#: templates/manage/_editor_form.html:105
+msgid "Form of the poll"
+msgstr "Forme du vote"
+
+#: web/manage/editor.py:133
+msgid "One option only, resolutions included (For, Against, Abstention)"
+msgstr "Une seule option, résolutions comprises (Pour, Contre, Abstention)"
+
+#: web/manage/editor.py:134
+msgid "Each voter picks one option: for or against a resolution, or one among several."
+msgstr "Chaque votant choisit une seule option : pour ou contre une résolution, ou une parmi plusieurs."
+
+#: web/manage/editor.py:137
+msgid "Reports, accounts, budget, bylaws; or two or three options (beyond, prefer majority judgment)."
+msgstr "Rapport moral, comptes, budget, statuts ; ou deux ou trois options (au-delà, préférer le jugement majoritaire)."
+
+#: web/manage/editor.py:192
+msgid "For, Against and Abstention: the assembly adopts or rejects a text."
+msgstr "Pour, Contre et Abstention : l'assemblée adopte ou rejette un texte."
+
+#: web/manage/editor.py:194
+msgid "Free options"
+msgstr "Options libres"
+
+#: web/manage/editor.py:194
+msgid "Each voter picks one of the options below."
+msgstr "Chaque votant choisit une des options saisies ci-dessous."

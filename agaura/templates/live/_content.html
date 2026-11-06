@@ -1,0 +1,19 @@
+{# Sections of the live page (FR-41): with two or more open polls, a summary of what remains to
+   vote; the open polls, those already voted on one line each; else the waiting screen; then the
+   results published to voters, under their own heading. Each group most recent first. #}
+{% from "live/macros.html" import open_summary, poll_section, result_section, results_title, waiting with context %}
+{% if view.open_polls | length >= 2 %}
+{{ open_summary(view) }}
+{% endif %}
+{% for poll in view.open_polls %}
+{{ poll_section(poll, "recorded" if poll.id in view.voted else "ballot") }}
+{% endfor %}
+{% if not view.open_polls %}
+{{ waiting() }}
+{% endif %}
+{% if view.results %}
+{{ results_title() }}
+{% endif %}
+{% for poll in view.results %}
+{{ result_section(poll) }}
+{% endfor %}

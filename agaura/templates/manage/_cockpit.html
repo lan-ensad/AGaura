@@ -1,0 +1,108 @@
+{#- Steering during the session: commands, not cards (D-A). Each command acts at once, without any
+    setting, and leads to its card, which stays in its rubric in every state (command_head of
+    macros/console.html: the icon and name of that rubric). Main column: "Vote clos" right after
+    a poll closes, while its result is neither published nor shown (state.just_closed, D-K), the
+    polls open now (#live-panel), the agenda item under discussion (_agenda_now.html), the next
+    poll (the first draft, _ready.html) and the quick note; side column: chronometer, headcount,
+    joining. The bodies of the polls open now, the item under discussion and the next poll, and
+    the count of drafts in the head of the next poll, are live parts (data-live-part, refreshed
+    by manage.js from GET /manage/{id}/panel); the heads, with "Confier", stay out of them.
+    One column on a phone, in the same order. Forms post to an address ending in #tab-cockpit
+    or in the id of their command, so the page comes back here. A delegate link (FR-92) gets
+    the commands of its rights only, and the item under discussion without its controls; one
+    column when the other would be empty. One primary button per command, the next step of the
+    session (R12): "Publish the result to voters" of the poll just closed, "Close the vote"
+    when one poll is open, "Next", "Push to voters" of the next poll; the tools (notes,
+    chronometer, headcount) keep secondary buttons, unless a delegate has nothing else
+    (can.lone_tool). The command of a right offers the owner to hand it over in place, and names
+    its holder (hand_over of macros/delegates.html, D-G). On a
+    phone, closing the session sits at the very foot (.session-end, owner only: the same form
+    and confirmation as the status bar, which keeps it on a computer; manage.css shows one or
+    the other). -#}
+{% from "macros/forms.html" import csrf with context %}
+{% from "macros/delegates.html" import hand_over with context %}
+{% from "macros/console.html" import command_head, ready_link with context %}
+{% from "macros/icons.html" import icon with context %}
+{% from "macros/results.html" import verdict %}
+{% set agenda_items = assembly.agenda or [] %}
+{% set just_closed = state.just_closed if can.polls else none %}
+{% set has_main = can.agenda or can.notes or can.polls or agenda_items %}
+{% set has_side = can.timer or can.headcount or can.owner %}
+<div class="cockpit{{ ' is-single' if not (has_main and has_side) }}">
+  {% if has_main %}
+  <div class="cockpit-main">
+    {% if just_closed %}
+    {% set poll = just_closed.poll %}
+    {% set base = "/manage/" ~ assembly.public_id ~ "/polls/" ~ poll.id %}
+    <section class="card cmd cmd-closed" id="just-closed" aria-labelledby="just-closed-title">
+      {{ command_head("lock", _("Poll closed"), "polls", "poll-" ~ poll.id, _("Details, in Polls"), "just-closed-title") }}
+      <p class="cmd-state"><strong>{{ poll.title }}</strong> · {{ _("closed at %(time)s", time=poll.closed_at | time_of_day) }} · {{ ngettext("%(num)s ballot", "%(num)s ballots", just_closed.turnout) }}{% if poll.trial %} <span class="badge neutral">{{ _("Trial") }}</span>{% endif %}</p>
+      {{ verdict(poll, poll.result.data.outcome, option_labels(poll)) }}
+      <div class="cmd-actions">
+        <form method="post" action="{{ base }}/publish#tab-cockpit" class="inline">
+          {{ csrf() }}<input type="hidden" name="voters" value="1">
+          <button type="submit" class="button primary">{{ icon("smartphone") }} {{ _("Publish the result to voters") }}</button>
+        </form>
+        <form method="post" action="{{ base }}/screen#tab-cockpit" class="inline">
+          {{ csrf() }}<input type="hidden" name="shown" value="1">
+          <button type="submit" class="button">{{ icon("presentation") }} {{ _("Display on the screen") }}</button>
+        </form>
+      </div>
+      <p class="hint">{{ _("Two separate actions. On the screen: the verdict and, from %(num)s ballots, the count of each option.", num=polls_screen_detail_min) }}</p>
+    </section>
+    {% endif %}
+
+    {% if can.polls %}
+    <section class="card cmd" id="live" aria-labelledby="live-title">
+      {{ command_head("vote", _("Polls open now"), "polls", "tab-polls", _("In Polls"), "live-title") }}
+      <p class="alert alert-notice" id="refresh-hint" data-refresh-hint hidden>{{ _("A poll has closed.") }} <a href="/manage/{{ assembly.public_id }}#results">{{ _("Refresh the page") }}</a></p>
+      <div id="live-panel" data-live-part="polls" aria-live="polite">
+        {% include "manage/_live_polls.html" %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can.agenda or agenda_items %}
+    <section class="card cmd agenda-now" id="agenda-now" aria-labelledby="agenda-now-title">
+      {% if can.agenda %}
+      {{ command_head("list-ordered", _("Item under discussion"), "agenda", "agenda", _("The whole agenda"), "agenda-now-title", control=hand_over("agenda", "agenda-now")) }}
+      {% else %}
+      <div class="cmd-head"><h2 id="agenda-now-title">{{ icon("list-ordered") }}<span>{{ _("Item under discussion") }}</span></h2></div>
+      {% endif %}
+      <div class="cmd-part" data-live-part="agenda-now">
+        {% include "manage/_agenda_now.html" %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can.polls %}
+    {% set drafts = state.drafts %}
+    <section class="card cmd" id="ready" aria-labelledby="ready-title">
+      {{ command_head("pencil-line", _("Next poll"), "polls", "drafts", ready_link(drafts), "ready-title", note=_("invisible to voters"), control=hand_over("polls", "ready"), link_part="ready-link") }}
+      <div class="cmd-part" data-live-part="ready">
+        {% include "manage/_ready.html" %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can.notes %}{% with compact = true %}{% include "manage/_notes.html" %}{% endwith %}{% endif %}
+  </div>
+  {% endif %}
+
+  {% if has_side %}
+  <div class="cockpit-side">
+    {% if can.timer %}{% with compact = true %}{% include "manage/_timer.html" %}{% endwith %}{% endif %}
+    {% if can.headcount %}{% with compact = true %}{% include "manage/_presence.html" %}{% endwith %}{% endif %}
+    {% if can.owner %}{% with compact = true %}{% include "manage/_join.html" %}{% endwith %}{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% if can.owner %}
+<div class="session-end">
+  <p>{{ _("All polls closed? The session can end: every voter access will end.") }}</p>
+  <form method="post" action="/manage/{{ assembly.public_id }}/close#tab-cockpit" class="inline" data-confirm="{{ _('Close the session? Every voter access will end.') }}">
+    {{ csrf() }}
+    <button type="submit" class="button">{{ _("Close the session") }}</button>
+  </form>
+</div>
+{% endif %}
