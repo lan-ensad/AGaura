@@ -9,6 +9,9 @@ Canonical form, also used by the JSON export so anyone can recount::
     }
 
 serialized as UTF-8 JSON with sorted keys and no insignificant whitespace.
+
+An aura battle (SPEC §6.8) has no ballot: its result ranks the taps counted in memory
+(``agaura/aura.py``), and its digest covers the poll and those totals, ``{"poll", "taps"}``.
 """
 
 from __future__ import annotations
@@ -25,6 +28,7 @@ from sqlalchemy.orm import Session
 from agaura import voting
 from agaura.models import Ballot, Participation, Poll, Result, utcnow
 from agaura.services import access
+from agaura.voting import aura
 
 
 def spec_of(poll: Poll) -> voting.PollSpec:
@@ -84,6 +88,37 @@ def compute_result(db: Session, poll: Poll, *, now: datetime | None = None) -> R
         poll_id=poll.id,
         data={"attendees": present, **voting.to_jsonable(outcome)},
         ballots_sha256=ballots_sha256(poll, ballots),
+        computed_at=now or utcnow(),
+    )
+    poll.result = result
+    db.flush()
+    return result
+
+
+def compute_aura_result(
+    db: Session, poll: Poll, taps: aura.Taps, *, now: datetime | None = None
+) -> Result:
+    """Rank the taps of a battle and store the result, with no ballot to count."""
+    present = access.attendees(db, poll.assembly)
+    options = tuple(option.position for option in poll.options)
+    outcome = aura.rank(options, taps)
+    document = {
+        "poll": canonical_poll(poll),
+        "taps": {
+            "totals": {str(option): count for option, count in sorted(taps.totals.items())},
+            "phones": taps.phones,
+            "interrupted": taps.interrupted,
+        },
+    }
+    result = Result(
+        poll_id=poll.id,
+        data={
+            "attendees": present,
+            "method": poll.method,
+            "counts": voting.to_jsonable(voting.Counts(cast=0, blank=0, valid=0)),
+            "outcome": voting.to_jsonable(outcome),
+        },
+        ballots_sha256=hashlib.sha256(canonical_json(document)).hexdigest(),
         computed_at=now or utcnow(),
     )
     poll.result = result

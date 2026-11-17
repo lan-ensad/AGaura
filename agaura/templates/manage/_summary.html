@@ -4,12 +4,12 @@
     every download sits (D-H); the corrections still possible, in Meeting and in Session notes
     (the tribune and the notes stay editable after closing, each change logged, and the minutes
     follow). A trial vote
-    (D-I) counts in no figure, as in the minutes. Owner only: a delegate link ends with the
-    session. -#}
+    (D-I) and an aura battle (SPEC §6.8) count in no figure, as in the minutes. Owner only: a
+    delegate link ends with the session. -#}
 {% from "macros/console.html" import command_head with context %}
 {% from "macros/icons.html" import icon with context %}
 {% from "macros/demo.html" import exports_note with context %}
-{% set record = state.finished | rejectattr("poll.trial") | list %}
+{% set record = state.finished | rejectattr("poll.trial") | rejectattr("poll.is_aura") | list %}
 {% set held_polls = record | rejectattr("poll.status.value", "equalto", "cancelled") | list %}
 {% set held = held_polls | length %}
 {% set cancelled = (record | length) - held %}

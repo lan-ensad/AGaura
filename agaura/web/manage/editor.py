@@ -28,6 +28,10 @@ faulty field; the fold that holds a faulty field opens.
 
 The blank vote has a fixed label: "Abstention" for a resolution, none ("Vote blanc") otherwise.
 
+An aura battle (the card of the "Animation" group, SPEC §6.8) is no vote: 2 to 6 options, the
+duration of its tap phase (``duration``), and nothing else: no rule to set, no blank vote, no
+automatic closing to type, since it closes by itself once its phases are over.
+
 Form fields hold raw text; ``poll_input`` turns them into a ``PollInput`` and the service checks
 it again (``polls.poll_problems``), so the browser is never trusted.
 """
@@ -56,7 +60,10 @@ from agaura.services.errors import (
     ServiceError,
 )
 from agaura.services.polls import OptionInput, PollInput
+from agaura.voting.aura import CHOOSE_SECONDS, DEFAULT_DURATION, DURATIONS
+from agaura.voting.aura import MAX_OPTIONS as MAX_AURA_OPTIONS
 from agaura.voting.base import MAX_OPTIONS
+from agaura.web import aura
 from agaura.web.deps import CsrfProtected, DatabaseDep, RowId
 from agaura.web.labels import base_label
 from agaura.web.manage.common import (
@@ -89,6 +96,8 @@ ERRORS.update(
         "editor_copy_same_session": N_("Choose another session to copy from."),
         "editor_copy_empty": N_("That session has no poll to copy."),
         "editor_unknown_kind": N_("Choose a voting method."),
+        "editor_invalid_duration": N_("Choose a duration among those offered."),
+        "editor_aura_option_count": N_("An aura battle takes 2 to 6 options."),
     }
 )
 NOTICES.update(
@@ -119,6 +128,7 @@ class Kind:
     example: str = ""
     when: str = ""
     card: str = ""  # the card whose step 2 offers this mode, when it has none of its own
+    group: str = "vote"  # the group of step 1 its card belongs to (``GROUPS``)
 
 
 KINDS: dict[str, Kind] = {
@@ -171,14 +181,36 @@ KINDS: dict[str, Kind] = {
                 "others, one on one, wins."
             ),
         ),
+        Kind(
+            "aura",
+            "aura",
+            "zap",
+            N_("Aura battle"),
+            N_("A game of the room, no ballot"),
+            N_(
+                "Each voter picks an option within 10 seconds, then taps a button as fast as "
+                "possible: the option with the most taps wins."
+            ),
+            N_("Choose the theme of the party"),
+            N_("To liven up the room: it decides nothing, and the minutes only mention it."),
+            group="animation",
+        ),
     )
 }
 
-# Step 1 lists groups of cards: (key, name of the group, its modes). A second group, set apart
-# and styled apart, may join under the voting modes later (an "Animation" group with no voting
-# value: nothing in the ballot box, the minutes or the results); there is one group for now.
-GROUPS: tuple[tuple[str, str, tuple[Kind, ...]], ...] = (
-    ("vote", N_("Voting methods"), tuple(kind for kind in KINDS.values() if not kind.card)),
+# Step 1 lists groups of cards: (key, name of the group, its modes). The voting methods first;
+# then, set apart and styled apart, the animations, with no voting value: no ballot, no number,
+# no export, only a mention in the minutes (SPEC §6.8).
+GROUPS: tuple[tuple[str, str, tuple[Kind, ...]], ...] = tuple(
+    (
+        group,
+        label,
+        tuple(kind for kind in KINDS.values() if not kind.card and kind.group == group),
+    )
+    for group, label in (
+        ("vote", N_("Voting methods")),
+        ("animation", N_("Animation (no voting value)")),
+    )
 )
 
 # The forms a card offers at the top of its step 2, as (mode, name, what it gives voters); the
@@ -255,6 +287,7 @@ INLINE_FIELDS = frozenset(
         "max_choices",
         "min_share",
         "minutes",
+        "duration",
     }
 )
 # Fields folded under "Modifier la règle": an error there opens the fold.
@@ -266,6 +299,7 @@ PARAM_MESSAGES = {
     "threshold": "editor_invalid_percent",
     "min_share": "editor_invalid_percent",
     "adopt_option": "editor_invalid_adopt",
+    "duration": "editor_invalid_duration",
 }
 
 
@@ -296,6 +330,8 @@ class EditorFields(BaseModel):
     min_share_strict: str = ""
     # Majority Judgment: a non-default scale is kept as is, never offered.
     grade_count: str = ""
+    # Aura battle: seconds of the tap phase, among ``DURATIONS``.
+    duration: str = str(DEFAULT_DURATION)
     # Launch at once (in session): optional auto-close, in minutes.
     minutes: str = ""
     # Buttons
@@ -385,11 +421,20 @@ def switch_kind(fields: EditorFields, kind: str) -> EditorFields:
 
 
 def display_rows(
-    rows: list[tuple[str, str]], minimum: int = MIN_ROWS, extra: int = EXTRA_ROWS
+    rows: list[tuple[str, str]],
+    minimum: int = MIN_ROWS,
+    extra: int = EXTRA_ROWS,
+    maximum: int = MAX_OPTIONS,
 ) -> list[tuple[str, str]]:
-    """Filled rows first (so that ``option:<n>`` errors match), then empty rows to fill in."""
-    total = min(max(len(rows) + extra, minimum), MAX_OPTIONS)
+    """Filled rows first (so that ``option:<n>`` errors match), then empty rows to fill in, up
+    to ``maximum`` rows; filled rows beyond it stay, for the error to name them."""
+    total = min(max(len(rows) + extra, minimum), maximum)
     return rows + [("", "")] * max(total - len(rows), 0)
+
+
+def max_options(kind: Kind) -> int:
+    """Options a mode takes at most: an aura battle has one gauge each on the screen."""
+    return MAX_AURA_OPTIONS if kind.method == "aura" else MAX_OPTIONS
 
 
 # --- Percentages ------------------------------------------------------------------------------
@@ -499,7 +544,12 @@ def poll_input(fields: EditorFields) -> tuple[PollInput, dict[str, str]]:
         params = _approval_params(fields, errors)
     elif fields.method == "majority_judgment" and fields.grade_count:
         params = {"grade_count": whole_number(fields.grade_count)}
-    if fields.launch and fields.minutes.strip() and whole_number(fields.minutes) is None:
+    elif fields.method == "aura":
+        # A value that is no whole number is sent as typed, for the engine to refuse it.
+        duration = whole_number(fields.duration)
+        params = {"duration": fields.duration if duration is None else duration}
+    timed = fields.method != "aura"  # a battle closes by itself: no timer to read
+    if timed and fields.launch and fields.minutes.strip() and whole_number(fields.minutes) is None:
         errors["minutes"] = error_message("invalid_number")
     data = PollInput(
         title=fields.title,
@@ -511,8 +561,19 @@ def poll_input(fields: EditorFields) -> tuple[PollInput, dict[str, str]]:
         blank_label=_("Abstention") if fields.kind == "resolution" else None,
     )
     for problem in polls.poll_problems(data):
-        errors.setdefault(problem.detail or "", problem_message(problem))
+        if fields.method == "aura" and problem.code == "option_count":
+            errors.setdefault("options", error_message("editor_aura_option_count"))
+        else:
+            errors.setdefault(problem.detail or "", problem_message(problem))
     return data, errors
+
+
+def launch_minutes(fields: EditorFields) -> int | None:
+    """The automatic closing of a poll launched from the form; none for an aura battle, which
+    closes by itself once its phases are over."""
+    if fields.method == "aura":
+        return None
+    return optional_int(fields.minutes, minimum=1)
 
 
 def problem_message(problem: ServiceError) -> str:
@@ -567,6 +628,8 @@ def fields_from_poll(poll: Poll) -> EditorFields:
             fields.max_choices, fields.max_choices_number = "number", str(max_choices)
         if params.get("min_share"):
             fields.min_share_percent, fields.min_share_strict = quota_fields(params["min_share"])
+    elif poll.method == "aura":
+        fields.duration = str(params.get("duration", DEFAULT_DURATION))
     elif "grade_count" in params:
         fields.grade_count = str(params["grade_count"])
     return fields
@@ -621,6 +684,7 @@ def rule_texts() -> dict[str, str]:
             "The option preferred to each of the others, one on one, wins; a cycle is settled "
             "by the strongest chains of duels won (Schulze)."
         ),
+        "aura": _("The option with the most taps wins; a tie is reported, never broken."),
         **{f"base-{base}": base_label(base) for base in BASES},
     }
     return {key: text % holders for key, text in texts.items()}
@@ -648,6 +712,8 @@ def rule_sentence(fields: EditorFields) -> str:
         return texts["judgment"]
     if fields.kind == "condorcet":
         return texts["condorcet"]
+    if fields.kind == "aura":
+        return texts["aura"]
     if fields.kind == "approval":
         seats = whole_number(fields.seats)
         key = "seats-many" if (seats or 0) > 1 else "seats-one"
@@ -741,7 +807,7 @@ def render_editor(
     if kind.name == "resolution":  # For and Against: no empty row to fill in
         rows = display_rows(fields.rows(), max(len(fields.rows()), 2), extra=0)
     else:
-        rows = display_rows(fields.rows(), minimum_rows)
+        rows = display_rows(fields.rows(), minimum_rows, maximum=max_options(kind))
     thresholds = THRESHOLD_CHOICES.get(kind.name, ())
     if thresholds and fields.threshold not in thresholds and fields.threshold != "auto":
         thresholds = (*thresholds, fields.threshold)  # kept as stored, or as sent
@@ -764,7 +830,9 @@ def render_editor(
             "rule_texts": rule_texts(),
             "rule_open": any(field in RULE_FIELDS for field in errors),
             "labels_open": any(field.startswith("option") for field in errors),
-            "max_options": MAX_OPTIONS,
+            "max_options": max_options(kind),
+            "durations": DURATIONS,
+            "choose_seconds": CHOOSE_SECONDS,
             "can_launch": assembly.status is AssemblyStatus.IN_SESSION,
         },
         status_code=status_code,
@@ -794,6 +862,7 @@ def _editable(poll: Poll) -> str | None:
 def _saved(request: Request, public_id: str, *, notice: str, launched: bool) -> Response:
     hub = request.app.state.hub
     if launched:
+        aura.sync_battles(request.app.state.database, request.app.state.arena, public_id)
         hub.publish(live_channel(public_id), "update", "polls")
     hub.publish(manage_channel(public_id), "turnout", "console")
     # Launched: back to Polls, whose "Votes en cours" shows it, as after pushing a draft there.
@@ -890,8 +959,7 @@ def create_poll(
             with console_write(request) as db:
                 poll = polls.create_poll(db, user, public_id, data)
                 if fields.launch:
-                    minutes = optional_int(fields.minutes, minimum=1)
-                    polls.open_poll(db, user, poll.id, minutes=minutes)
+                    polls.open_poll(db, user, poll.id, minutes=launch_minutes(fields))
         except NotFoundError:
             raise
         except ServiceError as error:
@@ -944,8 +1012,7 @@ def update_poll(
                 owned_poll(db, user, public_id, poll_id)
                 polls.update_poll(db, user, poll_id, data)
                 if fields.launch:
-                    minutes = optional_int(fields.minutes, minimum=1)
-                    polls.open_poll(db, user, poll_id, minutes=minutes)
+                    polls.open_poll(db, user, poll_id, minutes=launch_minutes(fields))
         except NotFoundError:
             raise
         except InvalidStateError as error:  # pushed, or session closed or not open

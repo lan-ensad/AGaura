@@ -10,10 +10,10 @@
 {% if drafts %}
 {% set poll = drafts[0] %}
 <div class="ready-item">
-  <div class="ready-text"><strong>{{ poll.title }}</strong><span class="muted small">{{ poll_method_label(poll) }} · {{ ngettext("%(num)s option", "%(num)s options", poll.options | length) }}{% if poll.trial %} <span class="badge neutral">{{ _("Trial") }}</span>{% endif %}</span></div>
+  <div class="ready-text"><strong>{{ poll.title }}</strong><span class="muted small">{{ poll_method_label(poll) }} · {{ ngettext("%(num)s option", "%(num)s options", poll.options | length) }}{% if poll.trial %} <span class="badge neutral">{{ _("Trial") }}</span>{% endif %}{% if poll.is_aura %} <span class="badge neutral">{{ _("Animation") }}</span>{% endif %}</span></div>
   <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/open#tab-cockpit">
     {{ csrf() }}
-    <button type="submit" class="button primary small">{{ _("Push to voters") }}</button>
+    <button type="submit" class="button primary small">{% if poll.is_aura %}{{ _("Start the battle") }}{% else %}{{ _("Push to voters") }}{% endif %}</button>
   </form>
 </div>
 {% else %}

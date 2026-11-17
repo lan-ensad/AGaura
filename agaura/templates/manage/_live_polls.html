@@ -3,7 +3,8 @@
     it shows twice on the page. "Close the vote" is the primary button when one poll is open,
     the next step of the session; with several open, none of them is, and each stays secondary
     (R12). The pill says the state of the poll in the words of its life cycle; a trial vote
-    (D-I) says so too. Needs panel. -#}
+    (D-I) says so too. An aura battle (SPEC §6.8) has no ballot to count: it says it closes by
+    itself, and its button stops it early, the taps counted so far kept. Needs panel. -#}
 {% from "macros/forms.html" import csrf with context %}
 {% set assembly = panel.assembly %}
 {% if panel.open_polls %}
@@ -12,14 +13,22 @@
   <li class="open-poll">
     <div class="spread">
       <strong>{{ view.poll.title }}</strong>
-      <span class="row">{% if view.poll.trial %}<span class="badge neutral">{{ _("Trial") }}</span>{% endif %}{% if view.poll.closes_at %}<span class="badge warning">{{ _("closes at %(time)s", time=view.poll.closes_at | clock_time) }}</span>{% endif %}<span class="badge live is-live">{{ poll_status_label(view.poll.status) }}</span></span>
+      <span class="row">{% if view.poll.trial %}<span class="badge neutral">{{ _("Trial") }}</span>{% endif %}{% if view.poll.is_aura %}<span class="badge neutral">{{ _("Animation") }}</span>{% endif %}{% if view.poll.closes_at %}<span class="badge warning">{{ _("closes at %(time)s", time=view.poll.closes_at | clock_time) }}</span>{% endif %}<span class="badge live is-live">{{ poll_status_label(view.poll.status) }}</span></span>
     </div>
+    {% if view.poll.is_aura %}
+    <p class="muted small">{{ _("Aura battle: no ballot. The gauges are on the screen; it closes by itself and shows its ranking there.") }}</p>
+    <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ view.poll.id }}/close" class="inline">
+      {{ csrf() }}
+      <button type="submit" class="button small">{{ _("Stop the battle now") }}</button>
+    </form>
+    {% else %}
     <progress class="bar" max="{{ [panel.attendees, view.turnout, 1] | max }}" value="{{ view.turnout }}">{{ view.turnout }}</progress>
     <p class="muted small">{{ ngettext("%(num)s ballot", "%(num)s ballots", view.turnout) }} / {{ ngettext("%(num)s attendee", "%(num)s attendees", panel.attendees) }}</p>
     <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ view.poll.id }}/close" class="inline">
       {{ csrf() }}
       <button type="submit" class="button{{ ' primary' if panel.open_polls | length == 1 }} small">{{ _("Close the vote") }}</button>
     </form>
+    {% endif %}
   </li>
   {% endfor %}
 </ul>

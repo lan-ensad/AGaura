@@ -1,7 +1,8 @@
 {#- PDF minutes of a session (FR-62), rendered by WeasyPrint (agaura/exports/minutes.py).
     A4, page numbers from @page counters, CSS inline: WeasyPrint fetches nothing. A trial vote
     (Poll.trial, D-I) never reaches this template: agaura/services/exports.py leaves it out of
-    the record, its number and its attendance readings included. -#}
+    the record, its number and its attendance readings included. An aura battle (SPEC §6.8) only
+    reaches the course of the session, one line with its title (exports/proceedings.py). -#}
 {% from "macros/results.html" import verdict, single_choice_rule, approval_rule, condorcet_rule, condorcet_finding, duel_table, duel_note, path_note, merit_bar, ranked %}
 <!doctype html>
 <html lang="fr">
@@ -168,6 +169,8 @@ table.attendance .num { width: 24mm; }
     {% for entry in group.entries %}
     {% if entry.note %}
     <li><span class="when">{{ entry.when }}</span><div class="feed-body feed-note">{{ entry.note.text }}</div></li>
+    {% elif entry.battle %}
+    <li><span class="when">{{ entry.when }}</span><div class="feed-body">{{ _("Aura battle: “%(title)s”", title=entry.battle.title) }} <span class="muted small">{{ _("(a game of the room, with no voting value)") }}</span></div></li>
     {% else %}
     {% set poll = entry.record.poll %}
     <li><span class="when">{{ entry.when }}</span><div class="feed-body">

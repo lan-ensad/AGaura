@@ -16,7 +16,7 @@ from agaura.voting import (
 
 
 def test_registered_methods() -> None:
-    assert set(METHODS) == {"single_choice", "approval", "majority_judgment", "condorcet"}
+    assert set(METHODS) == {"single_choice", "approval", "majority_judgment", "condorcet", "aura"}
 
 
 class TestSpec:

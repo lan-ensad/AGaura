@@ -3,8 +3,10 @@
     (_panel.html), so it follows what other consoles, the chronometer card, a delegate or a
     poll's timer change (manage.js swaps it, keeping the focus on the button pressed, by its id).
     Its buttons are live forms: manage.js sends them with fetch (204), then fetches the live
-    parts; without script they post and the page comes back to #screen-now. Needs
-    links_screen_view, polls_screen_detail_min, assembly and csrf_token. -#}
+    parts; without script they post and the page comes back to #screen-now. While an aura battle
+    runs it has the stage alone (SPEC §6.8): the chronometer, the agenda and the way to join wait,
+    so their buttons wait too. Needs links_screen_view, polls_screen_detail_min, assembly and
+    csrf_token. -#}
 {% from "screen/macros.html" import verdict_text %}
 {% from "macros/forms.html" import csrf with context %}
 {% from "macros/icons.html" import icon with context %}
@@ -30,7 +32,7 @@
 
 {% macro result_line(item, main) -%}
 <li>{{ icon("presentation") }}<span><strong>{{ _("Result shown") if main else _("Result on one line") }}</strong> : {{ item.poll.title }}, {{ verdict_text(item, option_labels(item.poll), short=not main) }}
-  {%- if main %}, {% if item.detail %}{{ ngettext("with the count of votes (%(num)s ballot)", "with the count of votes (%(num)s ballots)", item.ballots) }}{% else %}{{ _("the verdict alone: fewer than %(num)s ballots", num=item.detail_min) }}{% endif %}{% endif %}</span>
+  {%- if main %}, {% if item.battle %}{{ _("with the taps of each option") }}{% elif item.detail %}{{ ngettext("with the count of votes (%(num)s ballot)", "with the count of votes (%(num)s ballots)", item.ballots) }}{% else %}{{ _("the verdict alone: fewer than %(num)s ballots", num=item.detail_min) }}{% endif %}{% endif %}</span>
   {{ toggle("result", true, _("result of %(title)s", title=item.poll.title), item.poll.id) }}</li>
 {%- endmacro %}
 
@@ -48,7 +50,10 @@
     {% if view.in_session and view.quorum is not none %}{{ _("title, attendees and quorum") }}{% elif view.in_session %}{{ _("title and attendees") }}{% else %}{{ _("title") }}{% endif %},
     « {% if entries == "open" %}{{ _("Entries open") }}{% elif entries == "locked" %}{{ _("Entries closed") }}{% elif entries == "soon" %}{{ _("Opening soon") }}{% else %}{{ _("Session over") }}{% endif %} »</span></li>
   {% for part in shown %}
-  {% if part == "questions" %}
+  {% if part == "battle" %}
+  <li>{{ icon("vote") }}<span><strong>{{ _("Aura battle in progress") }}</strong> : {{ _("%(title)s, its gauges and its totals of taps, live; then its ranking, by itself", title=view.battle.poll.title) }}</span></li>
+  <li class="is-off">{{ icon("info") }}<span>{{ _("The other blocks come back once the battle is over") }}</span></li>
+  {% elif part == "questions" %}
   {% if open_count %}
   <li>{{ icon("vote") }}<span><strong>{{ ngettext("%(num)s poll in progress", "%(num)s polls in progress", open_count) }}</strong> : {{ _("title, options and turnout") }}{% if open_count == 1 %} ({{ ngettext("%(num)s ballot", "%(num)s ballots", view.open_polls[0].turnout) }} / {{ ngettext("%(num)s attendee", "%(num)s attendees", view.attendees) }}){% endif %}</span></li>
   {% endif %}
@@ -72,6 +77,7 @@
   <li>{{ icon("info") }}<span><strong>{{ _("Message") }}</strong> : « {% if view.closed %}{{ _("The session is closed.") }} {{ _("Thank you for taking part.") }}{% elif view.in_session %}{{ _("Waiting for the next vote") }}{% else %}{{ _("The session will start shortly.") }}{% endif %} »</span></li>
   {% endif %}
   {% endfor %}
+  {% if hero != "battle" %}
   {% if "timer" not in shown and live %}
   <li class="is-off">{{ icon("timer") }}<span>{{ _("Chronometer: not shown") }}</span>
     {{ toggle("timer", false, _("chronometer")) }}</li>
@@ -89,6 +95,7 @@
   {% if view.agenda and view.agenda_hidden and live %}
   <li class="is-off">{{ icon("list-ordered") }}<span>{{ _("Agenda: hidden") }}</span>
     {{ toggle("agenda", false, _("agenda")) }}</li>
+  {% endif %}
   {% endif %}
   {% if not view.results %}
   <li class="is-off">{{ icon("presentation") }}<span>{{ _("No result shown") }}</span></li>

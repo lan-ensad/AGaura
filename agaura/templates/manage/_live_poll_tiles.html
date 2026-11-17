@@ -3,7 +3,8 @@
     against the attendees and "Close the vote". Steering keeps them at one click
     (_live_polls.html). The live part "poll-tiles" of the panel answer: ids of its own
     (open-poll-<id>), so that manage.js keeps an unfolded tile open when it redraws the part.
-    "Close the vote" is the primary button when one poll is open (R12). Needs panel. -#}
+    "Close the vote" is the primary button when one poll is open (R12). An aura battle (SPEC
+    §6.8) has no turnout: it closes by itself, or earlier with its own button. Needs panel. -#}
 {% from "macros/forms.html" import csrf with context %}
 {% from "macros/polls.html" import tile_head with context %}
 {% set assembly = panel.assembly %}
@@ -12,12 +13,20 @@
   {% for view in panel.open_polls %}
   <details class="open-poll poll-tile" id="open-poll-{{ view.poll.id }}">
     {{ tile_head(view.poll, trial=view.poll.trial, closes_at=view.poll.closes_at) }}
+    {% if view.poll.is_aura %}
+    <p class="muted small">{{ _("Aura battle: no ballot. The gauges are on the screen; it closes by itself and shows its ranking there.") }}</p>
+    <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ view.poll.id }}/close" class="inline">
+      {{ csrf() }}
+      <button type="submit" class="button small">{{ _("Stop the battle now") }}</button>
+    </form>
+    {% else %}
     <progress class="bar" max="{{ [panel.attendees, view.turnout, 1] | max }}" value="{{ view.turnout }}">{{ view.turnout }}</progress>
     <p class="muted small">{{ ngettext("%(num)s ballot", "%(num)s ballots", view.turnout) }} / {{ ngettext("%(num)s attendee", "%(num)s attendees", panel.attendees) }}</p>
     <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ view.poll.id }}/close" class="inline">
       {{ csrf() }}
       <button type="submit" class="button{{ ' primary' if panel.open_polls | length == 1 }} small">{{ _("Close the vote") }}</button>
     </form>
+    {% endif %}
   </details>
   {% endfor %}
 </div>

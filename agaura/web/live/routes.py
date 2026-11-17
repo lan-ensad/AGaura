@@ -462,7 +462,7 @@ def _voter_poll(
         if credential is None:
             return None
         poll = live.voter_poll(db, credential.assembly_id, poll_id)
-        if poll is None:
+        if poll is None or poll.is_aura:  # a battle has no ballot (SPEC §6.8)
             raise NotFoundError("poll")
         voted = ballots.has_voted(db, credential, poll.id)
         assembly = db.get_one(Assembly, credential.assembly_id)

@@ -21,6 +21,7 @@ METHODS = {
     "approval": N_("Approval vote"),
     "majority_judgment": N_("Majority judgment"),
     "condorcet": N_("Condorcet method"),
+    "aura": N_("Aura battle"),  # an animation, with no voting value (SPEC §6.8)
 }
 
 ASSEMBLY_STATUSES = {

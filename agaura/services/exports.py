@@ -9,18 +9,20 @@ Secrecy (SPEC §9.2): the ballots of a poll are only handed out once voting on i
 match each new ballot with the person who just voted.
 
 A trial vote (``Poll.trial``, D-I) is no part of the record: it gets no number, and the minutes,
-the session export, the public results and the attendance readings they carry leave it out.
+the session export, the public results and the attendance readings they carry leave it out. An
+aura battle (SPEC §6.8) neither (``Poll.on_record``), but the minutes mention it in the course
+of the session (``SessionRecord.battles``).
 """
 
 from __future__ import annotations
 
 import datetime as dt
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from agaura.models import Assembly, Ballot, Note, Participation, Poll, PollStatus, User
+from agaura.models import AURA, Assembly, Ballot, Note, Participation, Poll, PollStatus, User
 from agaura.services import access, assemblies, attendance, audit, meeting, notes, polls
 from agaura.services.attendance import Reading
 from agaura.services.errors import InvalidStateError, NotFoundError
@@ -53,6 +55,8 @@ class SessionRecord:
     poll_items: dict[int, tuple[int | None, str | None]]
     # Anchor of the session's last log entry (``audit.session_anchor``), for the minutes only.
     log_anchor: str | None = None
+    # Aura battles pushed, in session order: mentioned in the course of the minutes only.
+    battles: list[Poll] = field(default_factory=list)
 
     @property
     def quorum_reached(self) -> bool | None:
@@ -93,7 +97,7 @@ def poll_numbers(db: Session, assembly: Assembly) -> dict[int, int]:
         select(Poll.id, Poll.opened_at).where(
             Poll.assembly_id == assembly.id,
             Poll.status != PollStatus.DRAFT,
-            Poll.trial.is_(False),
+            Poll.on_record,
         )
     ).all()
     ordered = sorted(rows, key=lambda row: (row.opened_at or _EPOCH, row.id))
@@ -132,14 +136,28 @@ def _ballots(db: Session, poll_ids: list[int]) -> dict[int, tuple[Ballot, ...]]:
 
 
 def _pushed_polls(db: Session, assembly: Assembly) -> list[Poll]:
-    """Every poll pushed so far, in session order, trial votes aside."""
+    """Every poll pushed so far, in session order, trial votes and aura battles aside."""
     rows = db.scalars(
         select(Poll)
         .options(selectinload(Poll.options), selectinload(Poll.result))
         .where(
             Poll.assembly_id == assembly.id,
             Poll.status != PollStatus.DRAFT,
+            Poll.on_record,
+        )
+    ).all()
+    return sorted(rows, key=session_order)
+
+
+def _battles(db: Session, assembly: Assembly) -> list[Poll]:
+    """The aura battles pushed so far, in session order, for their mention in the minutes;
+    cancelled ones aside."""
+    rows = db.scalars(
+        select(Poll).where(
+            Poll.assembly_id == assembly.id,
+            Poll.method == AURA,
             Poll.trial.is_(False),
+            Poll.status.in_((PollStatus.OPEN, PollStatus.CLOSED, PollStatus.PUBLISHED)),
         )
     ).all()
     return sorted(rows, key=session_order)
@@ -180,6 +198,7 @@ def session_record(
         notes=notes.session_notes(db, assembly, internal=False),
         poll_items=meeting.poll_items(db, assembly),
         log_anchor=audit.session_anchor(db, assembly.id),
+        battles=_battles(db, assembly),
     )
 
 
@@ -190,7 +209,8 @@ def poll_record(
 
     Raises ``NotFoundError`` for a poll of another session or account,
     ``InvalidStateError("export_poll_not_finished")`` while the poll is a draft or open, and
-    ``InvalidStateError("export_trial_poll")`` for a trial vote, which no export carries.
+    ``InvalidStateError("export_trial_poll")`` for a trial vote and
+    ``InvalidStateError("export_aura_poll")`` for an aura battle, which no export carries.
     """
     poll = polls.get_poll(db, owner, poll_id)
     if poll.assembly.public_id != public_id:
@@ -199,6 +219,8 @@ def poll_record(
         raise InvalidStateError("export_poll_not_finished")
     if poll.trial:
         raise InvalidStateError("export_trial_poll")
+    if poll.is_aura:
+        raise InvalidStateError("export_aura_poll")
     session = session_record(db, owner, public_id)
     number = next(record.number for record in session.polls if record.poll.id == poll_id)
     (record,) = _records(db, [poll], numbers={poll.id: number}, with_ballots=True)
@@ -226,7 +248,7 @@ def record_export(
 def public_results(db: Session, assembly: Assembly) -> list[Poll]:
     """Polls of the session behind a valid public link: published results and cancellations.
 
-    Drafts, open polls, closed polls whose result was never published and trial votes stay
-    hidden.
+    Drafts, open polls, closed polls whose result was never published, trial votes and aura
+    battles stay hidden.
     """
     return [poll for poll in _pushed_polls(db, assembly) if poll.status in PUBLIC]

@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from agaura.voting.approval import Approval
+from agaura.voting.aura import Aura
 from agaura.voting.base import (
     MAX_OPTIONS,
     MIN_OPTIONS,
@@ -42,7 +43,8 @@ class Method(Protocol):
 
 
 METHODS: dict[str, Method] = {
-    method.name: method for method in (SingleChoice(), Approval(), MajorityJudgment(), Condorcet())
+    method.name: method
+    for method in (SingleChoice(), Approval(), MajorityJudgment(), Condorcet(), Aura())
 }
 
 

@@ -19,7 +19,7 @@ from agaura.models import Assembly
 from agaura.security import Keyring
 from agaura.services import polls, screen
 from agaura.services.polls import PollInput
-from agaura.web.deps import CsrfProtected, RowId
+from agaura.web.deps import ArenaDep, CsrfProtected, RowId
 from agaura.web.manage.common import (
     ACTIONS,
     ConsoleAccess,
@@ -38,6 +38,14 @@ ERRORS.update(
     {
         "poll_trial_waiting": N_(
             "A trial vote is already waiting in the drafts: push it once the session is open."
+        ),
+        # An aura battle and the other polls never run at the same time (SPEC §6.8).
+        "aura_running": N_(
+            "An aura battle is under way: push this poll once it is over, in less than half a "
+            "minute."
+        ),
+        "aura_needs_stage": N_(
+            "An aura battle needs the stage to itself: close the polls open now first."
         ),
     }
 )
@@ -115,14 +123,15 @@ def open_poll(
 
 @router.post("/manage/{public_id}/polls/{poll_id}/close", dependencies=[CsrfProtected])
 def close_poll(
-    request: Request, public_id: PollsSession, user: ConsoleUser, poll_id: RowId
+    request: Request, public_id: PollsSession, user: ConsoleUser, poll_id: RowId, arena: ArenaDep
 ) -> Response:
     return poll_action(
         request,
         public_id,
         user,
         poll_id,
-        lambda db, poll: polls.close_poll(db, user, poll.id),
+        # An aura battle stopped early keeps the taps counted so far (SPEC §6.8).
+        lambda db, poll: polls.close_poll(db, user, poll.id, taps_of=arena.result),
         notice="poll_closed",
         voters="polls",
         # Back where it was closed: Steering, which then heads with the "Vote clos" command

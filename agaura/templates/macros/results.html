@@ -7,7 +7,8 @@
    segment's x and width are whole vote counts (exact) and the median line sits at half of it.
    Colours are SVG presentation attributes, which the CSP allows; a text equivalent always
    accompanies them (labels, aria-label, table of votes per grade). Ties are reported, never
-   broken. #}
+   broken. An aura battle (SPEC §6.8) is no vote: its "result" ranks the taps of each option,
+   with no ballot to count (``data.counts`` stays at zero and is not shown). #}
 
 {# Fill of a grade in the merit profile. Six grades: the --grade-0 to --grade-5 tokens of
    app.css, written again here for the PDF minutes, which load no stylesheet of the site (the
@@ -40,7 +41,15 @@
 {%- endmacro %}
 
 {% macro verdict(poll, outcome, labels) -%}
-{% if poll.method == "single_choice" and "adopt_option" in poll.params and outcome.status != "no_valid_votes" %}
+{% if poll.method == "aura" %}
+  {% if outcome.status == "decided" %}
+  <p class="verdict success">{{ _("Strongest aura: %(option)s", option=labels[outcome.winners[0]]) }}</p>
+  {% elif outcome.status == "tie" %}
+  <p class="verdict warning">{{ _("Tie for the strongest aura: %(names)s", names=names(outcome.winners, labels)) }}</p>
+  {% else %}
+  <p class="verdict warning">{{ _("No tap counted") }}</p>
+  {% endif %}
+{% elif poll.method == "single_choice" and "adopt_option" in poll.params and outcome.status != "no_valid_votes" %}
   {% if outcome.adopted is true %}
   <p class="verdict success">{{ _("Adopted") }}</p>
   {% elif outcome.adopted is false %}
@@ -232,6 +241,29 @@
     {% endcall %}
     </tbody>
   </table>
+  {% elif poll.method == "aura" %}
+  <p class="muted small result-rule">{{ _("Aura battle, with no voting value: the option with the most taps wins.") }}</p>
+  <table class="data result-table">
+    <thead><tr><th class="num">{{ _("Rank") }}</th><th>{{ _("Option") }}</th><th class="num">{{ _("Taps") }}</th><th class="num">{{ _("of every tap") }}</th></tr></thead>
+    <tbody>
+    {% call(id, rank, tied) ranked(outcome) %}
+      {% set row = rows[id] %}
+      {% set won = outcome.taps and id in outcome.winners %}
+      <tr>
+        <td class="num">{{ rank if rank is not none else "–" }}{% if tied %} ={% endif %}</td>
+        <td>{% if won %}<strong>{{ labels[id] }}</strong>{% else %}{{ labels[id] }}{% endif %}
+          {% if won and outcome.status == "tie" %} <span class="badge warning">{{ _("Tie") }}</span>{% endif %}
+          <progress class="bar{{ ' win' if won }}" max="{{ [outcome.taps, 1] | max }}" value="{{ row.taps }}">{{ row.taps }}</progress></td>
+        <td class="num">{{ row.taps }}</td>
+        <td class="num">{{ row.share | percent }}</td>
+      </tr>
+    {% endcall %}
+    </tbody>
+  </table>
+  <p class="muted small">{{ ngettext("%(num)s phone tapped.", "%(num)s phones tapped.", outcome.phones) }}</p>
+  {% if outcome.interrupted %}
+  <p class="alert alert-warning small">{{ _("Battle interrupted by a restart of the server: taps may be missing.") }}</p>
+  {% endif %}
   {% elif poll.method == "condorcet" %}
   {% set valid = data.counts.valid %}
   <p class="muted small result-rule">{{ condorcet_rule() }}</p>
@@ -287,6 +319,6 @@
   </details>
   {% endif %}
   {% endif %}
-  {% if show_counts %}{{ counts(poll, data, show_turnout) }}{% endif %}
+  {% if show_counts and poll.method != "aura" %}{{ counts(poll, data, show_turnout) }}{% endif %}
 </div>
 {%- endmacro %}

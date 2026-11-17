@@ -35,6 +35,7 @@ from agaura.security import Keyring
 from agaura.services import assemblies, audit, delegates, polls
 from agaura.services.delegates import Right
 from agaura.services.errors import InvalidInputError, NotFoundError, ServiceError
+from agaura.web import aura
 from agaura.web.deps import (
     SuperAdminRefusedError,
     logged_in_user,
@@ -415,6 +416,8 @@ def run_action(
         flash_error(response, request, error.code)
         return response
     hub = request.app.state.hub
+    if voters == "polls":  # a poll pushed, closed or cancelled: aura battles follow
+        aura.sync_battles(request.app.state.database, request.app.state.arena, public_id)
     if voters:
         hub.publish(live_channel(public_id), "update", voters)
     hub.publish(manage_channel(public_id), "turnout", "console")

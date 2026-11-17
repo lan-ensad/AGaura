@@ -10,8 +10,10 @@
     see; the others, the screen's included, are secondary. Both routes redirect without an
     anchor: these forms come back to their poll (#poll-<id>), the "Vote clos" command of
     Steering to Steering (D-K). A trial vote (D-I) says so, and has no number and no export:
-    the minutes and the exports leave it out. Each poll is a tile folded by default (title and
-    pills; macros/polls.html), unfolded by the address of an action that comes back to it. -#}
+    the minutes and the exports leave it out. An aura battle (SPEC §6.8) neither has a number
+    nor an export, the minutes only mention it; its ranking is on the screen from its closing
+    (taken off with the same button). Each poll is a tile folded by default (title and pills;
+    macros/polls.html), unfolded by the address of an action that comes back to it. -#}
 {% from "macros/forms.html" import csrf, field with context %}
 {% from "macros/icons.html" import icon with context %}
 {% from "macros/results.html" import result_block %}
@@ -39,6 +41,8 @@
     {% endif %}
     {% if poll.trial %}
     <p class="muted small">{{ _("Trial vote: left out of the minutes and the exports.") }}</p>
+    {% elif poll.is_aura %}
+    <p class="muted small">{{ _("Aura battle: no voting value. No export; the minutes only mention it.") }}</p>
     {% elif can.owner %}
     <p class="export-links"><a class="to-home" href="#exports-{{ poll.id }}">{{ icon("scroll-text", size="sm") }}<span>{{ _("Exports of this poll, in Documents") }}</span>{{ icon("chevron-right", size="sm") }}</a></p>
     {% endif %}
@@ -63,7 +67,7 @@
         <button type="submit" class="button small">{{ icon("presentation") }} {{ _("Display on the screen") }}</button>
         {% endif %}
       </form>
-      {% if poll.result.data.counts.cast < polls_screen_detail_min %}
+      {% if poll.result.data.counts.cast < polls_screen_detail_min and not poll.is_aura %}
       <span class="muted small">{{ _("Fewer than %(num)s ballots: the screen shows the verdict only.", num=polls_screen_detail_min) }}</span>
       {% endif %}
       {% endif %}

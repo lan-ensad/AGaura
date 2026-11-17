@@ -417,12 +417,33 @@ delegates.py`, `templates/manage/{_delegates,_delegate_home,delegate_join,delega
 
 ## Real time
 
-`HubDep` gives the hub. Events carry no data that matters; pages refetch their state.
+`HubDep` gives the hub. Events carry no data that matters; pages refetch their state. The one
+exception is `aura`: the gauges of an aura battle (SPEC §6.8), counts the whole room sees.
 
 | Channel | Event (data) | Published by | Listened by |
 |---|---|---|---|
 | `live_channel(public_id)` | `update` (`polls`, `results`, `session`) | console, after any change voters can see; poll timers | voter live page |
 | `manage_channel(public_id)` | `turnout` (`""` join or ballot, `console` console action, `polls` timer) | voter routes, `run_action`, session deletion, poll timers | session console, projection screen |
+| `manage_channel(public_id)` | `aura` (`{"poll", "levels", "totals", "phones", "final"}`, a JSON object) | `tasks.run_aura_ticker`, four times a second while a battle runs, one last frame `final` at its end | projection screen |
+
+`aura` frames are published with `recheck=False`: `stream()` passes them on without asking the
+holder's access again (a database read per stream four times a second), the periodic check of
+`RECHECK_INTERVAL` still running.
+
+**Aura battles** (`agaura/aura.py`, `agaura/web/aura.py`, `static/js/aura.js`): the taps live in
+the `Arena` of the application (`app.state.arena`, `ArenaDep`), in memory, from the push to the
+closing. `run_action` with `voters="polls"` and the editor's launch call `aura.sync_battles`
+after their commit, so the arena starts the battles pushed and forgets those closed or
+cancelled; closing early passes `taps_of=arena.result` to `polls.close_poll`; the ticker
+(`tasks.run_aura_ticker`, started with the background jobs) closes a battle 1 s after its end
+through `tasks.close_expired_polls`, which the 5 s job also runs (after a restart the arena has
+no taps, and the ranking says the battle was interrupted). `POST /{session_id}/aura/{poll_id}`
+is `async`, body `o=NN&n=NN` (two digits each), CSRF in the `X-CSRF-Token` header, answers 204,
+401, 409 or 422 with no body; it reads the database once per phone (the arena then remembers
+the credential while a battle of the session runs) and never logs, stores or publishes
+anything. The voter section (`aura_section` of `live/macros.html`) gets its phases from
+`battle_clock(poll)` (milliseconds from the moment it is drawn); its `data-key` never changes
+while the battle runs, so live.js never redraws it under the fingers.
 
 SSE endpoints use FastAPI's native support. Each stream holds a socket of the single process:
 an `async` dependency with `yield` holds the stream's slot (`hub.hold(channel, Holder(kind,
@@ -512,6 +533,13 @@ without script. Drafts: `POST …/polls/{poll_id}/move` (`direction`);
 `poll_action()` brings a draft action back to `#drafts` by default. Code cards: `POST /manage/{id}/codes`
 with `output=pdf` returns the card PDF (`no-store`); without it, the printable page. Codes exist
 in clear only in that response.
+
+**Aura battle in the editor**: `KINDS["aura"]`, alone in the group `animation` of `GROUPS`, a
+list of its own after the voting methods, without heading, its icon in another colour
+(`is-apart`). Step 2 has the question, 2 to 6 options (`aura.MAX_OPTIONS`) and the
+duration (`EditorFields.duration`, radio buttons of `aura.DURATIONS`, 5 checked), saved as
+`params {"duration": n}`; no rule to edit, no blank vote, no automatic closing (a typed timer is
+ignored for a battle). Launching reads "Lancer la battle".
 
 ## Projection screen
 
@@ -627,6 +655,18 @@ both resolutions. Closing times read to the second (`clock_time`).
   `timer.js`, loaded by `_timer.html`, counts on in the card, corrects the device clock and
   refetches the card on `agaura:console-refreshed`; it replaces only `[data-timer-status]`,
   never the start form.
+
+**Aura battle on the screen** (SPEC §6.8): `ScreenView.battle` (`ScreenBattle`, phase
+`choose`, `taps` or `over` from `BattlePhase`) gives the stage to `Part.BATTLE` while a battle
+is open, every other block waiting; `screen/routes.py` draws its gauges and totals as they stand
+from `Arena.view`, so a refresh loses nothing. `battle_stage` of `screen/macros.html` carries
+`data-battle`, `data-tap-start` and `data-tap-end` (epoch ms, read with the server's clock):
+`screen.js` moves from phase to phase by itself, takes the frames of the event `aura` in place
+(gauge heights as a CSS custom property set from the script, against the highest level seen in
+the battle; strict CSP, no `style` attribute) and keeps only the last frame (`final`) past the
+end. Closed, a battle is shown on the screen by itself (`polls._close`): its ranking
+(`ScreenResult.battle`) gives every total of taps whatever the number of phones; a closed battle
+in the questions put to the vote reads "Battle d'aura" or "Battle annulée".
 
 ## Results and exports
 

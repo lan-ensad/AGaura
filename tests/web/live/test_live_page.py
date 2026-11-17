@@ -175,11 +175,11 @@ def test_page_weight_and_strict_csp(
     # Icons point into the small voter sprite (href="…/icons-voter.svg?v=…#i-NAME"), fetched once
     # then cached; never into the full sprite of the console.
     assets = {url.split("#")[0] for url in re.findall(r'(?:href|src)="(/static/[^"]+)"', page.text)}
-    assert len(assets) == 5  # favicon, app.css, live.css, live.js, icons-voter.svg
+    assert len(assets) == 6  # favicon, app.css, live.css, live.js, aura.js, icons-voter.svg
     assert any("/icons-voter.svg" in url for url in assets)
     assert "/static/icons.svg" not in page.text
     total = len(page.content) + sum(len(client.get(url).content) for url in assets)
-    assert total < 85_000  # NFR-04 (100 kB), with room to spare
+    assert total < 90_000  # NFR-04 (100 kB), with room to spare (aura.js: about 7 kB)
     assert not re.search(r"<script(?![^>]*\bsrc=)", page.text)
     assert " style=" not in page.text
 

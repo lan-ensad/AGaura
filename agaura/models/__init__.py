@@ -15,9 +15,10 @@ from agaura.models.base import (
 from agaura.models.delegate import Delegate
 from agaura.models.log import AuditEntry, OutboxEmail
 from agaura.models.note import Note
-from agaura.models.poll import Ballot, Option, Participation, Poll, Result
+from agaura.models.poll import AURA, Ballot, Option, Participation, Poll, Result
 
 __all__ = [
+    "AURA",
     "AccessMode",
     "Assembly",
     "AssemblyStatus",

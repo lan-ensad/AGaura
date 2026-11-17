@@ -4,6 +4,8 @@ The secret link is the only credential: every request checks the token (constant
 wrong, regenerated or deleted link answers the 404 page. The page refreshes its content
 through ``/state`` on every event of the console channel (console actions, chronometer and
 agenda included, joins, ballots, poll timers), with a polling fallback (``static/js/screen.js``).
+The frames of an aura battle (event ``aura``, four a second) move its gauges in place, without
+a refresh.
 
 Responses are never cached and send no ``Referer`` (the link is in the URL). The screen shows
 only what the whole room may see, and a result only when the tribune shows it for a closed poll
@@ -21,7 +23,11 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.sse import EventSourceResponse, ServerSentEvent
+from sqlalchemy.orm import Session
 
+from agaura.aura import Arena
+from agaura.models import Assembly
+from agaura.security import Keyring
 from agaura.services import access, assemblies, screen
 from agaura.services.errors import NotFoundError
 from agaura.web.deps import DatabaseDep, HubDep, KeyringDep
@@ -60,6 +66,13 @@ def _server_time() -> str:
     return str(int(time.time() * 1000))
 
 
+def _view(request: Request, db: Session, keyring: Keyring, assembly: Assembly) -> screen.ScreenView:
+    """What the screen shows; the gauges of an aura battle under way come from the arena of
+    the process, so a refresh during the battle draws them as they stand (SPEC §6.8)."""
+    arena: Arena = request.app.state.arena
+    return screen.screen_view(db, keyring, assembly, taps=arena.view)
+
+
 def _context(request: Request, view: screen.ScreenView, token: str) -> dict[str, Any]:
     public_id = view.assembly.public_id
     url = voter_url(request, public_id)
@@ -87,7 +100,7 @@ def screen_page(
         if session_id != assembly.public_id:
             redirect = RedirectResponse(f"/{assembly.public_id}/screen/{token}", status_code=303)
             return _secret_link(redirect)
-        context = _context(request, screen.screen_view(db, keyring, assembly), token)
+        context = _context(request, _view(request, db, keyring, assembly), token)
         context["server_time"] = _server_time()
         return _secret_link(_render(request, "screen/page.html", context))
 
@@ -100,7 +113,7 @@ def screen_state(
     public_id = _public_id(session_id)
     with database.read() as db:
         assembly = access.check_link_token(db, keyring, public_id, token)
-        context = _context(request, screen.screen_view(db, keyring, assembly), token)
+        context = _context(request, _view(request, db, keyring, assembly), token)
         response = _render(request, "screen/_state.html", context)
     response.headers[SERVER_TIME_HEADER] = _server_time()
     return _secret_link(response)

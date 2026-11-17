@@ -31,7 +31,10 @@
     {% if assembly.headcount is not none %}
     <div><dt>{{ _("Counted in the room") }}</dt><dd>{{ assembly.headcount }}</dd></div>
     {% endif %}
-    {% if status == "in_session" and open_count == 1 %}
+    {% if status == "in_session" and open_count == 1 and panel.open_polls[0].poll.is_aura %}
+    {#- An aura battle (SPEC §6.8) has no ballot to count: the bar says it runs. -#}
+    <div class="status-ballots"><dt>{{ _("Aura battle") }}</dt><dd>{% if can.polls %}<a href="#live">{{ _("under way") }}</a>{% else %}{{ _("under way") }}{% endif %}</dd></div>
+    {% elif status == "in_session" and open_count == 1 %}
     {% set ballots = panel.open_polls[0].turnout %}
     <div class="status-ballots"><dt>{{ _("Ballots") }}</dt><dd>{% if can.polls %}<a href="#live">{{ ballots }}</a>{% else %}{{ ballots }}{% endif %}</dd></div>
     {% elif status == "in_session" %}

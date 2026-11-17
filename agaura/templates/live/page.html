@@ -31,4 +31,5 @@
   data-msg-help="{{ _('The ballot you started stays in place.') }}"
   data-msg-back="{{ _('Connection restored') }}">{{ icon("wifi-off") }}<p data-net-text></p></div>
 {% endblock %}
-{% block scripts %}<script src="{{ static_url('js/live.js') }}" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/live.js') }}" defer></script>
+<script src="{{ static_url('js/aura.js') }}" defer></script>{% endblock %}

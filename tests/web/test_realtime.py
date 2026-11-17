@@ -112,3 +112,36 @@ def test_close_from_another_thread_wakes_streams_at_once() -> None:
         return loop.time() - started
 
     assert asyncio.run(scenario()) < 0.5
+
+
+def test_battle_frames_pass_without_a_check_per_frame() -> None:
+    """The frames of an aura battle (``recheck=False``), four a second, cost no access check
+    each; any other event is still checked first (SPEC §6.8)."""
+
+    async def scenario() -> tuple[list[object], int]:
+        hub = Hub()
+        hub.bind(asyncio.get_running_loop())
+        checks: list[bool] = []
+        received: list[object] = []
+
+        def allowed() -> bool:
+            checks.append(True)
+            return True
+
+        async def listen() -> None:
+            async for message in stream(hub, "manage:A", allowed):
+                received.append(message.data)
+                if len(received) == 3:
+                    return
+
+        task = asyncio.create_task(listen())
+        await asyncio.sleep(0.01)
+        hub.publish("manage:A", "aura", {"poll": 1, "levels": [3]}, recheck=False)
+        hub.publish("manage:A", "aura", {"poll": 1, "levels": [5]}, recheck=False)
+        hub.publish("manage:A", "turnout", "console")
+        await asyncio.wait_for(task, 1)
+        return received, len(checks)
+
+    received, checks = asyncio.run(scenario())
+    assert received == [{"poll": 1, "levels": [3]}, {"poll": 1, "levels": [5]}, "console"]
+    assert checks == 1

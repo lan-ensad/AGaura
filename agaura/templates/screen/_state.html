@@ -1,10 +1,11 @@
 {# Content of the projection screen (FR-70 to FR-75), replaced as a whole by screen.js.
-   Layout: one block takes the stage (``view.hero``: the open votes, with the latest result
-   shown next to them; else that result; else how to join, the chronometer, the agenda, the
-   questions already put to the vote, or a message); the others stack in a side column
+   Layout: one block takes the stage (``view.hero``: an aura battle under way, alone; the open
+   votes, with the latest result shown next to them; else that result; else how to join, the
+   chronometer, the agenda, the questions already put to the vote, or a message); the others
+   stack in a side column
    (``view.side``). A result only when the tribune shows it, for a closed poll (FR-72, FR-75):
    the latest in the main place, the earlier ones in one line of the questions put to the vote. #}
-{% from "screen/macros.html" import entries_status, join_panel, timer_face, agenda_block, poll_card, past_list, result_card %}
+{% from "screen/macros.html" import entries_status, join_panel, timer_face, agenda_block, poll_card, past_list, result_card, battle_stage %}
 {% set assembly = view.assembly %}
 {% set hero = view.hero.value %}
 {% set side = view.side | map(attribute="value") | list %}
@@ -27,7 +28,9 @@
 </header>
 <main class="screen-stage hero-{{ hero }}{{ ' has-side' if side }}{{ ' is-closed' if view.closed }}">
   <div class="screen-hero">
-    {% if hero == "questions" %}
+    {% if hero == "battle" %}
+    {{ battle_stage(view.battle) }}
+    {% elif hero == "questions" %}
     {% if open_count %}
     {#- One row for up to three cards (each gets the whole height), two by two for four. -#}
     <div class="screen-items columns-{{ items if items <= 3 else (2 if items == 4 else 3) }}">

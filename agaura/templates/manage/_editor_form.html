@@ -5,11 +5,14 @@
     sentence, rendered here and rewritten by editor.js from data-rule-texts (no text in the
     script); its settings fold under "Modifier la règle", open when one of them is at fault.
     Enter saves a draft (the first submit button), never launches. The blank vote has no field:
-    "Abstention" for a resolution, "Vote blanc" otherwise. -#}
+    "Abstention" for a resolution, "Vote blanc" otherwise. An aura battle (SPEC §6.8) shows its
+    options (6 at most), the duration of its tap phase and its rule in one sentence; no blank
+    vote, no rule to edit, no automatic closing: it closes by itself. -#}
 {% from "macros/forms.html" import csrf with context %}
 {% from "macros/icons.html" import icon, icon_button with context %}
 {% set action = "/manage/" ~ assembly.public_id ~ ("/polls/" ~ poll.id ~ "/edit" if editing else "/polls/new") %}
 {% set candidates = kind.name == "approval" %}
+{% set battle = kind.method == "aura" %}
 
 {% macro error_id(key) %}error-{{ key | replace(":", "-") }}{% endmacro %}
 
@@ -156,6 +159,7 @@
     {% endfor %}
     {% else %}
     <h2 id="options-title">{% if candidates %}{{ _("Seats and candidates") }}{% elif kind.name == "majority_judgment" %}{{ _("Options to grade") }}{% elif kind.name == "condorcet" %}{{ _("Options to rank") }}{% else %}{{ _("Options") }}{% endif %}</h2>
+    {% if battle %}<p class="hint">{{ _("From 2 to %(num)s options: one gauge each on the projection screen.", num=max_options) }}</p>{% endif %}
     {% if candidates %}
     <div class="field">
       <label for="editor-seats">{{ _("Seats to fill") }}</label>
@@ -183,6 +187,22 @@
     {% endif %}
   </section>
 
+  {% if battle %}
+  {#- The course of a battle: the choice, then the taps for the duration chosen here. -#}
+  <section class="card" id="battle" aria-labelledby="battle-title">
+    <h2 id="battle-title">{{ _("Course of the battle") }}</h2>
+    <fieldset class="plain">
+      <legend>{{ _("Duration of the taps") }}</legend>
+      <p class="hint" id="duration-hint">{{ _("Once pushed, voters have %(num)s seconds to pick an option; then a button appears on their phone, to tap for this long.", num=choose_seconds) }}</p>
+      <div class="choices compact duration-choices">
+        {% for seconds in durations %}{{ choice("duration", seconds | string, _("%(num)s s", num=seconds), none, form.duration) }}
+        {% endfor %}
+      </div>
+      {{ problem("duration") }}
+    </fieldset>
+  </section>
+  {% endif %}
+
   <section class="card" id="rule" aria-labelledby="rule-title">
     <h2 id="rule-title">{{ _("Rule of the result") }}</h2>
     <div class="rule-summary">
@@ -198,6 +218,8 @@
       } %}
       {% for base, text in bases.items() %}<p class="hint" data-base-hint="{{ base }}"{% if (form.base or "valid") != base %} hidden{% endif %}>{{ text }}</p>
       {% endfor %}
+      {% elif battle %}
+      <p class="hint">{{ _("No blank vote. The battle closes by itself at the end of the taps, the ranking then on the screen. It decides nothing: the minutes only mention it.") }}</p>
       {% else %}
       <p class="hint">
         {%- if kind.name == "single_choice" %}{{ _("Below the threshold, the result reads \"No option reaches the required threshold\". A tie is reported, never broken.") }}
@@ -280,7 +302,7 @@
     {% endif %}
   </section>
 
-  {% if can_launch %}
+  {% if can_launch and not battle %}
   <section class="card" aria-labelledby="launch-title">
     <h2 id="launch-title">{{ _("Push") }}</h2>
     <div class="field">
@@ -294,7 +316,7 @@
 
   <div class="editor-actions">
     {% if can_launch %}
-    <button type="submit" name="action" value="launch" class="button primary">{{ _("Push to voters") }}</button>
+    <button type="submit" name="action" value="launch" class="button primary">{% if battle %}{{ _("Start the battle") }}{% else %}{{ _("Push to voters") }}{% endif %}</button>
     <button type="submit" name="action" value="draft" class="button">{{ _("Save the draft") }}</button>
     {% else %}
     <button type="submit" name="action" value="draft" class="button primary">{{ _("Save the draft") }}</button>

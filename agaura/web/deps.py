@@ -12,6 +12,7 @@ from urllib.parse import quote
 
 from fastapi import Depends, Path, Request
 
+from agaura.aura import Arena
 from agaura.config import Settings
 from agaura.db import Database
 from agaura.models import User
@@ -42,6 +43,10 @@ def get_keyring(request: Request) -> Keyring:
 
 def get_hub(request: Request) -> Hub:
     return request.app.state.hub
+
+
+def get_arena(request: Request) -> Arena:
+    return request.app.state.arena
 
 
 def get_limiter(request: Request) -> RateLimiter:
@@ -131,6 +136,7 @@ OptionalUser = Annotated[User | None, Depends(optional_user)]
 DatabaseDep = Annotated[Database, Depends(get_database)]
 KeyringDep = Annotated[Keyring, Depends(get_keyring)]
 HubDep = Annotated[Hub, Depends(get_hub)]
+ArenaDep = Annotated[Arena, Depends(get_arena)]
 LimiterDep = Annotated[RateLimiter, Depends(get_limiter)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 CsrfProtected = Depends(verify_csrf)

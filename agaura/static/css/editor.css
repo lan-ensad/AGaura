@@ -52,6 +52,12 @@ label.method-card { cursor: pointer; }
 .method-card:has(input:checked) { border: 2px solid var(--accent); background: var(--accent-soft); padding: calc(1rem - 1px) calc(1.1rem - 1px); }
 .method-card:has(input:checked) .method-name::after { content: "\00a0\2713"; content: "\00a0\2713" / ""; color: var(--accent-strong); }
 .editor fieldset.plain > .method-cards:last-child { margin-bottom: 0; }
+/* The animations (aura battle, SPEC §6.8), told apart from the voting methods by the warm
+   colour of their icon only. */
+.method-cards.is-apart .method-icon { background: var(--warning-soft); color: var(--warning-ink); }
+/* Step 2 of a battle: the durations of the tap phase, side by side. */
+.choices.duration-choices { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.duration-choices .choice { flex: 0 0 auto; min-width: 5.5rem; }
 
 /* "Reprendre les votes d'une session passée": a fold under the cards, the owner's only. */
 .copy-past > summary { min-height: var(--tap); padding-block: 0.7rem; font-weight: 700; cursor: pointer; }

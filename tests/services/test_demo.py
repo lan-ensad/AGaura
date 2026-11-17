@@ -72,7 +72,8 @@ def test_a_demo_holds_the_example_sessions(database: Database, keyring: Keyring)
         assert all(poll.result.data["counts"]["cast"] == access.DEMO_VOTERS for poll in past.polls)
         assert past.registered_count == 20 and assemblies.quorum_required(past) == 5
         current = db.get_one(Assembly, current.id)
-        assert [poll.status for poll in current.polls] == [PollStatus.DRAFT] * 5
+        assert [poll.status for poll in current.polls] == [PollStatus.DRAFT] * 6
+        assert current.polls[-1].is_aura  # an aura battle to try (SPEC §6.8)
         assert len(current.tribune) == 3 and len(current.agenda) == 7
         assert db.scalar(select(func.count()).where(Delegate.assembly_id == current.id)) == 1
         assert db.scalar(select(func.count()).select_from(OutboxEmail)) == 0  # no email
@@ -134,7 +135,7 @@ def test_demo_quotas_are_lower(world: World, database: Database, keyring: Keyrin
     with pytest.raises(QuotaExceededError):
         world.assembly(user, in_session=False)
     public_id = sessions_of(database, user)[1].public_id
-    for number in range(accounts.DEMO_QUOTAS.polls_per_assembly - 5):
+    for number in range(accounts.DEMO_QUOTAS.polls_per_assembly - 6):  # 6 example drafts
         world.poll(user, public_id, question(f"Q{number}"), open_it=False)
     with pytest.raises(QuotaExceededError):
         world.poll(user, public_id, question("One too many"), open_it=False)

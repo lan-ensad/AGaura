@@ -5,6 +5,7 @@ reorders and pushes polls from a phone; another phone votes. Without JavaScript 
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 import pytest
@@ -80,7 +81,11 @@ def test_prepare_edit_reorder_and_push_from_a_phone(
     admin.locator("#drafts").get_by_role("link", name="Nouveau vote").click()
     expect(admin.get_by_role("heading", name="Nouveau vote")).to_be_visible()
     expect(admin.locator('.stepper [aria-current="step"]')).to_have_text("Mode de scrutin")
-    expect(admin.locator(".method-card")).to_have_count(4)
+    expect(admin.locator('[data-group="vote"] .method-card')).to_have_count(4)
+    # Set apart, the game of the room (SPEC §6.8).
+    expect(admin.locator('[data-group="animation"] .method-card')).to_have_text(
+        re.compile("Battle d'aura")
+    )
     assert admin.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     shot(admin, "editor-step1-phone")
     admin.locator(".method-card").get_by_role("link", name="Choix unique", exact=True).click()

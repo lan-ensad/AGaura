@@ -141,12 +141,17 @@
    people elected, the Majority Judgment winner and its majority grade, the Condorcet winner
    (or the winner of the Schulze method), no option over the
    threshold, or a tie flagged to be settled under the bylaws, never broken (D6). ``short``: the
-   one-line form of the list (the winner without its grade). #}
+   one-line form of the list (the winner without its grade). An aura battle (SPEC §6.8) names
+   the option with the most taps, the options tied at the top, or that nobody tapped. #}
 {% macro verdict_text(item, labels, short=false) -%}
 {% set poll = item.poll %}
 {% set outcome = item.data.outcome %}
 {% set kind = item.verdict.value %}
-{%- if kind == "adopted" %}{{ _("Adopted") }}
+{%- if item.battle %}
+{%- if kind == "decided" %}{{ _("Strongest aura: %(option)s", option=labels[outcome.winners[0]]) }}
+{%- elif kind == "tie" %}{{ _("Tie at the top: %(names)s", names=names(outcome.winners, labels)) }}
+{%- else %}{{ _("Nobody tapped") }}{% endif %}
+{%- elif kind == "adopted" %}{{ _("Adopted") }}
 {%- elif kind == "rejected" %}{{ _("Rejected") }}
 {%- elif kind == "tie" %}{{ _("Tie: to be settled under the bylaws") }}
 {%- elif kind == "decided" and poll.method == "approval" %}{{ _("Elected: %(names)s", names=names(outcome.elected, labels)) }}
@@ -183,6 +188,7 @@
 {% set kind = item.verdict.value %}
 {% set rows = {} %}
 {% for row in outcome.options %}{% set unused = rows.update({row.option: row}) %}{% endfor %}
+{% if item.battle %}{{ battle_result(item, labels, rows) }}{% else %}
 <section class="screen-result" aria-labelledby="screen-result-{{ poll.id }}" data-fit data-fit-min="-3" data-result="{{ poll.id }}">
   <div class="card-top">
     <p class="eyebrow result">{{ icon("presentation") }}{{ _("Result") }}</p>
@@ -262,10 +268,90 @@
   <p class="screen-detail-off">{{ icon("eye-off") }}{{ _("Count of votes not shown: fewer than %(num)s ballots", num=item.detail_min) }}</p>
   {% endif %}
 </section>
+{% endif %}
 {%- endmacro %}
 
-{# Questions already put to the vote: title and state ("Vote clos", "Vote annulé"), or the
-   verdict of a result the tribune shows (FR-75), never another figure (FR-72). A cancelled
+{# The ranking of an aura battle (SPEC §6.8), on the night card of results, shown by itself
+   once the battle is closed: the option with the most taps first, then the taps of every
+   option whatever their number (the room saw them grow), a tie at the top reported and never
+   broken, and a word when a restart of the server may have lost taps. #}
+{% macro battle_result(item, labels, rows) -%}
+{% set poll = item.poll %}
+{% set outcome = item.data.outcome %}
+{% set kind = item.verdict.value %}
+<section class="screen-result is-battle" aria-labelledby="screen-result-{{ poll.id }}" data-fit data-fit-min="-3" data-result="{{ poll.id }}">
+  <div class="card-top">
+    <p class="eyebrow result">{{ icon("zap") }}{{ _("Aura battle") }}</p>
+    <p class="result-when">{{ ngettext("ended at %(time)s · %(num)s phone", "ended at %(time)s · %(num)s phones", outcome.phones, time=poll.closed_at | time_of_day) }}</p>
+  </div>
+  <h2 id="screen-result-{{ poll.id }}">{{ poll.title }}</h2>
+  <p class="screen-verdict is-{{ kind }}" data-verdict="{{ kind }}">{{ verdict_icon(kind) }}{{ verdict_text(item, labels) }}</p>
+  {% if outcome.interrupted %}<p class="screen-rule battle-interrupted">{{ icon("triangle-alert") }}{{ _("Interrupted by a restart of the server: taps may have been lost.") }}</p>{% endif %}
+  <p class="screen-rule">{{ _("A game with no voting value: the option with the most taps wins, a tie is reported, never broken.") }}</p>
+  <ul class="screen-tally is-ranked is-battle">
+    {% call(id, rank, tied) ranked(outcome) %}
+    {% set row = rows[id] %}
+    <li{{ ' class="is-win"' | safe if id in outcome.winners }} data-battle-row="{{ id }}">
+      <span class="tally-rank">{% if outcome.taps %}{{ rank }}{% if tied %} ={% endif %}{% else %}–{% endif %}</span>
+      <span class="tally-label">{{ labels[id] }}{% if id in outcome.winners and outcome.winners | length > 1 %} <span class="tag-tie">{{ _("Tie") }}</span>{% endif %}</span>
+      <span class="tally-votes" data-taps="{{ row.taps }}">{{ ngettext("%(num)s tap", "%(num)s taps", row.taps) }}</span>
+      <progress class="bar" max="{{ [outcome.taps, 1] | max }}" value="{{ row.taps }}">{{ row.taps }}</progress>
+    </li>
+    {% endcall %}
+  </ul>
+</section>
+{%- endmacro %}
+
+{# An aura battle under way (SPEC §6.8), the stage to itself: the room chooses an option on
+   the phones while a countdown runs (phase "choose"), then taps (phase "taps": one gauge per
+   option, its total of taps under it, the phones that tapped), then the gauges freeze at the
+   end ("over") until the poll closes and its ranking takes the stage. Each option keeps its
+   colour from the first second, its label always under its gauge (never colour alone).
+   screen.js moves from phase to phase on the server's clock (data-tap-start, data-tap-end,
+   epoch ms), sets the height of each gauge from data-level against the highest level seen in
+   the battle (CSS custom property, no style attribute: strict CSP), and takes the frames of
+   the event "aura" in place; the server draws the phase and the gauges as they stand, so a
+   refresh during the battle loses nothing. Its texts come from here, as for the rest of the
+   screen. #}
+{% macro battle_stage(battle) -%}
+{% set poll = battle.poll %}
+{% set count = poll.options | length %}
+<section class="screen-battle is-{{ battle.phase.value }}" aria-labelledby="screen-battle-{{ poll.id }}" data-fit data-fit-min="-2"
+  data-battle="{{ poll.id }}" data-tap-start="{{ battle.tap_start_ms }}" data-tap-end="{{ battle.tap_end_ms }}" data-peak="{{ battle.peak }}">
+  <div class="card-top">
+    <p class="eyebrow live">{{ _("Aura battle") }}</p>
+    <p class="battle-phones" data-phones
+       data-one="{{ ngettext('%(num)s phone tapping', '%(num)s phones tapping', 1, num='{n}') }}"
+       data-other="{{ ngettext('%(num)s phone tapping', '%(num)s phones tapping', 2, num='{n}') }}">{{ ngettext("%(num)s phone tapping", "%(num)s phones tapping", battle.phones) }}</p>
+  </div>
+  <h2 id="screen-battle-{{ poll.id }}">{{ poll.title }}</h2>
+  {% if poll.description %}<p class="poll-description">{{ poll.description }}</p>{% endif %}
+  <div class="battle-phase">
+    <div class="battle-choose">
+      <p class="battle-count" data-battle-count>{{ battle.left if battle.phase.value == "choose" else 0 }}</p>
+      <div>
+        <p class="battle-call">{{ icon("smartphone") }}{{ _("Choose an option on your phone") }}</p>
+        <p class="battle-next">{{ _("Then tap the button as fast as you can!") }}</p>
+      </div>
+    </div>
+    <p class="battle-clock battle-taps">{{ _("Tap!") }} <strong data-battle-left>{{ "%02d:%02d" | format(battle.left // 60, battle.left % 60) if battle.phase.value == "taps" else "00:00" }}</strong></p>
+    <p class="battle-clock battle-over">{{ _("Time is up! The ranking is coming.") }}</p>
+  </div>
+  <ol class="battle-gauges count-{{ count }}">
+    {% for option in poll.options %}
+    <li class="gauge tone-{{ loop.index }}" data-gauge>
+      <div class="gauge-track"><div class="gauge-fill" data-level="{{ battle.levels[loop.index0] }}"></div></div>
+      <p class="gauge-total" data-total>{{ battle.totals[loop.index0] }}</p>
+      <p class="gauge-label"><span>{{ option.label }}</span></p>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{%- endmacro %}
+
+{# Questions already put to the vote: title and state ("Vote clos", "Vote annulé"; "Battle
+   d'aura", "Battle annulée" for an aura battle), or the verdict of a result the tribune shows
+   (FR-75), never another figure (FR-72). A cancelled
    poll stays listed as cancelled: the room saw it put to the vote, and it must not vanish
    silently; its reason goes to the minutes and the public results page, not here.
    ``mode``: "large" (the stage), "strip" (below open polls or a result), "side" (side column);
@@ -282,6 +368,8 @@
       <span class="past-title">{{ poll.title }}</span>
       {% if shown %}
       <span class="past-verdict is-{{ shown.verdict.value }}">{{ verdict_text(shown, option_labels(poll), short=true) }}</span>
+      {% elif poll.is_aura %}
+      <span class="past-state">{{ icon("ban" if cancelled else "presentation") }}{{ _("Battle cancelled") if cancelled else _("Aura battle") }}</span>
       {% else %}
       <span class="past-state">{{ icon("ban" if cancelled else "lock") }}{{ _("Vote cancelled") if cancelled else _("Vote closed") }}</span>
       {% endif %}

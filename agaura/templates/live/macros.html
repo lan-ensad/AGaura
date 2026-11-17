@@ -11,7 +11,8 @@
 {% macro poll_head(poll, focus=false) -%}
 <div class="poll-head">
   <h2 id="poll-{{ poll.id }}-title"{% if focus %} tabindex="-1" data-focus{% endif %}>{{ poll.title }}</h2>
-  {% if poll.closes_at %}<p class="timer">{{ _("Closes at %(time)s", time=poll.closes_at | clock_time) }}</p>{% endif %}
+  {#- A battle counts down on its own: no closing time. -#}
+  {% if poll.closes_at and not poll.is_aura %}<p class="timer">{{ _("Closes at %(time)s", time=poll.closes_at | clock_time) }}</p>{% endif %}
 </div>
 {% if poll.description %}<p class="poll-description">{{ poll.description }}</p>{% endif %}
 {%- endmacro %}
@@ -309,6 +310,41 @@
   </ul>
   {% endif %}
 </nav>
+{%- endmacro %}
+
+{# An aura battle under way (SPEC §6.8): a game, not a ballot. The option picked stays on this
+   device; aura.js counts down the choice and the taps from ``battle_clock`` (milliseconds from
+   the moment the page was drawn, never the phone's own clock), then sends the taps in batches
+   to ``data-tap-url``. The radio buttons belong to no form: nothing is ever submitted. Its key
+   never changes while the battle runs, so live.js never redraws it under the fingers. Without
+   JavaScript, one sentence says the battle needs it. #}
+{% macro aura_section(poll) -%}
+{% set clock = battle_clock(poll) %}
+<section class="card poll poll-aura" id="poll-{{ poll.id }}" data-key="poll-{{ poll.id }}-aura" aria-labelledby="poll-{{ poll.id }}-title"
+  data-aura data-tap-url="/{{ public_id }}/aura/{{ poll.id }}" data-csrf="{{ csrf_token }}"
+  data-choose-ms="{{ clock.choose }}" data-end-ms="{{ clock.end }}">
+  <p class="eyebrow">{{ _("Aura battle · no voting value") }}</p>
+  {{ poll_head(poll) }}
+  <p class="aura-nojs" data-aura-nojs>{{ _("This aura battle needs JavaScript: follow it on the projection screen.") }}</p>
+  <div class="aura-game" data-aura-game hidden>
+    <p class="aura-status" role="status" data-aura-status
+      data-msg-choose="{{ _('Choose your option before the end of the countdown.') }}"
+      data-msg-tap="{{ _('Tap the button as fast as you can!') }}"
+      data-msg-late="{{ _('No option chosen in time: watch the projection screen.') }}"
+      data-msg-over="{{ _('Over! The ranking is on the projection screen.') }}"></p>
+    <p class="aura-countdown" data-aura-countdown aria-hidden="true"></p>
+    <fieldset class="choices aura-options" data-aura-options>
+      <legend class="visually-hidden">{{ _("Your option") }}</legend>
+      {% for option in poll.options %}
+      <label class="choice"><input type="radio" name="aura-{{ poll.id }}" value="{{ ballot_number(option.position) }}" data-label="{{ option.label }}">{{ option_text(option) }}</label>
+      {% endfor %}
+    </fieldset>
+    <button type="button" class="aura-button" data-aura-button hidden>
+      <span class="aura-button-label" data-aura-label></span>
+      <span class="aura-button-count" data-aura-count aria-hidden="true">0</span>
+    </button>
+  </div>
+</section>
 {%- endmacro %}
 
 {% macro results_title() -%}

@@ -428,3 +428,90 @@ body.idle .screen-fullscreen { opacity: 0; pointer-events: none; }
 .past-verdict.is-rejected { background: var(--danger-soft); color: var(--danger-ink); }
 .past-verdict.is-tie { background: var(--warning-soft); color: var(--warning-ink); }
 .past-verdict.is-none { background: var(--neutral-soft); color: var(--neutral-ink); }
+
+/* --- Aura battle (SPEC §6.8): the stage to itself while it runs. A light card like the votes
+   in progress, the plum of what runs now on its eyebrow; one colour per option from the tokens
+   of app.css (blue, plum, green, red, brown, slate: every one at least 4.5:1 on white), its
+   label always under its gauge, never the colour alone. The phase (is-choose, is-taps,
+   is-over) shows its own line: the countdown to choose, the time left to tap, then "Time is
+   up". Each gauge fills from the bottom to --level (0 to 1, set by screen.js against the
+   highest level of the battle); it moves in 250 ms steps, the rhythm of the frames. -------- */
+
+.screen-battle {
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 0.55em 0.9em;
+  background: #fff; border: 1px solid #c9d0da; border-radius: 0.35rem;
+}
+.screen-battle > * { flex-shrink: 0; }
+.screen-battle h2 { margin: 0 0 0.2em; font-size: 1.45em; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+.battle-phones {
+  margin: 0; padding: 0.05em 0.55em; border-radius: 999px; font-size: 0.8em; font-weight: 800;
+  background: var(--live-soft); color: var(--live); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.screen-battle.is-choose .battle-phones { visibility: hidden; }
+
+.battle-phase { margin: 0.1em 0 0.3em; }
+.battle-choose, .battle-taps, .battle-over { display: none; }
+.screen-battle.is-choose .battle-choose { display: flex; align-items: center; gap: 0.6em; }
+.screen-battle.is-taps .battle-taps, .screen-battle.is-over .battle-over { display: block; }
+.battle-count {
+  flex: none; margin: 0; min-width: 1.6em; padding: 0 0.15em; border-radius: 0.2em;
+  background: var(--live); color: #fff; text-align: center;
+  font-size: 3.2em; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums;
+}
+.battle-call { margin: 0; font-size: 1.35em; font-weight: 800; color: #12306f; }
+.battle-call svg.icon { margin-right: 0.3em; }
+.battle-next { margin: 0.1em 0 0; font-size: 0.95em; font-weight: 700; color: #4a5361; }
+.battle-clock { margin: 0; font-size: 1.5em; font-weight: 800; color: #12306f; }
+.battle-clock strong {
+  display: inline-block; margin-left: 0.2em; padding: 0 0.4em; border-radius: 0.25em;
+  background: #fde7c2; color: #5c3900; font-variant-numeric: tabular-nums;
+}
+.battle-over { color: #5c3900; }
+
+/* The gauges take the rest of the card: one column each, as wide as the stage allows. */
+.screen-battle > .battle-gauges { flex: 1 1 0; }
+.battle-gauges {
+  list-style: none; margin: 0; padding: 0; min-height: 0;
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 0.8em;
+}
+.battle-gauges.count-5, .battle-gauges.count-6 { gap: 0.5em; }
+.gauge { display: flex; flex-direction: column; align-items: stretch; min-height: 0; min-width: 0; }
+.gauge-track {
+  position: relative; flex: 1 1 0; min-height: 2em; overflow: hidden;
+  background: #eef1f5; border: 1px solid #c9d0da; border-radius: 0.3em;
+}
+.gauge-fill {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: calc(var(--level, 0) * 100%); background: var(--tone);
+  transition: height 0.25s linear;
+}
+@media (prefers-reduced-motion: reduce) { .gauge-fill { transition: none; } }
+.gauge-total {
+  margin: 0.1em 0 0; text-align: center; font-size: 1.6em; font-weight: 800; line-height: 1.1;
+  font-variant-numeric: tabular-nums; color: #0f1419;
+}
+/* Two lines for every label, whatever its length, so that the gauges keep one height; a longer
+   label ends with an ellipsis on its second line. */
+.gauge-label {
+  flex: none; height: 2.45em; margin: 0; padding-top: 0.1em; border-top: 0.25em solid var(--tone);
+  text-align: center; font-size: 1em; font-weight: 800; line-height: 1.15;
+}
+.gauge-label span {
+  overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
+.battle-gauges.count-5 .gauge-label, .battle-gauges.count-6 .gauge-label { font-size: 0.85em; }
+.screen-battle.is-over .gauge-fill { transition: none; }
+.tone-1 { --tone: var(--accent); }
+.tone-2 { --tone: var(--live); }
+.tone-3 { --tone: var(--success); }
+.tone-4 { --tone: var(--danger); }
+.tone-5 { --tone: var(--warning); }
+.tone-6 { --tone: var(--neutral-ink); }
+
+/* Its ranking, on the night card of results: the taps of every option, the option with the
+   most first. */
+.screen-tally.is-battle li { grid-template-columns: 2.4em minmax(0, 1fr) auto; }
+.screen-tally.is-battle .tally-rank { white-space: nowrap; }
+.screen-tally.is-battle .tally-votes { font-size: 0.95em; }
+.battle-interrupted { display: flex; align-items: center; gap: 0.35em; color: #fde7c2; }

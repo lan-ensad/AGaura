@@ -10,7 +10,7 @@ screen are two separate choices of the tribune.
 from __future__ import annotations
 
 import datetime as dt
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -24,12 +24,14 @@ from agaura.services import attendance, audit, meeting, results
 from agaura.services.accounts import quotas
 from agaura.services.assemblies import clean_text, get_assembly, require_status
 from agaura.services.audit import Actor
+from agaura.services.ballots import is_accepting_votes
 from agaura.services.errors import (
     InvalidInputError,
     InvalidStateError,
     NotFoundError,
     QuotaExceededError,
 )
+from agaura.voting import aura
 
 MAX_POLL_TITLE_LENGTH = 200
 MAX_POLL_DESCRIPTION_LENGTH = 5000
@@ -478,6 +480,21 @@ def _agenda_item(assembly: Assembly) -> dict[str, int | str]:
     return {} if position is None else {"agenda_position": position, "agenda_title": title or ""}
 
 
+def _require_stage(db: Session, poll: Poll, now: dt.datetime) -> None:
+    """An aura battle and the other polls never run at the same time (SPEC §6.8)."""
+    others = db.scalars(
+        select(Poll).where(
+            Poll.assembly_id == poll.assembly_id,
+            Poll.status == PollStatus.OPEN,
+            Poll.id != poll.id,
+        )
+    ).all()
+    if any(other.is_aura for other in others):
+        raise InvalidStateError("aura_running")
+    if poll.is_aura and any(is_accepting_votes(other, now) for other in others):
+        raise InvalidStateError("aura_needs_stage")
+
+
 def open_poll(
     db: Session,
     owner: User,
@@ -486,16 +503,26 @@ def open_poll(
     minutes: int | None = None,
     now: dt.datetime | None = None,
 ) -> Poll:
-    """Push a draft to voters, with an optional auto-close timer (FR-33)."""
+    """Push a draft to voters, with an optional auto-close timer (FR-33).
+
+    An aura battle (SPEC §6.8) takes no timer: it closes by itself once its phases are over
+    (``closes_at``: the choice, then the taps). It needs the stage to itself: refused while
+    another poll accepts votes, and no poll is pushed while a battle runs.
+    """
     now = now or utcnow()
     poll = get_poll(db, owner, poll_id)
     require_status(poll.assembly, AssemblyStatus.IN_SESSION)
     _require_draft(poll)
-    if minutes is not None and not 1 <= minutes <= MAX_TIMER_MINUTES:
+    if minutes is not None and (poll.is_aura or not 1 <= minutes <= MAX_TIMER_MINUTES):
         raise InvalidInputError("invalid_timer")
+    _require_stage(db, poll, now)
     poll.status = PollStatus.OPEN
     poll.opened_at = now
-    poll.closes_at = None if minutes is None else now + dt.timedelta(minutes=minutes)
+    if poll.is_aura:
+        seconds = aura.CHOOSE_SECONDS + aura.parse(range(len(poll.options)), poll.params).duration
+        poll.closes_at = now + dt.timedelta(seconds=seconds)
+    else:
+        poll.closes_at = None if minutes is None else now + dt.timedelta(minutes=minutes)
     audit.record(
         db,
         "poll.opened",
@@ -514,47 +541,91 @@ def open_poll(
     return poll
 
 
-def _close(db: Session, poll: Poll, *, actor: str, now: dt.datetime) -> Result:
+# Where the closing of an aura battle finds its taps (``Arena.result``): None when they were
+# lost (a restart of the server), and the ranking then says the battle was interrupted.
+TapsOf = Callable[[int], aura.Taps | None]
+
+
+def no_taps(_poll_id: int) -> aura.Taps | None:
+    return None
+
+
+def _close(db: Session, poll: Poll, *, actor: str, now: dt.datetime, taps_of: TapsOf) -> Result:
     poll.status = PollStatus.CLOSED
     poll.closed_at = now
-    result = results.compute_result(db, poll, now=now)
-    compact_after_commit(db)  # erase the arrival order of ballots from the files (SPEC §9.2)
+    if poll.is_aura:
+        # No ballot to count nor to shuffle in the files; the ranking comes on the screen by
+        # itself, the gauges having been in view all along (SPEC §6.8, FR-75).
+        taps = taps_of(poll.id) or aura.Taps(totals={}, phones=0, interrupted=True)
+        result = results.compute_aura_result(db, poll, taps, now=now)
+        poll.shown_on_screen = True
+        poll.screen_shown_at = now
+        details: dict[str, Any] = {
+            "poll_id": poll.id,
+            "phones": taps.phones,
+            "ballots_sha256": result.ballots_sha256,
+        }
+    else:
+        result = results.compute_result(db, poll, now=now)
+        compact_after_commit(db)  # erase the arrival order of ballots from the files (SPEC §9.2)
+        details = {
+            "poll_id": poll.id,
+            "ballots": result.data["counts"]["cast"],
+            "ballots_sha256": result.ballots_sha256,
+            **attendance.counts(db, poll.assembly),  # attendance reading
+        }
     audit.record(
         db,
         "poll.closed",
         actor=actor,
         user_id=poll.assembly.owner_id,
         assembly_id=poll.assembly_id,
-        details={
-            "poll_id": poll.id,
-            "ballots": result.data["counts"]["cast"],
-            "ballots_sha256": result.ballots_sha256,
-            **attendance.counts(db, poll.assembly),  # attendance reading
-        },
+        details=details,
         now=now,
     )
     return result
 
 
-def close_poll(db: Session, owner: User, poll_id: int, *, now: dt.datetime | None = None) -> Result:
-    """Close an open poll: voting stops, the result and the digest are computed (FR-34)."""
+def close_poll(
+    db: Session,
+    owner: User,
+    poll_id: int,
+    *,
+    taps_of: TapsOf = no_taps,
+    now: dt.datetime | None = None,
+) -> Result:
+    """Close an open poll: voting stops, the result and the digest are computed (FR-34). An
+    aura battle stopped early is ranked on the taps counted so far."""
     poll = get_poll(db, owner, poll_id)
     if poll.status is not PollStatus.OPEN:
         raise InvalidStateError(f"poll_{poll.status.value}")
-    return _close(db, poll, actor=Actor.USER, now=now or utcnow())
+    return _close(db, poll, actor=Actor.USER, now=now or utcnow(), taps_of=taps_of)
 
 
-def close_expired_polls(db: Session, *, now: dt.datetime | None = None) -> list[Poll]:
-    """Close every open poll whose timer has run out, including after a restart (SPEC §10)."""
+def close_expired_polls(
+    db: Session, *, taps_of: TapsOf = no_taps, now: dt.datetime | None = None
+) -> list[Poll]:
+    """Close every open poll whose timer has run out, including after a restart (SPEC §10).
+
+    An aura battle waits for the taps still in flight (``aura.GRACE_SECONDS`` past its end).
+    """
     now = now or utcnow()
-    expired = db.scalars(
-        select(Poll)
-        .where(Poll.status == PollStatus.OPEN, Poll.closes_at.is_not(None), Poll.closes_at <= now)
-        .order_by(Poll.closes_at, Poll.id)
-    ).all()
+    expired = [
+        poll
+        for poll in db.scalars(
+            select(Poll)
+            .where(
+                Poll.status == PollStatus.OPEN, Poll.closes_at.is_not(None), Poll.closes_at <= now
+            )
+            .order_by(Poll.closes_at, Poll.id)
+        ).all()
+        if not poll.is_aura
+        or poll.closes_at is None
+        or now >= poll.closes_at + dt.timedelta(seconds=aura.GRACE_SECONDS)
+    ]
     for poll in expired:
-        _close(db, poll, actor=Actor.SYSTEM, now=now)
-    return list(expired)
+        _close(db, poll, actor=Actor.SYSTEM, now=now, taps_of=taps_of)
+    return expired
 
 
 def cancel_poll(

@@ -1,0 +1,269 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+
+#: services/demo.py:101
+msgid "Theme of the summer party"
+msgstr "Thème de la fête d'été"
+
+#: services/demo.py:103
+msgid "Pirates"
+msgstr "Pirates"
+
+#: services/demo.py:103
+msgid "Disco"
+msgstr "Disco"
+
+#: services/demo.py:103
+msgid "Western"
+msgstr "Western"
+
+#: templates/exports/minutes.html:173
+msgid "Aura battle: “%(title)s”"
+msgstr "Battle d'aura : « %(title)s »"
+
+#: templates/exports/minutes.html:173
+msgid "(a game of the room, with no voting value)"
+msgstr "(un jeu de la salle, sans valeur de vote)"
+
+#: templates/live/macros.html:325
+msgid "Aura battle · no voting value"
+msgstr "Battle d'aura · sans valeur de vote"
+
+#: templates/live/macros.html:327
+msgid "This aura battle needs JavaScript: follow it on the projection screen."
+msgstr "Cette battle d'aura a besoin de JavaScript : suivez-la sur l'écran de projection."
+
+#: templates/live/macros.html:330
+msgid "Choose your option before the end of the countdown."
+msgstr "Choisissez votre option avant la fin du compte à rebours."
+
+#: templates/live/macros.html:331
+msgid "Tap the button as fast as you can!"
+msgstr "Tapez sur le bouton le plus vite possible !"
+
+#: templates/live/macros.html:332
+msgid "No option chosen in time: watch the projection screen."
+msgstr "Aucune option choisie à temps : regardez l'écran de projection."
+
+#: templates/live/macros.html:333
+msgid "Over! The ranking is on the projection screen."
+msgstr "Terminé ! Le classement s'affiche sur l'écran de projection."
+
+#: templates/live/macros.html:336
+msgid "Your option"
+msgstr "Votre option"
+
+#: templates/macros/ethics.html:17
+msgid "Aura battles are games."
+msgstr "Les battles d'aura sont des jeux."
+
+#: templates/macros/ethics.html:18
+msgid "An aura battle decides nothing and leaves no ballot: the option chosen stays on the phone, the server counts only the taps of each option, without keeping who tapped for what, and the minutes only mention it."
+msgstr "Une battle d'aura ne décide rien et ne laisse aucun bulletin : l'option choisie reste sur le téléphone, le serveur compte seulement les frappes de chaque option, sans garder qui a tapé pour quoi, et le procès-verbal la mentionne seulement."
+
+#: templates/macros/polls.html:15 templates/manage/_live_polls.html:16 templates/manage/_ready.html:13
+msgid "Animation"
+msgstr "Animation"
+
+#: templates/macros/results.html:46 templates/screen/macros.html:151
+msgid "Strongest aura: %(option)s"
+msgstr "Plus forte aura : %(option)s"
+
+#: templates/macros/results.html:48
+msgid "Tie for the strongest aura: %(names)s"
+msgstr "Égalité pour la plus forte aura : %(names)s"
+
+#: templates/macros/results.html:50
+msgid "No tap counted"
+msgstr "Aucune frappe comptée"
+
+#: templates/macros/results.html:245
+msgid "Aura battle, with no voting value: the option with the most taps wins."
+msgstr "Battle d'aura, sans valeur de vote : l'option qui reçoit le plus de frappes l'emporte."
+
+#: templates/macros/results.html:247
+msgid "Taps"
+msgstr "Frappes"
+
+#: templates/macros/results.html:247
+msgid "of every tap"
+msgstr "de toutes les frappes"
+
+#: templates/macros/results.html:263
+msgid "%(num)s phone tapped."
+msgid_plural "%(num)s phones tapped."
+msgstr[0] "%(num)s téléphone a tapé."
+msgstr[1] "%(num)s téléphones ont tapé."
+
+#: templates/macros/results.html:265
+msgid "Battle interrupted by a restart of the server: taps may be missing."
+msgstr "Battle interrompue par un redémarrage du serveur : des frappes peuvent manquer."
+
+#: templates/manage/_drafts.html:52 templates/manage/_editor_form.html:319 templates/manage/_ready.html:16
+msgid "Start the battle"
+msgstr "Lancer la battle"
+
+#: templates/manage/_editor_form.html:162
+msgid "From 2 to %(num)s options: one gauge each on the projection screen."
+msgstr "De 2 à %(num)s options : une jauge chacune sur l'écran de projection."
+
+#: templates/manage/_editor_form.html:193
+msgid "Course of the battle"
+msgstr "Déroulé de la battle"
+
+#: templates/manage/_editor_form.html:195
+msgid "Duration of the taps"
+msgstr "Durée des frappes"
+
+#: templates/manage/_editor_form.html:196
+msgid "Once pushed, voters have %(num)s seconds to pick an option; then a button appears on their phone, to tap for this long."
+msgstr "Une fois la battle lancée, les votants ont %(num)s secondes pour choisir une option ; puis un bouton apparaît sur leur téléphone, à taper pendant cette durée."
+
+#: templates/manage/_editor_form.html:198
+msgid "%(num)s s"
+msgstr "%(num)s s"
+
+#: templates/manage/_editor_form.html:222
+msgid "No blank vote. The battle closes by itself at the end of the taps, the ranking then on the screen. It decides nothing: the minutes only mention it."
+msgstr "Pas de vote blanc. La battle se clôt d'elle-même à la fin des frappes, puis son classement s'affiche à l'écran. Elle ne décide rien : le procès-verbal la mentionne seulement."
+
+
+#: templates/manage/_finished.html:45
+msgid "Aura battle: no voting value. No export; the minutes only mention it."
+msgstr "Battle d'aura : sans valeur de vote. Aucun export ; le procès-verbal la mentionne seulement."
+
+#: templates/manage/_live_poll_tiles.html:17 templates/manage/_live_polls.html:19
+msgid "Aura battle: no ballot. The gauges are on the screen; it closes by itself and shows its ranking there."
+msgstr "Battle d'aura : pas de bulletin. Les jauges sont à l'écran ; elle se clôt d'elle-même et y affiche son classement."
+
+#: templates/manage/_live_poll_tiles.html:20 templates/manage/_live_polls.html:22
+msgid "Stop the battle now"
+msgstr "Arrêter la battle maintenant"
+
+#: templates/manage/_screen_recap_list.html:35
+msgid "with the taps of each option"
+msgstr "avec les frappes de chaque option"
+
+#: templates/manage/_screen_recap_list.html:54
+msgid "Aura battle in progress"
+msgstr "Battle d'aura en cours"
+
+#: templates/manage/_screen_recap_list.html:54
+msgid "%(title)s, its gauges and its totals of taps, live; then its ranking, by itself"
+msgstr "%(title)s, ses jauges et ses totaux de frappes, en direct ; puis son classement, de lui-même"
+
+#: templates/manage/_screen_recap_list.html:55
+msgid "The other blocks come back once the battle is over"
+msgstr "Les autres blocs reviennent une fois la battle terminée"
+
+#: templates/manage/_status.html:36 templates/screen/macros.html:284 templates/screen/macros.html:322
+msgid "Aura battle"
+msgstr "Battle d'aura"
+
+#: templates/manage/_status.html:36 templates/manage/_status.html:36
+msgid "under way"
+msgstr "en cours"
+
+#: templates/screen/macros.html:152
+msgid "Tie at the top: %(names)s"
+msgstr "Ex æquo en tête : %(names)s"
+
+#: templates/screen/macros.html:153
+msgid "Nobody tapped"
+msgstr "Personne n'a tapé"
+
+#: templates/screen/macros.html:285
+msgid "ended at %(time)s · %(num)s phone"
+msgid_plural "ended at %(time)s · %(num)s phones"
+msgstr[0] "terminée à %(time)s · %(num)s téléphone"
+msgstr[1] "terminée à %(time)s · %(num)s téléphones"
+
+#: templates/screen/macros.html:289
+msgid "Interrupted by a restart of the server: taps may have been lost."
+msgstr "Interrompue par un redémarrage du serveur : des frappes ont pu être perdues."
+
+#: templates/screen/macros.html:290
+msgid "A game with no voting value: the option with the most taps wins, a tie is reported, never broken."
+msgstr "Un jeu sans valeur de vote : l'option qui reçoit le plus de frappes l'emporte ; une égalité est signalée, jamais tranchée."
+
+#: templates/screen/macros.html:297
+msgid "%(num)s tap"
+msgid_plural "%(num)s taps"
+msgstr[0] "%(num)s frappe"
+msgstr[1] "%(num)s frappes"
+
+#: templates/screen/macros.html:324 templates/screen/macros.html:325 templates/screen/macros.html:325
+msgid "%(num)s phone tapping"
+msgid_plural "%(num)s phones tapping"
+msgstr[0] "%(num)s téléphone en jeu"
+msgstr[1] "%(num)s téléphones en jeu"
+
+#: templates/screen/macros.html:333
+msgid "Choose an option on your phone"
+msgstr "Choisissez une option sur votre téléphone"
+
+#: templates/screen/macros.html:334
+msgid "Then tap the button as fast as you can!"
+msgstr "Puis tapez sur le bouton le plus vite possible !"
+
+#: templates/screen/macros.html:337
+msgid "Tap!"
+msgstr "Tapez !"
+
+#: templates/screen/macros.html:338
+msgid "Time is up! The ranking is coming."
+msgstr "Temps écoulé ! Le classement arrive."
+
+#: templates/screen/macros.html:372
+msgid "Battle cancelled"
+msgstr "Battle annulée"
+
+#: web/manage/editor.py:99
+msgid "Choose a duration among those offered."
+msgstr "Choisissez une durée parmi celles proposées."
+
+#: web/manage/editor.py:100
+msgid "An aura battle takes 2 to 6 options."
+msgstr "Une battle d'aura compte de 2 à 6 options."
+
+#: web/manage/editor.py:189
+msgid "A game of the room, no ballot"
+msgstr "Un jeu de la salle, sans bulletin"
+
+#: web/manage/editor.py:191
+msgid "Each voter picks an option within 10 seconds, then taps a button as fast as possible: the option with the most taps wins."
+msgstr "Chaque votant choisit une option en 10 secondes, puis tape sur un bouton le plus vite possible : l'option qui reçoit le plus de frappes l'emporte."
+
+#: web/manage/editor.py:194
+msgid "Choose the theme of the party"
+msgstr "Choisir le thème de la fête"
+
+#: web/manage/editor.py:195
+msgid "To liven up the room: it decides nothing, and the minutes only mention it."
+msgstr "Pour animer la salle : elle ne décide rien, et le procès-verbal la mentionne seulement."
+
+#: web/manage/editor.py:212
+msgid "Animation (no voting value)"
+msgstr "Animation (sans valeur de vote)"
+
+#: web/manage/editor.py:687
+msgid "The option with the most taps wins; a tie is reported, never broken."
+msgstr "L'option qui reçoit le plus de frappes l'emporte ; une égalité est signalée, jamais tranchée."
+
+#: web/manage/exports.py:54
+msgid "An aura battle has no voting value: no export carries it; the minutes only mention it."
+msgstr "Une battle d'aura est un jeu sans valeur de vote : aucun export ne la contient ; le procès-verbal la mentionne seulement."
+
+#: web/manage/polls.py:44
+msgid "An aura battle is under way: push this poll once it is over, in less than half a minute."
+msgstr "Une battle d'aura est en cours : lancez ce vote une fois qu'elle est terminée, dans moins d'une demi-minute."
+
+#: web/manage/polls.py:48
+msgid "An aura battle needs the stage to itself: close the polls open now first."
+msgstr "Une battle d'aura a besoin de la scène pour elle seule : clôturez d'abord les votes en cours."

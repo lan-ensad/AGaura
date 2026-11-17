@@ -86,18 +86,22 @@ class TestStepOne:
         page = admin.get(new_url(public_id))
         assert page.status_code == 200
         links = re.findall(r'<h3><a href="([^"]*)"[^>]*>([^<]*)</a></h3>', page.text)
-        # Four cards: "Choix unique" covers resolutions, and opens on one (§4.4).
-        assert links == [
+        # Four voting methods: "Choix unique" covers resolutions, and opens on one (§4.4);
+        # then, in a group of its own, the aura battle (SPEC §6.8).
+        assert links[:4] == [
             (f"{new_url(public_id)}?kind=resolution", "Choix unique"),
             (f"{new_url(public_id)}?kind=approval", "Vote par approbation"),
             (f"{new_url(public_id)}?kind=majority_judgment", "Jugement majoritaire"),
             (f"{new_url(public_id)}?kind=condorcet", "Méthode Condorcet"),
         ]
-        assert page.text.count('<div class="method-card">') == 4
+        assert [link for link, _label in links[4:]] == [f"{new_url(public_id)}?kind=aura"]
+        assert page.text.count('<div class="method-card">') == 5
         assert "Une seule option, résolutions comprises (Pour, Contre, Abstention)" in page.text
-        # A list of groups: the voting methods for now.
+        # A list of groups: the voting methods, then the animations, set apart.
         assert page.text.count('class="method-cards"') == 1
+        assert page.text.count('class="method-cards is-apart"') == 1
         assert 'aria-label="Modes de scrutin" data-group="vote"' in page.text
+        assert 'data-group="animation"' in page.text
         # Every method on the same level: none set apart, flagged or preselected.
         assert "Le plus courant" not in page.text and "is-common" not in page.text
         assert "checked" not in page.text
@@ -541,7 +545,7 @@ class TestCreate:
         response = post(admin, new_url(public_id), {**form, "kind": "borda"})
         assert response.status_code == 400
         assert "Choisissez un mode de scrutin." in response.text
-        assert response.text.count('type="radio" name="switch"') == 4
+        assert response.text.count('type="radio" name="switch"') == 5  # the battle too
         assert 'name="switch" value="single_choice"' in response.text
         assert not re.search(r'name="switch"[^>]* checked', response.text)  # none of them
         assert 'type="hidden" name="title" value="Lieu de la prochaine assemblée"' in response.text
@@ -619,7 +623,7 @@ class TestChangeMethod:
         assert re.search(
             r'name="switch" value="single_choice" id="switch-single_choice"[^>]* checked', page
         )
-        assert page.count('type="radio" name="switch"') == 4
+        assert page.count('type="radio" name="switch"') == 5  # the battle too
         hidden = re.findall(r'<input type="hidden" name="([^"]*)" value="([^"]*)">', page)
         assert ("title", "Lieu de la prochaine assemblée") in hidden
         assert ("description", "Texte") in hidden and ("kind", "single_choice") in hidden
@@ -641,6 +645,7 @@ class TestChangeMethod:
             ("approval", "approval", ""),
             ("majority_judgment", "majority_judgment", ""),
             ("condorcet", "condorcet", ""),
+            ("aura", "aura", ""),
         ]
         page = post(admin, new_url(public_id), {**typed, "switch": "resolution"}).text
         assert 'data-kind="resolution"' in page and 'value="Budget"' in page

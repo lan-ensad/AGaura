@@ -1,5 +1,6 @@
 """Course of the session for the minutes ("Déroulé de la séance", FR-62): the tribune's notes
-and the polls pushed, grouped by agenda item, each group in time order.
+and the polls pushed, grouped by agenda item, each group in time order. An aura battle (SPEC
+§6.8) is mentioned there, one line with its title, and nowhere else in the minutes.
 
 A note belongs to the item it was attached to (under discussion when it was written, or chosen
 later); a poll to the item under discussion when it was pushed. Both are placed in the agenda
@@ -12,7 +13,7 @@ from __future__ import annotations
 import datetime as dt
 from dataclasses import dataclass, field
 
-from agaura.models import Note
+from agaura.models import Note, Poll
 from agaura.services.exports import PollRecord, SessionRecord
 from agaura.web.templating import DISPLAY_TIMEZONE, short_datetime, time_of_day
 
@@ -25,6 +26,7 @@ class Entry:
     when: str  # "14:05", or with the date when the session spans several days
     note: Note | None = None
     record: PollRecord | None = None
+    battle: Poll | None = None  # an aura battle, mentioned without a result
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,20 +37,23 @@ class Group:
 
 
 def worth_showing(session: SessionRecord) -> bool:
-    """A note to report, or polls to place in an agenda; otherwise the section would only
-    repeat the list of polls."""
-    return bool(session.notes) or bool(session.agenda and session.polls)
+    """A note to report, a battle to mention, or polls to place in an agenda; otherwise the
+    section would only repeat the list of polls."""
+    return bool(session.notes or session.battles) or bool(session.agenda and session.polls)
 
 
 def groups(session: SessionRecord) -> list[Group]:
     titles = session.agenda
-    found: list[tuple[int | None, dt.datetime, int, Note | None, PollRecord | None]] = []
+    found: list[tuple[int | None, dt.datetime, int, Entry]] = []
     for note in session.notes:
-        found.append((session.note_item(note), note.created_at, 0, note, None))
+        found.append((session.note_item(note), note.created_at, 0, Entry(_EPOCH, "", note=note)))
     for record in session.polls:
         at = record.poll.opened_at or _EPOCH
-        found.append((session.poll_item(record.poll.id), at, 1, None, record))
-    days = {at.astimezone(DISPLAY_TIMEZONE).date() for _, at, _, _, _ in found if at != _EPOCH}
+        found.append((session.poll_item(record.poll.id), at, 1, Entry(_EPOCH, "", record=record)))
+    for battle in session.battles:
+        at = battle.opened_at or _EPOCH
+        found.append((session.poll_item(battle.id), at, 1, Entry(_EPOCH, "", battle=battle)))
+    days = {at.astimezone(DISPLAY_TIMEZONE).date() for _, at, _, _ in found if at != _EPOCH}
     when = time_of_day if len(days) <= 1 else short_datetime
 
     def entries(position: int | None) -> list[Entry]:
@@ -56,7 +61,10 @@ def groups(session: SessionRecord) -> list[Group]:
             (item for item in found if item[0] == position or not titles),
             key=lambda item: (item[1], item[2]),
         )
-        return [Entry(at, when(at), note, record) for _, at, _, note, record in chosen]
+        return [
+            Entry(at, when(at), entry.note, entry.record, entry.battle)
+            for _, at, _, entry in chosen
+        ]
 
     if not titles:
         return [Group(None, None, entries(None))] if found else []

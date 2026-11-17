@@ -14,12 +14,18 @@ and gives the address at its foot, as when entries are locked.
 is on, whether or not it is published to voters (FR-36). Never the result of an open poll (D4)
 or of a cancelled one (FR-72); the count of each option only from ``SCREEN_DETAIL_MIN``
 ballots, the verdict alone below; never anything about one voter. Drafts never appear.
+
+**An aura battle** (SPEC §6.8), the exception: a game with no voting value, whose gauges and
+totals of taps the whole room watches while it runs (``ScreenBattle``, on the stage alone,
+from its push until its closing, frozen past its end); once closed, its ranking is shown by
+itself (``polls._close``), with the taps of every option whatever their number.
 """
 
 from __future__ import annotations
 
 import datetime as dt
-from collections.abc import Mapping
+import math
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
@@ -43,6 +49,7 @@ from agaura.services.assemblies import require_status
 from agaura.services.ballots import is_accepting_votes
 from agaura.services.errors import InvalidInputError
 from agaura.services.timer import TimerState
+from agaura.voting import aura
 
 _EPOCH = dt.datetime.min.replace(tzinfo=dt.UTC)
 
@@ -63,6 +70,7 @@ class Entries(StrEnum):
 class Part(StrEnum):
     """Blocks of the screen; the layout gives the stage to one of them (``ScreenView.hero``)."""
 
+    BATTLE = "battle"  # an aura battle under way: the stage to itself (SPEC §6.8)
     QUESTIONS = "questions"
     RESULT = "result"  # the latest result shown by the tribune (FR-75)
     JOIN = "join"
@@ -120,10 +128,15 @@ class ScreenResult:
         return int(self.data["counts"]["cast"])
 
     @property
+    def battle(self) -> bool:
+        """The ranking of an aura battle (SPEC §6.8), not the result of a vote."""
+        return self.poll.is_aura
+
+    @property
     def detail(self) -> bool:
         """The count of each option, from ``SCREEN_DETAIL_MIN`` ballots; the verdict alone
-        below (FR-75)."""
-        return self.ballots >= SCREEN_DETAIL_MIN
+        below (FR-75). A battle always gives its taps: the room saw them grow."""
+        return self.battle or self.ballots >= SCREEN_DETAIL_MIN
 
     @property
     def detail_min(self) -> int:
@@ -132,6 +145,76 @@ class ScreenResult:
     @property
     def verdict(self) -> Verdict:
         return verdict(self.poll, self.data["outcome"])
+
+
+class BattlePhase(StrEnum):
+    """Where an aura battle stands, as the screen draws it; screen.js moves on by itself."""
+
+    CHOOSE = "choose"  # the room picks an option on the phones, a countdown on the screen
+    TAPS = "taps"  # the gauges move
+    OVER = "over"  # frozen, until the poll closes and its ranking takes the stage
+
+
+@dataclass(frozen=True, slots=True)
+class ScreenBattle:
+    """An aura battle under way (SPEC §6.8), with its gauges and totals when the arena of the
+    process knows them (``live``: the ``Arena.view`` of the poll)."""
+
+    poll: Poll
+    tap_start: dt.datetime
+    tap_end: dt.datetime
+    phase: BattlePhase
+    left: int  # whole seconds left in the phase, rounded up (0 once over)
+    live: Mapping[str, Any] | None = None
+
+    @property
+    def tap_start_ms(self) -> int:
+        return int(self.tap_start.timestamp() * 1000)
+
+    @property
+    def tap_end_ms(self) -> int:
+        return int(self.tap_end.timestamp() * 1000)
+
+    def _series(self, key: str) -> list[int]:
+        values = list(self.live[key]) if self.live else []
+        count = len(self.poll.options)
+        return (values + [0] * count)[:count]
+
+    @property
+    def levels(self) -> list[int]:
+        """Taps of each option in the last moments, in the order of the options."""
+        return self._series("levels")
+
+    @property
+    def totals(self) -> list[int]:
+        return self._series("totals")
+
+    @property
+    def phones(self) -> int:
+        return int(self.live["phones"]) if self.live else 0
+
+    @property
+    def peak(self) -> int:
+        """The level the gauges are drawn against at first: the highest one now."""
+        return max([1, *self.levels])
+
+
+def battle_of(
+    poll: Poll, now: dt.datetime, live: Mapping[str, Any] | None = None
+) -> ScreenBattle | None:
+    """The battle of an open aura poll, else None."""
+    if not poll.is_aura or poll.status is not PollStatus.OPEN or poll.opened_at is None:
+        return None
+    tap_start = poll.opened_at + dt.timedelta(seconds=aura.CHOOSE_SECONDS)
+    tap_end = poll.closes_at or tap_start
+    if now < tap_start:
+        phase, until = BattlePhase.CHOOSE, tap_start
+    elif now < tap_end:
+        phase, until = BattlePhase.TAPS, tap_end
+    else:
+        phase, until = BattlePhase.OVER, now
+    left = math.ceil((until - now).total_seconds())
+    return ScreenBattle(poll, tap_start, tap_end, phase, left, live)
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,6 +277,9 @@ class ScreenView:
     agenda: list[str]  # item titles, in order
     agenda_hidden: bool = False  # by the tribune (``show_part``)
     join_hidden: bool = False  # by the tribune, while entries are open (``show_part``)
+    # An aura battle under way: the stage to itself, the other blocks wait (SPEC §6.8). Never
+    # among ``open_polls`` nor ``past_polls`` until it is closed.
+    battle: ScreenBattle | None = None
 
     @property
     def in_session(self) -> bool:
@@ -287,6 +373,8 @@ class ScreenView:
         questions already put to the vote, else a message."""
         if self.closed:
             return Part.MESSAGE
+        if self.battle is not None:
+            return Part.BATTLE
         if self.open_polls:
             return Part.QUESTIONS
         if self.stage_result is not None:
@@ -304,6 +392,8 @@ class ScreenView:
         if self.closed:
             return [Part.QUESTIONS] if self.past_polls else []
         hero = self.hero
+        if hero is Part.BATTLE:
+            return []  # the chronometer, the agenda and the way to join come back after it
         return [
             part
             for part in self._parts()
@@ -330,10 +420,20 @@ def _turnouts(db: Session, poll_ids: list[int]) -> dict[int, int]:
     return {poll_id: count for poll_id, count in rows}
 
 
+def _no_taps(_poll_id: int) -> Mapping[str, Any] | None:
+    return None
+
+
 def screen_view(
-    db: Session, keyring: Keyring, assembly: Assembly, *, now: dt.datetime | None = None
+    db: Session,
+    keyring: Keyring,
+    assembly: Assembly,
+    *,
+    taps: Callable[[int], Mapping[str, Any] | None] = _no_taps,
+    now: dt.datetime | None = None,
 ) -> ScreenView:
-    """The screen of ``assembly``, already checked against the secret link."""
+    """The screen of ``assembly``, already checked against the secret link. ``taps`` gives the
+    gauges and totals of an aura battle under way (``Arena.view``), when the process has them."""
     now = now or utcnow()
     entries_open = assembly.status is not AssemblyStatus.CLOSED and not assembly.entries_locked
     join_shown = entries_open and not assembly.screen_join_hidden
@@ -352,6 +452,13 @@ def screen_view(
         key=_pushed_order,
         reverse=True,
     )
+    # An aura battle keeps the stage until it is closed, frozen past its end.
+    battle = next(
+        (found for poll in polls if (found := battle_of(poll, now, taps(poll.id))) is not None),
+        None,
+    )
+    if battle is not None:
+        polls = [poll for poll in polls if poll.id != battle.poll.id]
     # A poll whose timer ran out stops accepting votes before the periodic job closes it.
     accepting = [poll for poll in polls if is_accepting_votes(poll, now)]
     turnouts = _turnouts(db, [poll.id for poll in accepting])
@@ -381,6 +488,7 @@ def screen_view(
         agenda=[str(item.get("title", "")) for item in assembly.agenda or []],
         agenda_hidden=assembly.screen_agenda_hidden,
         join_hidden=assembly.screen_join_hidden,
+        battle=battle,
     )
 
 

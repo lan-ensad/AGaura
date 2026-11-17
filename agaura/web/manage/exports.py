@@ -50,6 +50,9 @@ ERRORS.update(
         "export_trial_poll": N_(
             "A trial vote only tests the room's network: no export carries it, nor the minutes."
         ),
+        "export_aura_poll": N_(
+            "An aura battle has no voting value: no export carries it; the minutes only mention it."
+        ),
     }
 )
 ACTIONS.update(

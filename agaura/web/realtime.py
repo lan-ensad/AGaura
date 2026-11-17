@@ -8,7 +8,9 @@ fetch the new state through normal, access-checked requests. Channels:
   changes state or access mode;
 - ``manage:{PUBLIC_ID}``: the session console and the projection screen. Event ``turnout``
   with data ``""`` after a join or a ballot, ``console`` after any console action (including
-  deletion of the session), ``polls`` when a timer closed a poll.
+  deletion of the session), ``polls`` when a timer closed a poll. Event ``aura``, the one
+  exception to events without data: the gauges and totals of an aura battle (SPEC §6.8), four
+  times a second while it runs, counts the whole room sees on the screen (``web/aura.py``).
 
 ``publish`` is thread-safe: synchronous routes run in worker threads and call it after their
 transaction has committed.
@@ -31,6 +33,7 @@ from collections import Counter, defaultdict
 from collections.abc import AsyncIterator, Callable, Iterable, Iterator
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass
+from typing import Any
 
 from starlette.concurrency import run_in_threadpool
 
@@ -63,7 +66,11 @@ RECHECK_INTERVAL = 30.0
 @dataclass(frozen=True, slots=True)
 class Message:
     event: str
-    data: str = ""
+    data: str | dict[str, Any] = ""
+    # Ask the holder's access again before passing the message on (``stream``). Off only for
+    # the frames of an aura battle: four a second would cost a database read per stream each
+    # time, for counts shown to the whole room; the periodic check still runs.
+    recheck: bool = True
 
 
 CLOSE = Message("close")
@@ -160,11 +167,13 @@ class Hub:
                     queue.get_nowait()
             queue.put_nowait(message)
 
-    def publish(self, channel: str, event: str, data: str = "") -> None:
+    def publish(
+        self, channel: str, event: str, data: str | dict[str, Any] = "", *, recheck: bool = True
+    ) -> None:
         """Send an event to every subscriber of ``channel``; callable from any thread."""
         if self._loop is None or self._loop.is_closed():
             return
-        message = Message(event, data)
+        message = Message(event, data, recheck)
         try:
             running = asyncio.get_running_loop()
         except RuntimeError:
@@ -202,9 +211,10 @@ async def stream(
     """Messages of ``channel`` until the hub closes; the caller turns them into SSE events.
 
     ``allowed`` (blocking: it runs in a worker thread) tells whether the holder may still
-    follow the channel. It is asked before each message is passed on and at least every
-    ``RECHECK_INTERVAL`` seconds; the stream ends at the first no, so a holder never receives an
-    event published after it lost access.
+    follow the channel. It is asked before each message is passed on (but the frames of an aura
+    battle, ``Message.recheck``) and at least every ``RECHECK_INTERVAL`` seconds; the stream ends
+    at the first no, so a holder never receives an event published after it lost access, the
+    counts of a battle shown to the whole room aside.
     """
     async with hub.subscribe(channel) as queue:
         while True:
@@ -216,7 +226,8 @@ async def stream(
                 pass
             if message is CLOSE:
                 return
-            if allowed is not None and not await run_in_threadpool(allowed):
+            recheck = message is None or message.recheck
+            if allowed is not None and recheck and not await run_in_threadpool(allowed):
                 return
             if message is not None:
                 yield message

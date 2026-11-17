@@ -3,7 +3,8 @@
     first draft is the primary button, the next step; the others are secondary (R12). The head says
     who holds the polls right and offers to hand it over in place (R13, D-G), then leads to the
     creation page, "the method first" (D-C), where the polls of a past session are copied too. A
-    trial vote of the checklist (D-I) carries the pill "Essai". Each draft is a tile folded by
+    trial vote of the checklist (D-I) carries the pill "Essai", an aura battle "Animation" (no
+    timer to push it with: it closes by itself, SPEC §6.8). Each draft is a tile folded by
     default, like every poll of the rubric: its title and state, the rest (method, options, order,
     actions) unfolded (macros/polls.html). -#}
 {% from "macros/forms.html" import csrf, field with context %}
@@ -48,7 +49,7 @@
         {% if in_session %}
         <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/open" class="inline">
           {{ csrf() }}
-          <button type="submit" class="button{{ ' primary' if loop.first }} small">{{ _("Push to voters") }}</button>
+          <button type="submit" class="button{{ ' primary' if loop.first }} small">{% if poll.is_aura %}{{ _("Start the battle") }}{% else %}{{ _("Push to voters") }}{% endif %}</button>
         </form>
         {% elif not closed %}
         <a class="button small" href="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/edit">{{ _("Edit") }}</a>
@@ -57,11 +58,13 @@
           <summary class="button small menu-toggle" aria-label="{{ _('More actions: %(title)s', title=poll.title) }}" title="{{ _('More actions') }}"><span aria-hidden="true">&#8943;</span></summary>
           <div class="menu-panel">
             {% if in_session %}
+            {% if not poll.is_aura %}
             <form method="post" action="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/open" class="menu-timer">
               {{ csrf() }}
               <label class="inline-field">{{ _("Timer (minutes)") }} <input type="number" name="minutes" min="1" max="1440" inputmode="numeric" class="short" required></label>
               <button type="submit" class="button small">{{ _("Push with this timer") }}</button>
             </form>
+            {% endif %}
             <a class="menu-item" href="/manage/{{ assembly.public_id }}/polls/{{ poll.id }}/edit">{{ _("Edit") }}</a>
             {% endif %}
             {% if not closed %}

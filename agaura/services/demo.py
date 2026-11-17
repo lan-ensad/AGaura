@@ -96,6 +96,12 @@ def _drafts() -> list[PollInput]:
         ),
         PollInput(title=_("Projects to fund"), method="majority_judgment", options=_projects()),
         PollInput(title=_("Name of the newsletter"), method="condorcet", options=_names()),
+        # A game of the room, with no voting value (SPEC §6.8).
+        PollInput(
+            title=_("Theme of the summer party"),
+            method="aura",
+            options=[_("Pirates"), _("Disco"), _("Western")],
+        ),
     ]
 
 
@@ -177,8 +183,9 @@ def fill(db: Session, keyring: Keyring, owner: User, *, now: datetime | None = N
 def preparation_session(
     db: Session, keyring: Keyring, owner: User, *, now: datetime | None = None
 ) -> tuple[str, str]:
-    """A session in preparation with five drafts, a tribune, an agenda and a delegate link;
-    returns its ID and the key of the link. Also used by ``scripts/dev_seed.py``."""
+    """A session in preparation with six drafts (an aura battle among them), a tribune, an
+    agenda and a delegate link; returns its ID and the key of the link. Also used by
+    ``scripts/dev_seed.py``."""
     now = now or utcnow()
     assembly = assemblies.create_assembly(
         db,

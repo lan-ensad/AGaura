@@ -14,6 +14,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from agaura import __version__, backups, logs
+from agaura.aura import Arena
 from agaura.config import Settings, get_settings
 from agaura.db import Database
 from agaura.i18n import N_, _
@@ -22,7 +23,7 @@ from agaura.security import PASSWORD_BUSY_RETRY_AFTER, Keyring, PasswordBusyErro
 from agaura.services import assemblies
 from agaura.services.errors import NotFoundError
 from agaura.tasks import start_background_jobs
-from agaura.web import account, live, manage, public, results, screen, superadmin
+from agaura.web import account, aura, live, manage, public, results, screen, superadmin
 from agaura.web.deps import LoginRequiredError, SuperAdminRefusedError
 from agaura.web.manage.common import DelegateEndedError, TooManyRendersError
 from agaura.web.realtime import Hub
@@ -95,13 +96,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     database = Database(settings.sqlalchemy_url, audit_key=settings.audit_key)
     hub = Hub()
+    arena = Arena()
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         # All state lives in the database: after a restart, sessions, polls and timers resume.
         await run_in_threadpool(database.upgrade)
         hub.bind(asyncio.get_running_loop())
-        jobs = start_background_jobs(settings, database, hub)
+        jobs = start_background_jobs(settings, database, hub, arena)
         try:
             yield
         finally:
@@ -128,6 +130,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.database = database
     app.state.keyring = Keyring(settings.secret_key.get_secret_value())
     app.state.hub = hub
+    app.state.arena = arena
     app.state.limiter = RateLimiter()
     app.add_middleware(
         SecurityMiddleware, secure_cookies=settings.is_production, hsts=settings.is_production
@@ -208,6 +211,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(manage.router)
     app.include_router(screen.router)
     app.include_router(results.router)
+    app.include_router(aura.router)  # taps of aura battles, under the voter's path
     app.include_router(live.router)
     return app
 

@@ -68,6 +68,7 @@
     function rule() {
       if (kind === "majority_judgment") return texts.judgment;
       if (kind === "condorcet") return texts.condorcet;
+      if (kind === "aura") return texts.aura;
       if (kind === "approval") {
         var seats = whole(text("seats"));
         var parts = [fill(texts[seats > 1 ? "seats-many" : "seats-one"], { n: seats ? String(seats) : "" })];

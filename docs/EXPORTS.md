@@ -31,6 +31,13 @@ the session export and the public results page leave it out with the attendance 
 its opening and closing, and its own exports answer 409 ("Un vote d'essai teste seulement le
 réseau de la salle…"). An export therefore recounts exactly the polls of the record.
 
+**Aura battle.** A game of the room with no voting value (`Poll.method == "aura"`, SPEC §6.8):
+no ballot, only the totals of taps of each option once it is over. Like the trial vote it gets
+no number, the session export, the public results and the attendance readings leave it out,
+and its own exports answer 409 ("Une battle d'aura est un jeu…"); the minutes mention it in the
+course of the session, one line with its title at its time ("Battle d'aura : « … »"), and
+nothing else: neither its ranking nor its totals.
+
 - The console routes are owner only: another account gets 404, an anonymous visitor goes to the
   login page. A poll can be exported once voting on it has stopped (closed, published or
   cancelled); a draft, an open poll or a trial vote answers 409. Session exports always answer

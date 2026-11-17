@@ -29,12 +29,15 @@ uv run python scripts/i18n.py check      # French translations complete (also a 
 uv run python scripts/dev_seed.py        # local account + session for manual testing
 uv run python scripts/recount.py FILE    # recount a JSON export (docs/EXPORTS.md)
 uv run python scripts/screenshots.py     # README screenshots (docs/screenshots/), after UI changes
+uv run python scripts/aura_load.py       # 300 phones tapping in an aura battle (server running)
 docker compose up --build                # app + Caddy on https://localhost (mkdir -p backups/auto first)
 ```
 
 ## Layout
 
 - `agaura/voting/` — pure tallying (no I/O, no database, no web). 100% test coverage required.
+- `agaura/aura.py` — aura battles under way (SPEC §6.8), in memory: taps per option, allowance
+  per phone, never which option a phone picked; `agaura/web/aura.py` takes the taps.
 - `agaura/models/`, `agaura/services/` — persistence and business rules (phase P2). Services
   flush but never commit; callers wrap them in `Database.write()` (BEGIN IMMEDIATE) or
   `Database.read()`.

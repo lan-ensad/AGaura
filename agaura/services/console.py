@@ -36,7 +36,7 @@ def summaries(db: Session, owner: User) -> list[AssemblySummary]:
         db.execute(
             select(Poll.assembly_id, func.count(Poll.id))
             .join(Assembly, Poll.assembly_id == Assembly.id)
-            .where(Assembly.owner_id == owner.id, Poll.trial.is_(False))
+            .where(Assembly.owner_id == owner.id, Poll.on_record)
             .group_by(Poll.assembly_id)
         ).all()
     )

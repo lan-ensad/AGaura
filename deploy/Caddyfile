@@ -78,9 +78,16 @@
 
 {$AGAURA_DOMAIN:localhost} {
 	# Ballot steps (/{ID}/polls/…) are padded to one size per poll whatever the choice; a
-	# compressed answer would shrink by an amount that depends on the choice (SPEC §9.2).
-	@compressible not path_regexp ^/[^/]+/polls/
+	# compressed answer would shrink by an amount that depends on the choice (SPEC §9.2). The
+	# taps of an aura battle (/{ID}/aura/…) answer nothing, and stay out of compression too.
+	@compressible not path_regexp ^/[^/]+/(polls|aura)/
 	encode @compressible zstd gzip
+
+	# The taps of an aura battle (SPEC §6.8): two batches a second from every phone for a few
+	# seconds, hundreds of lines a second that say nothing of the option (it travels in the
+	# body). Not logged, so that they never flood the logs nor the file of fail2ban.
+	@taps path_regexp ^/[^/]+/aura/[0-9]+$
+	log_skip @taps
 
 	# Forms are small (the largest is the poll editor): anything bigger is refused here.
 	request_body {

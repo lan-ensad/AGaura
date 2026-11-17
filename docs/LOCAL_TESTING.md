@@ -182,6 +182,27 @@ Tick each line on a computer (console) and two or three phones (voters).
       an option ticked with the blank vote is refused ("Un vote blanc ne se combine avec aucun
       autre choix…"), the choices kept.
 
+### Aura battle (a game, SPEC §6.8)
+- [ ] Votes → "Nouveau vote": below the voting methods, without a heading, the card "Battle
+      d'aura", its icon in another colour; its form asks a question, 2 to 6 options and the
+      duration of the taps (5 s chosen), and no rule, blank vote or automatic closing.
+- [ ] Projection screen open on a computer, three phones joined. "Lancer": the screen and the
+      phones count down 10 s; on each phone pick an option (change it once), then the large
+      button appears with the option picked; a phone that picked nothing says so.
+- [ ] Tap fast on two phones, slowly on the third: on the screen the gauges rise, fall when a
+      phone stops, and the totals under them grow; at 0 both freeze, and about a second later
+      the ranking appears by itself, the most taps first ("Plus forte aura"). Two options with
+      the same total read as a tie, never broken.
+- [ ] While a battle runs, "Lancer" another poll is refused; a battle is refused while a vote is
+      open. "Clore" during the battle ranks the taps so far.
+- [ ] The phone screen does not zoom, select text nor open a menu while tapping (Safari iOS and
+      Chrome Android); holding Space on a keyboard counts one tap, each press one more.
+- [ ] Without JavaScript, the phone says the battle needs it. The minutes say only "Battle
+      d'aura : « … »" in the course of the session; Documents has no row for it.
+- [ ] Load (optional, development server): `uv run python scripts/aura_load.py --phones 300`
+      prints the latency of the taps (95th percentile under 300 ms) and the frames the screen
+      received (about 4 a second).
+
 ### Codes mode
 - [ ] Accès et présences → "Passer aux codes individuels": phones that joined with the password
       are logged out.

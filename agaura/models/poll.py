@@ -18,13 +18,16 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import ForeignKey, String, Text, UniqueConstraint, false
+from sqlalchemy import ColumnElement, ForeignKey, String, Text, UniqueConstraint, and_, false
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from agaura.models.base import Base, PollStatus, str_enum, utcnow
 
 if TYPE_CHECKING:
     from agaura.models.assembly import Assembly
+
+AURA = "aura"  # the method of an aura battle (``agaura.voting.aura``)
 
 
 class Poll(Base):
@@ -65,6 +68,23 @@ class Poll(Base):
         order_by="Option.position",
     )
     result: Mapped[Result | None] = relationship(cascade="all, delete-orphan", passive_deletes=True)
+
+    @property
+    def is_aura(self) -> bool:
+        """An aura battle (SPEC §6.8): a game of the room, with no ballot and no voting value."""
+        return self.method == AURA
+
+    @hybrid_property
+    def on_record(self) -> bool:
+        """Part of the record of the session: numbered, in the minutes' list of polls, the
+        exports and the public results. Neither a trial vote nor an aura battle is (the minutes
+        only mention a battle, FR-62)."""
+        return not self.trial and self.method != AURA
+
+    @on_record.inplace.expression
+    @classmethod
+    def _on_record(cls) -> ColumnElement[bool]:
+        return and_(cls.trial.is_(False), cls.method != AURA)
 
 
 class Option(Base):
